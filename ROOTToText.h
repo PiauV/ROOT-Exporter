@@ -36,6 +36,8 @@ private:
     static ROOTToText* instance_;
 };
 
+R__EXTERN ROOTToText* gRTT;
+
 void ROOTToText::SetHeader(bool title, bool axis){
     headerTitle_ = title;
     headerAxis_ = axis;
