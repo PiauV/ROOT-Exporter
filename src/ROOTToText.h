@@ -8,12 +8,12 @@ class ROOTToText {
 public:
     ~ROOTToText();
 
-    static ROOTToText* getInstance();
+    static ROOTToText* GetInstance();
 
     inline void SetHeader(bool title = true, bool axis = true);
-    void SetDefaultExtension(TString ext);
+    void SetFileExtension(TString ext);
     void SetDirectory(TString dir);
-    inline TString GetDefaultExtension() const;
+    inline TString GetFileExtension() const;
     inline TString GetDirectory() const;
     // set precision, format ?
 
@@ -26,7 +26,7 @@ public:
 
 private:
     ROOTToText();
-    TString getFilePath(const TObject *obj, char *filename) const;
+    TString GetFilePath(const TObject *obj, char *filename) const;
 
 private:
     bool headerTitle_ = true;
@@ -43,7 +43,7 @@ void ROOTToText::SetHeader(bool title, bool axis){
     headerAxis_ = axis;
 }
 
-TString ROOTToText::GetDefaultExtension() const{
+TString ROOTToText::GetFileExtension() const{
     return defaultExtension_;
 }
 

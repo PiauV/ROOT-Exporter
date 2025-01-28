@@ -11,7 +11,7 @@
 
 ROOTToText* ROOTToText::instance_ = 0;
 
-ROOTToText* gRTT = ROOTToText::getInstance();
+ROOTToText* gRTT = ROOTToText::GetInstance();
 
 ROOTToText::ROOTToText(){
     headerTitle_ = true;
@@ -24,14 +24,15 @@ ROOTToText::~ROOTToText(){
 
 }
 
-ROOTToText* ROOTToText::getInstance(){
+ROOTToText* ROOTToText::GetInstance(){
     if (!instance_)
         instance_ = new ROOTToText();
     return instance_;
 }
 
-void ROOTToText::SetDefaultExtension(TString ext){
-    if (ext.Length() < 1 || (ext[0] == '.' && ext.Length() < 2))
+void ROOTToText::SetFileExtension(TString ext){
+    TPRegexp is_ext("^\\.?[a-zA-Z0-9]+$");
+    if (!is_ext.MatchB(ext))
         throw std::invalid_argument("this is not a valid file extension");
     defaultExtension_ = ext;
     if (!defaultExtension_.BeginsWith('.'))
@@ -39,16 +40,31 @@ void ROOTToText::SetDefaultExtension(TString ext){
 }
 
 void ROOTToText::SetDirectory(TString dir){
+    // a cleaner implementation would use std::filesystem (or std::experimental::filesystem)
+    // but it it would limit compatibility with some old compiler since it is a C++17 feature
     TString path(dir);
+    if (dir.Length()==0){
+        // empty string -> current directory
+        defaultDirectory_ = "./";
+        return;
+    }
+
+    TPRegexp is_file("[a-zA-Z0-9]+\\.[a-zA-Z0-9]+$");
+    if (is_file.MatchB(path)){
+        // this path is a file !
+        throw std::invalid_argument("this is not a directory");
+    }
+
     gSystem->ExpandPathName(path); // remove symbols
-    if (!gSystem->IsAbsoluteFileName(path)){
+    if (!gSystem->IsAbsoluteFileName(path) && !path.BeginsWith("./")){
         // relative directory... to what ?
         // let's assume its relative to current dir
+        // --> prepend path name
         gSystem->PrependPathName(defaultDirectory_, path);
     }
 
     if (!gSystem->AccessPathName(path)){
-        // this path can be accessed (! do not check if this is a directory!)
+        // this path can be accessed
         defaultDirectory_ = path;
         return;
     }
@@ -62,12 +78,14 @@ void ROOTToText::SetDirectory(TString dir){
         }
     }
 
-    // failed -> do not change anything
-    std::cerr << "Error: path " << path << " cannot be accessed." << std::endl;
-    std::cerr << "Keeping the previous directory: " << defaultDirectory_ << std::endl;
+    // what to do in case of failure ?? -> exception, error message, return value ?
+    TString error_msg = "path " + path + " cannot be accessed.";
+    throw std::runtime_error(error_msg);
+    //std::cerr << "Error: path " << path << " cannot be accessed." << std::endl;
+    //std::cerr << "Keeping the previous directory: " << defaultDirectory_ << std::endl;
 }
 
-TString ROOTToText::getFilePath(const TObject *obj, char *filename) const{
+TString ROOTToText::GetFilePath(const TObject *obj, char *filename) const{
     TString str(filename);
 
     // if no filename is given, use the histogram name
@@ -76,7 +94,6 @@ TString ROOTToText::getFilePath(const TObject *obj, char *filename) const{
         str.Append(TString(obj->GetName()));
     }
     str.ReplaceAll(' ', '_');
-    std::cout << str << std::endl;
 
     // check that filename ends with a file extension
     // if not, add the default ".txt" extension
@@ -84,13 +101,10 @@ TString ROOTToText::getFilePath(const TObject *obj, char *filename) const{
     if (!fileExt.MatchB(str))
         str.Append(".txt");
 
-    std::cout << str << std::endl;
-
-    if (!gSystem->IsAbsoluteFileName(str)){
+    if (!gSystem->IsAbsoluteFileName(str) && !str.BeginsWith("./")){
         gSystem->PrependPathName(defaultDirectory_, str);
     }
 
-    std::cout << str << std::endl;
     return str;
 }
 
@@ -117,7 +131,7 @@ bool ROOTToText::SaveTH1(const TH1 *h, char *filename, Option_t *opt) const{
     bool low_edge = option.Contains('L');
     bool with_errors = option.Contains('E');
 
-    TString path = getFilePath(h, filename);
+    TString path = GetFilePath(h, filename);
     std::ofstream ofs(path);
     if (!ofs.is_open()){
         std::cerr << "Error: could not open file " << path << std::endl;
@@ -167,7 +181,7 @@ bool ROOTToText::SaveTH2(const TH2 *h, char *filename, Option_t *opt) const{
     // z12 z22 z32 ...
     // ...
 
-    TString path = getFilePath(h, filename);
+    TString path = GetFilePath(h, filename);
     std::ofstream ofs(path);
     if (!ofs.is_open()){
         std::cerr << "Error: could not open file " << path << std::endl;
@@ -244,7 +258,7 @@ bool ROOTToText::SaveGraph(const TGraph *gr, char *filename, Option_t *opt) cons
     bool with_herrors = with_errors && option.Contains("H");
     bool with_zdata = (gr->IsA() == TGraph2D::Class());
 
-    TString path = getFilePath(gr, filename);
+    TString path = GetFilePath(gr, filename);
     std::ofstream ofs(path);
     if (!ofs.is_open()){
         std::cerr << "Error: could not open file " << path << std::endl;
