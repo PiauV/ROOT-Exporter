@@ -13,3 +13,4 @@ set(CMAKE_CXX_FLAGS "${ROOT_CXX_FLAGS}")
 link_directories(${ROOT_LIBRARY_DIR})
 
 add_subdirectory(src)
+add_subdirectory(tests)
