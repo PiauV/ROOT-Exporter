@@ -1,7 +1,11 @@
 #include "ROOTToText.h"
 
-#include "TGraph2D.h"
+#include "TClass.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TGraph.h"
 #include "TGraphErrors.h"
+#include "TGraph2D.h"
 #include "TMath.h"
 #include "TPRegexp.h"
 #include "TSystem.h"
@@ -110,22 +114,31 @@ TString ROOTToText::GetFilePath(const TObject *obj, char *filename) const{
 
 bool ROOTToText::SaveObject(const TObject *obj, char *filename, Option_t *opt) const{
     if (obj->InheritsFrom("TH2")){
-        return SaveTH2((TH2 *)obj, filename, opt);
+        return SaveTH2(dynamic_cast<const TH2*>(obj), filename, opt);
     }
-    else if (obj->InheritsFrom("TH1") || !obj->InheritsFrom("TH3")){
-        return SaveTH1((TH1 *)obj, filename, opt);
+    else if (obj->InheritsFrom("TH1") && !obj->InheritsFrom("TH3")){
+        return SaveTH1(dynamic_cast<const TH1*>(obj), filename, opt);
     }
     else if (obj->InheritsFrom("TGraph")){
-        return SaveGraph((TGraph *)obj, filename, opt);
+        return SaveGraph(dynamic_cast<const TGraph*>(obj), filename, opt);
+    }
+    else if (obj->InheritsFrom("TGraph2D")){
+        return SaveGraph2D(dynamic_cast<const TGraph2D*>(obj), filename, opt);
     }
     else{
         TString error_message = TString::Format("This kind of object (%s) is not supported.", obj->Class_Name());
         throw std::invalid_argument(error_message.Data());
+        // std::cerr << "This kind of object (" << obj->Class_Name() << ") is not supported" << std::endl;
     }
     return false;
 }
 
 bool ROOTToText::SaveTH1(const TH1 *h, char *filename, Option_t *opt) const{
+    if (!h){
+        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
+        return false;
+    }
+
     TString option(opt);
     option.ToUpper();
     bool low_edge = option.Contains('L');
@@ -166,10 +179,17 @@ bool ROOTToText::SaveTH1(const TH1 *h, char *filename, Option_t *opt) const{
             ofs << " " << h->GetBinError(i);
         ofs << std::endl;
     }
+
+    ofs.close();
     return true;
 }
 
 bool ROOTToText::SaveTH2(const TH2 *h, char *filename, Option_t *opt) const{
+    if (!h){
+        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
+        return false;
+    }
+
     TString option(opt);
     option.ToUpper();
     bool in_columns = option.Contains("C");
@@ -245,18 +265,23 @@ bool ROOTToText::SaveTH2(const TH2 *h, char *filename, Option_t *opt) const{
         }
     }
 
+    ofs.close();
     return true;
 }
 
 bool ROOTToText::SaveGraph(const TGraph *gr, char *filename, Option_t *opt) const{
-    if (gr->IsA() != TGraph::Class() && gr->IsA() != TGraphErrors::Class() && gr->IsA() != TGraph2D::Class())
-        std::cout << "Warning: only limited support for class " << gr->Class_Name() << std::endl;
+    if (!gr){
+        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
+        return false;
+    }
+
+    if (gr->IsA() != TGraph::Class() && gr->IsA() != TGraphErrors::Class())
+        std::cerr << "Warning: only limited support for class " << gr->Class_Name() << std::endl;
 
     TString option(opt);
     option.ToUpper();
     bool with_errors = (gr->IsA() == TGraphErrors::Class());
     bool with_herrors = with_errors && option.Contains("H");
-    bool with_zdata = (gr->IsA() == TGraph2D::Class());
 
     TString path = GetFilePath(gr, filename);
     std::ofstream ofs(path);
@@ -281,16 +306,9 @@ bool ROOTToText::SaveGraph(const TGraph *gr, char *filename, Option_t *opt) cons
         ofs << std::endl;
         if (with_errors){
             if (with_herrors)
-                ofs << "# 3:EY\n# 4:EX" << std::endl;
+                ofs << "# 3:EX\n# 4:EY" << std::endl;
             else
                 ofs << "# 3:EY" << std::endl;
-        }
-        else if (with_zdata){
-            ofs << "# 3:Z";
-            TString yaxis = gr->GetYaxis()->GetTitle();
-            if (yaxis.Length() > 0)
-                ofs << " - " << yaxis;
-            ofs << std::endl;
         }
     }
 
@@ -299,12 +317,9 @@ bool ROOTToText::SaveGraph(const TGraph *gr, char *filename, Option_t *opt) cons
     Double_t *EX = gr->GetEX();
     Double_t *EY = gr->GetEY();
     Int_t *idx = new Int_t[gr->GetN()];
-    TMath::Sort(gr->GetN(), XX, idx);
-    Double_t *ZZ = 0;
-    if (with_zdata)
-        ZZ = ((TGraph2D *)gr)->GetZ();
+    TMath::Sort(gr->GetN(), XX, idx, false);
 
-    for (int i = 1; i < gr->GetN(); i++){
+    for (int i = 0; i < gr->GetN(); i++){
         Int_t k = idx[i];
         ofs << XX[k] << " " << YY[k];
         if (with_errors){
@@ -313,11 +328,65 @@ bool ROOTToText::SaveGraph(const TGraph *gr, char *filename, Option_t *opt) cons
             else
                 ofs << " " << EY[k];
         }
-        else if (with_zdata){
-            ofs << " " << ZZ[k];
-        }
         ofs << std::endl;
     }
+    ofs.close();
+    delete[] idx;
+    return true;
+}
+
+bool ROOTToText::SaveGraph2D(const TGraph2D *gr, char *filename, Option_t *opt) const
+{
+    if (!gr){
+        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
+        return false;
+    }
+
+    //TString option(opt);
+    //option.ToUpper();
+
+    TString path = GetFilePath(gr, filename);
+    std::ofstream ofs(path);
+    if (!ofs.is_open()){
+        std::cerr << "Error: could not open file " << path << std::endl;
+        return false;
+    }
+
+    if (headerTitle_)
+        ofs << "# " << gr->GetTitle() << std::endl;
+
+    if (headerAxis_){
+        ofs << "# 1:X";
+        TString xaxis = gr->GetXaxis()->GetTitle();
+        if (xaxis.Length() > 0)
+            ofs << " - " << xaxis;
+        ofs << std::endl;
+        ofs << "# 2:Y";
+        TString yaxis = gr->GetYaxis()->GetTitle();
+        if (yaxis.Length() > 0)
+            ofs << " - " << yaxis;
+        ofs << std::endl;
+        ofs << "# 3:Z";
+        TString zaxis = gr->GetZaxis()->GetTitle();
+        if (zaxis.Length() > 0)
+            ofs << " - " << zaxis;
+        ofs << std::endl;
+    }
+
+    Double_t *XX = gr->GetX();
+    Double_t *YY = gr->GetY();
+    Double_t *ZZ = gr->GetZ();
+    Int_t *idx = new Int_t[gr->GetN()];
+    TMath::Sort(gr->GetN(), XX, idx, false);
+
+    double xprev = 0;
+    for (int i = 0; i < gr->GetN(); i++){
+        Int_t k = idx[i];
+        if (i>0 && xprev != XX[k]) ofs << std::endl;
+        ofs << XX[k] << " " << YY[k] << " " << ZZ[k] << std::endl;
+        xprev = XX[k];
+    }
+    ofs.close();
     delete[] idx;
     return true;
 }
