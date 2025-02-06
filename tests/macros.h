@@ -8,10 +8,12 @@ int ntest = 0;
 }
 
 #define END_TEST() {                                                                      \
-    if (nfailed) std::cout << "--> FAILED TEST "<< ntest                                  \
+    if (nfailed) std::cout << "-->\033[1;31m FAILED TEST "<< ntest << "\033[0m"           \
                            << " (" << nfailed << " failures / " << npassed+nfailed << ")" \
                            << std::endl;                                                  \
-    else std::cout << "--> PASSED TEST " << ntest << " (" << npassed << ")" << std::endl; \
+    else std::cout << "-->\033[1;32m PASSED TEST " << ntest << "\033[0m"                  \
+                           << " (" << npassed << " units)"                                \
+                           << std::endl;                                                  \
 }
 
 #define SIMPLE_TEST(x) {                                                                            \
