@@ -1,16 +1,25 @@
 #ifndef __CINT__
 
-#include "ROOTToText.h"
+#include "ROOTToText.hh"
 
 #include "TApplication.h"
+#include "TGraph.h"
+#include "TGraphErrors.h"
+#include "TGraph2D.h"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TH3D.h"
 #include "TROOT.h"
 #include "TString.h"
 #include "TSystem.h"
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <stdio.h>
 
 void RTT_test();
+bool open_file(const char *filename, int _col, int _lin, double _sum = 0, int _idx_col = -1);
 
 int main(int argc, char **argv){
     gROOT->SetBatch();
@@ -55,12 +64,11 @@ void TestRTTDefault(){
     TString out_dir(gSystem->UnixPathName(gRTT->GetDirectory())); // small trick otherwise the test fails in Windows
     COMPARE_TSTRING(out_dir, dir_name1);
     EXPECTED_EXCEPTION(gRTT->SetDirectory(__FILE__), std::invalid_argument);
-    remove(dir_name1.Data());
     END_TEST();
 }
 
 void TestRTTOutput(){
-    // TODO
+
 }
 
 void RTT_test(){

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 # create dictonary
-ROOT_GENERATE_DICTIONARY(ROOTToText_dict RootToText.h LINKDEF LinkDef.h)
+ROOT_GENERATE_DICTIONARY(ROOTToText_dict RootToText.hh LINKDEF LinkDef.h)
 
 #---Create a shared library with geneated dictionary
 add_library(libROOTToText SHARED ROOTToText.cpp ROOTToText_dict.cxx)

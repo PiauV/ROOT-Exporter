@@ -1,4 +1,4 @@
-#include "ROOTToText.h"
+#include "ROOTToText.hh"
 
 #include "TClass.h"
 #include "TH1.h"
