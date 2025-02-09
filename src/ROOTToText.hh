@@ -15,8 +15,10 @@ public:
     inline void SetHeader(bool title = true, bool axis = true);
     void SetFileExtension(TString ext);
     void SetDirectory(TString dir);
+    inline void SetCommentChar(char c);
     inline TString GetFileExtension() const;
     inline TString GetDirectory() const;
+    inline char GetCommentChar() const;
     // set precision, format ?
 
     bool SaveObject(const TObject *obj, char *filename = "", Option_t *opt = "") const;
@@ -37,6 +39,7 @@ private:
     TString defaultExtension_;
     TString defaultDirectory_;
     static ROOTToText *instance_;
+    char cc_; // comment character
 };
 
 R__EXTERN ROOTToText *gRTT;
@@ -52,4 +55,12 @@ TString ROOTToText::GetFileExtension() const {
 
 TString ROOTToText::GetDirectory() const {
     return defaultDirectory_;
+}
+
+void ROOTToText::SetCommentChar(char c){
+    cc_ = c;
+}
+
+char ROOTToText::GetCommentChar() const{
+    return cc_;
 }

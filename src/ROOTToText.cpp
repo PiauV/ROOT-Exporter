@@ -22,6 +22,7 @@ ROOTToText::ROOTToText(){
     headerAxis_ = true;
     defaultExtension_ = ".txt";
     defaultDirectory_ = "./";
+    cc_ = '#';
 }
 
 ROOTToText::~ROOTToText(){
@@ -152,21 +153,21 @@ bool ROOTToText::SaveTH1(const TH1 *h, char *filename, Option_t *opt) const{
     }
 
     if (headerTitle_)
-        ofs << "# " << h->GetTitle() << std::endl;
+        ofs << cc_ << " " << h->GetTitle() << std::endl;
 
     if (headerAxis_){
-        ofs << "# 1:X";
+        ofs << cc_ << " 1:X";
         TString xaxis = h->GetXaxis()->GetTitle();
         if (xaxis.Length() > 0)
             ofs << " - " << xaxis;
         ofs << std::endl;
-        ofs << "# 2:Y";
+        ofs << cc_ << " 2:Y";
         TString yaxis = h->GetYaxis()->GetTitle();
         if (yaxis.Length() > 0)
             ofs << " - " << yaxis;
         ofs << std::endl;
         if (with_errors)
-            ofs << "# 3:EY" << std::endl;
+            ofs << cc_ << " 3:EY" << std::endl;
     }
 
     for (int i = 1; i <= h->GetNbinsX(); i++){
@@ -208,35 +209,34 @@ bool ROOTToText::SaveTH2(const TH2 *h, char *filename, Option_t *opt) const{
         return false;
     }
 
+    if (!in_columns && path.EndsWith(".z") && cc_ == '!'){
+            // GLE mandatory header
+            int nx = h->GetNbinsX();
+            int ny = h->GetNbinsY();
+            ofs << "! nx " << nx
+                << " xmin " << h->GetXaxis()->GetBinLowEdge(1)
+                << " xmax " << h->GetXaxis()->GetBinLowEdge(nx+1)
+                << " ny " << ny
+                << " ymin " << h->GetYaxis()->GetBinLowEdge(1)
+                << " ymax " << h->GetYaxis()->GetBinLowEdge(ny+1)
+                << std::endl;
+    }
+
     if (headerTitle_)
-        ofs << "# " << h->GetTitle() << std::endl;
+        ofs << cc_ << " " << h->GetTitle() << std::endl;
 
     if (headerAxis_){
-        ofs << "# 1:X";
+        ofs << cc_ << " 1:X";
         TString xaxis = h->GetXaxis()->GetTitle();
         if (xaxis.Length() > 0)
             ofs << " - " << xaxis;
         ofs << std::endl;
-        if (!in_columns){
-            int nx = h->GetNbinsX();
-            ofs << "# nx " << nx
-                << " xmin " << h->GetXaxis()->GetBinLowEdge(1)
-                << " xmax " << h->GetXaxis()->GetBinLowEdge(nx)
-                << std::endl;
-        }
-        ofs << "# 2:Y";
+        ofs << cc_ << " 2:Y";
         TString yaxis = h->GetYaxis()->GetTitle();
         if (yaxis.Length() > 0)
             ofs << " - " << yaxis;
         ofs << std::endl;
-        if (!in_columns){
-            int ny = h->GetNbinsY();
-            ofs << "# ny " << ny
-                << " ymin " << h->GetYaxis()->GetBinLowEdge(1)
-                << " ymax " << h->GetYaxis()->GetBinLowEdge(ny)
-                << std::endl;
-        }
-        ofs << "# 3:Z";
+        ofs << cc_ << " 3:Z";
         TString zaxis = h->GetZaxis()->GetTitle();
         if (zaxis.Length() > 0)
             ofs << " - " << zaxis;
@@ -291,24 +291,24 @@ bool ROOTToText::SaveGraph(const TGraph *gr, char *filename, Option_t *opt) cons
     }
 
     if (headerTitle_)
-        ofs << "# " << gr->GetTitle() << std::endl;
+        ofs << cc_ << " " << gr->GetTitle() << std::endl;
 
     if (headerAxis_){
-        ofs << "# 1:X";
+        ofs << cc_ << " 1:X";
         TString xaxis = gr->GetXaxis()->GetTitle();
         if (xaxis.Length() > 0)
             ofs << " - " << xaxis;
         ofs << std::endl;
-        ofs << "# 2:Y";
+        ofs << cc_ << " 2:Y";
         TString yaxis = gr->GetYaxis()->GetTitle();
         if (yaxis.Length() > 0)
             ofs << " - " << yaxis;
         ofs << std::endl;
         if (with_errors){
             if (with_herrors)
-                ofs << "# 3:EX\n# 4:EY" << std::endl;
+                ofs << cc_ << " 3:EX\n" << cc_ << " 4:EY" << std::endl;
             else
-                ofs << "# 3:EY" << std::endl;
+                ofs << cc_ << " 3:EY" << std::endl;
         }
     }
 
@@ -353,20 +353,20 @@ bool ROOTToText::SaveGraph2D(const TGraph2D *gr, char *filename, Option_t *opt) 
     }
 
     if (headerTitle_)
-        ofs << "# " << gr->GetTitle() << std::endl;
+        ofs << cc_ << " " << gr->GetTitle() << std::endl;
 
     if (headerAxis_){
-        ofs << "# 1:X";
+        ofs << cc_ << " 1:X";
         TString xaxis = gr->GetXaxis()->GetTitle();
         if (xaxis.Length() > 0)
             ofs << " - " << xaxis;
         ofs << std::endl;
-        ofs << "# 2:Y";
+        ofs << cc_ << " 2:Y";
         TString yaxis = gr->GetYaxis()->GetTitle();
         if (yaxis.Length() > 0)
             ofs << " - " << yaxis;
         ofs << std::endl;
-        ofs << "# 3:Z";
+        ofs << cc_ << " 3:Z";
         TString zaxis = gr->GetZaxis()->GetTitle();
         if (zaxis.Length() > 0)
             ofs << " - " << zaxis;
