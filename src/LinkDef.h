@@ -7,8 +7,11 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-// Turn on creation of dictionaries for class ROOTToText and global variable gRTT
-#pragma link C++ class ROOTToText;
+// Turn on creation of dictionaries for Expad module
+#pragma link C++ namespace Expad;
+#pragma link C++ enum Expad::DataType;
+#pragma link C++ function Expad::GetDataType;
+#pragma link C++ class Expad::ROOTToText;
 #pragma link C++ global gRTT;
 
 #endif // __CINT__ / __CLING__

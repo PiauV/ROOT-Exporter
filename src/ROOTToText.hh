@@ -1,10 +1,17 @@
+#ifndef ROOTTOTEXT_HH
+#define ROOTTOTEXT_HH
+
 #include "TROOT.h"
 #include "TString.h"
+
+#include "DataType.hh"
 
 class TH1;
 class TH2;
 class TGraph;
 class TGraph2D;
+
+namespace Expad {
 
 class ROOTToText {
 public:
@@ -22,6 +29,7 @@ public:
     // set precision, format ?
 
     bool SaveObject(const TObject* obj, char* filename = "", Option_t* opt = "") const;
+    bool SaveObject(const TObject* obj, DataType dt, char* filename = "", Option_t* opt = "") const;
     bool SaveTH1(const TH1* h, char* filename = "", Option_t* opt = "") const;
     bool SaveTH2(const TH2* h, char* filename = "", Option_t* opt = "") const;
     bool SaveGraph(const TGraph* gr, char* filename = "", Option_t* opt = "") const;
@@ -41,8 +49,6 @@ private:
     static ROOTToText* instance_;
     char cc_; // comment character
 };
-
-R__EXTERN ROOTToText* gRTT;
 
 void ROOTToText::SetHeader(bool title, bool axis) {
     headerTitle_ = title;
@@ -64,3 +70,9 @@ void ROOTToText::SetCommentChar(char c) {
 char ROOTToText::GetCommentChar() const {
     return cc_;
 }
+
+} // namespace Expad
+
+R__EXTERN Expad::ROOTToText* gRTT;
+
+#endif

@@ -13,9 +13,11 @@
 #include <fstream>
 #include <iostream>
 
-ROOTToText* ROOTToText::instance_ = 0;
+Expad::ROOTToText* gRTT = Expad::ROOTToText::GetInstance();
 
-ROOTToText* gRTT = ROOTToText::GetInstance();
+namespace Expad {
+
+ROOTToText* ROOTToText::instance_ = 0;
 
 ROOTToText::ROOTToText() {
     headerTitle_ = true;
@@ -113,22 +115,23 @@ TString ROOTToText::GetFilePath(const TObject* obj, char* filename) const {
 }
 
 bool ROOTToText::SaveObject(const TObject* obj, char* filename, Option_t* opt) const {
-    if (obj->InheritsFrom("TH2")) {
-        return SaveTH2(dynamic_cast<const TH2*>(obj), filename, opt);
-    }
-    else if (obj->InheritsFrom("TH1") && !obj->InheritsFrom("TH3")) {
-        return SaveTH1(dynamic_cast<const TH1*>(obj), filename, opt);
-    }
-    else if (obj->InheritsFrom("TGraph")) {
-        return SaveGraph(dynamic_cast<const TGraph*>(obj), filename, opt);
-    }
-    else if (obj->InheritsFrom("TGraph2D")) {
-        return SaveGraph2D(dynamic_cast<const TGraph2D*>(obj), filename, opt);
-    }
-    else {
-        TString error_message = TString::Format("This kind of object (%s) is not supported.", obj->Class_Name());
-        throw std::invalid_argument(error_message.Data());
-        // std::cerr << "This kind of object (" << obj->Class_Name() << ") is not supported" << std::endl;
+    return SaveObject(obj, GetDataType(obj), filename, opt);
+}
+
+bool ROOTToText::SaveObject(const TObject* obj, DataType dt, char* filename, Option_t* opt) const {
+    switch (dt) {
+        case Histo1D:
+            return SaveTH1(dynamic_cast<const TH1*>(obj), filename, opt);
+        case Histo2D:
+            return SaveTH2(dynamic_cast<const TH2*>(obj), filename, opt);
+        case Graph1D:
+            return SaveGraph(dynamic_cast<const TGraph*>(obj), filename, opt);
+        case Graph2D:
+            return SaveGraph2D(dynamic_cast<const TGraph2D*>(obj), filename, opt);
+        default:
+            TString error_message = TString::Format("This kind of object (%s) is not supported.", obj->Class_Name());
+            throw std::invalid_argument(error_message.Data());
+            // std::cerr << "This kind of object (" << obj->Class_Name() << ") is not supported" << std::endl;
     }
     return false;
 }
@@ -389,3 +392,5 @@ bool ROOTToText::SaveGraph2D(const TGraph2D* gr, char* filename, Option_t* opt) 
     delete[] idx;
     return true;
 }
+
+} // namespace Expad
