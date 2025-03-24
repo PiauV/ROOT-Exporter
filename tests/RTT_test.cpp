@@ -30,7 +30,7 @@ int main(int argc, char **argv){
 
 #endif
 
-#include "macros.h"
+#include "macros.hh"
 
 void TestRTTDefault(){
     BEGIN_TEST();

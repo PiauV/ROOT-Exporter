@@ -1,4 +1,4 @@
-add_executable(TestRTT RTT_test.cpp macros.h)
+add_executable(TestRTT RTT_test.cpp macros.hh)
 
 target_link_libraries(TestRTT PUBLIC libROOTToText)
 
