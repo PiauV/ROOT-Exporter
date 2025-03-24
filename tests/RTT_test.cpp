@@ -4,8 +4,8 @@
 
 #include "TApplication.h"
 #include "TGraph.h"
-#include "TGraphErrors.h"
 #include "TGraph2D.h"
+#include "TGraphErrors.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
@@ -13,15 +13,15 @@
 #include "TString.h"
 #include "TSystem.h"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <stdio.h>
 
 void RTT_test();
-bool open_file(const char *filename, int _col, int _lin, double _sum = 0, int _idx_col = -1);
+bool open_file(const char* filename, int _col, int _lin, double _sum = 0, int _idx_col = -1);
 
-int main(int argc, char **argv){
+int main(int argc, char** argv) {
     gROOT->SetBatch();
     TApplication theApp("App", &argc, argv);
     RTT_test();
@@ -32,12 +32,12 @@ int main(int argc, char **argv){
 
 #include "macros.hh"
 
-void TestRTTDefault(){
+void TestRTTDefault() {
     BEGIN_TEST();
     // file extention - default extension
     const TString default = gRTT->GetFileExtension();
     SIMPLE_TEST(default.Length() > 1);
-    SIMPLE_TEST(default[0] == '.');
+    SIMPLE_TEST(default[ 0 ] == '.');
     SIMPLE_TEST(TString(default(1, default.Length())).IsAlnum());
 
     // file extention - correct argument
@@ -67,56 +67,56 @@ void TestRTTDefault(){
     END_TEST();
 }
 
-void TestRTTOutput(){
+void TestRTTOutput() {
     BEGIN_TEST();
     const int N = 8;
-    const double xx[N] = {1,2,3,4,5,6,7,8};
-    const double yy[N] = {1,1.1,2.2,3.3,5.4,8.5,13.6,21.7};
-    const double ey[N] = {0.5,1,1.5,2,5,6,8,8.5};
-    const double ex[N] = {0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8};
-    double zz[N*N];
-    for (int i=0; i<N; i++){
-        for (int j=0; j<N; j++){
-            zz[i+j*N] = xx[i] * yy[j];
+    const double xx[N] = {1, 2, 3, 4, 5, 6, 7, 8};
+    const double yy[N] = {1, 1.1, 2.2, 3.3, 5.4, 8.5, 13.6, 21.7};
+    const double ey[N] = {0.5, 1, 1.5, 2, 5, 6, 8, 8.5};
+    const double ex[N] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
+    double zz[N * N];
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            zz[i + j * N] = xx[i] * yy[j];
         }
     }
 
     // TH1(D)
-    TH1D *h = new TH1D("h","histo;x;y",N,0.5,N+0.5);
-    for (int k=1;k<=N;k++) {
-        h->SetBinContent(k,yy[k-1]);
-        h->SetBinError(k,ey[k-1]);
+    TH1D* h = new TH1D("h", "histo;x;y", N, 0.5, N + 0.5);
+    for (int k = 1; k <= N; k++) {
+        h->SetBinContent(k, yy[k - 1]);
+        h->SetBinError(k, ey[k - 1]);
     }
 
     // TH2(D)
-    TH2D *h2 = new TH2D("h2","histo2D;x;y;z",N,0.5,N+0.5,N,0.5,N+0.5);
-    for (int k=1;k<=N;k++) {
-        for (int p=1;p<=N;p++) {
-            h2->SetBinContent(k,p,zz[k-1+(p-1)*N]);
+    TH2D* h2 = new TH2D("h2", "histo2D;x;y;z", N, 0.5, N + 0.5, N, 0.5, N + 0.5);
+    for (int k = 1; k <= N; k++) {
+        for (int p = 1; p <= N; p++) {
+            h2->SetBinContent(k, p, zz[k - 1 + (p - 1) * N]);
         }
     }
 
     // TH3(D)
-    TH3D *h3 = new TH3D("h3","histo2D;x;y;z",N,0.5,N+0.5,N,0.5,N+0.5,2,0,1);
+    TH3D* h3 = new TH3D("h3", "histo2D;x;y;z", N, 0.5, N + 0.5, N, 0.5, N + 0.5, 2, 0, 1);
 
     // TGraph
-    TGraph *gr = new TGraph(N,xx,yy);
+    TGraph* gr = new TGraph(N, xx, yy);
     gr->SetName("gr");
     gr->SetTitle("graph_no_error");
 
     // TGraphErrors
-    TGraphErrors *gre = new TGraphErrors(N,xx,yy,ex,ey);
+    TGraphErrors* gre = new TGraphErrors(N, xx, yy, ex, ey);
     gre->SetName("gre");
     gre->SetTitle("graph_with_errors");
 
     // TGraph2D
-    TGraph2D *gr2d = new TGraph2D(N*N);
+    TGraph2D* gr2d = new TGraph2D(N * N);
     gr2d->SetName("gr2d");
     gr2d->SetTitle("2d_graph");
-    for (int i=0;i<N;i++) {
-        for (int j=0;j<N;j++) {
-            int k = i+j*N;
-            gr2d->SetPoint(k,xx[i],xx[j],zz[k]);
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            int k = i + j * N;
+            gr2d->SetPoint(k, xx[i], xx[j], zz[k]);
         }
     }
 
@@ -128,81 +128,81 @@ void TestRTTOutput(){
     SIMPLE_TEST(gRTT->SaveObject(gr));
     SIMPLE_TEST(gRTT->SaveObject(gre));
     SIMPLE_TEST(gRTT->SaveObject(gr2d));
-    EXPECTED_EXCEPTION(gRTT->SaveObject(h3),std::invalid_argument);
+    EXPECTED_EXCEPTION(gRTT->SaveObject(h3), std::invalid_argument);
 
     // saving with options and filenames
-    SIMPLE_TEST(gRTT->SaveObject(h,"h_with_errors","E"));
-    SIMPLE_TEST(gRTT->SaveObject(h,"h_lowedge_and_errors.dat","EL"));
-    SIMPLE_TEST(gRTT->SaveObject(gre,"gre_horizontal_errors.txt","H"));
-    SIMPLE_TEST(gRTT->SaveObject(h2,"h2_columns","C"));
+    SIMPLE_TEST(gRTT->SaveObject(h, "h_with_errors", "E"));
+    SIMPLE_TEST(gRTT->SaveObject(h, "h_lowedge_and_errors.dat", "EL"));
+    SIMPLE_TEST(gRTT->SaveObject(gre, "gre_horizontal_errors.txt", "H"));
+    SIMPLE_TEST(gRTT->SaveObject(h2, "h2_columns", "C"));
 
     // read files
     double sum_y = 0;
     double sum_ey = 0;
     double sum_ex = 0;
     double sum_z = 0;
-    for (int i=0;i<N;i++) {
+    for (int i = 0; i < N; i++) {
         sum_y += yy[i];
         sum_ey += ey[i];
         sum_ex += ex[i];
-        for (int j=0;j<N;j++) {
-            sum_z += zz[i+j*N];
+        for (int j = 0; j < N; j++) {
+            sum_z += zz[i + j * N];
         }
     }
 
-    SIMPLE_TEST(open_file("./output/h.txt",2,N,sum_y,2));
-    SIMPLE_TEST(open_file("./output/h2.txt",N,N,sum_z,0));
-    SIMPLE_TEST(open_file("./output/gr.txt",2,N,sum_y,2));
-    SIMPLE_TEST(open_file("./output/gre.txt",3,N,sum_y,2));
-    SIMPLE_TEST(open_file("./output/gre.txt",3,N,sum_ey,3));
-    SIMPLE_TEST(open_file("./output/gr2d.txt",3,N*N,sum_z,3));
-    SIMPLE_TEST(open_file("./output/h_with_errors.txt",3,N,sum_y,2));
-    SIMPLE_TEST(open_file("./output/h_lowedge_and_errors.dat",3,N,sum_ey,3));
-    SIMPLE_TEST(open_file("./output/gre_horizontal_errors.txt",4,N,sum_y,2));
-    SIMPLE_TEST(open_file("./output/gre_horizontal_errors.txt",4,N,sum_ex,3));
-    SIMPLE_TEST(open_file("./output/gre_horizontal_errors.txt",4,N,sum_ey,4));
-    SIMPLE_TEST(open_file("./output/h2_columns.txt",3,N*N,sum_z,3));
+    SIMPLE_TEST(open_file("./output/h.txt", 2, N, sum_y, 2));
+    SIMPLE_TEST(open_file("./output/h2.txt", N, N, sum_z, 0));
+    SIMPLE_TEST(open_file("./output/gr.txt", 2, N, sum_y, 2));
+    SIMPLE_TEST(open_file("./output/gre.txt", 3, N, sum_y, 2));
+    SIMPLE_TEST(open_file("./output/gre.txt", 3, N, sum_ey, 3));
+    SIMPLE_TEST(open_file("./output/gr2d.txt", 3, N * N, sum_z, 3));
+    SIMPLE_TEST(open_file("./output/h_with_errors.txt", 3, N, sum_y, 2));
+    SIMPLE_TEST(open_file("./output/h_lowedge_and_errors.dat", 3, N, sum_ey, 3));
+    SIMPLE_TEST(open_file("./output/gre_horizontal_errors.txt", 4, N, sum_y, 2));
+    SIMPLE_TEST(open_file("./output/gre_horizontal_errors.txt", 4, N, sum_ex, 3));
+    SIMPLE_TEST(open_file("./output/gre_horizontal_errors.txt", 4, N, sum_ey, 4));
+    SIMPLE_TEST(open_file("./output/h2_columns.txt", 3, N * N, sum_z, 3));
 
     END_TEST();
 }
 
-void RTT_test(){
+void RTT_test() {
     TestRTTDefault();
     TestRTTOutput();
 }
 
-bool open_file(const char *filename, int _col, int _lin, double _sum, int _idx_col)
-{
+bool open_file(const char* filename, int _col, int _lin, double _sum, int _idx_col) {
     std::ifstream ifs(filename);
     if (!ifs.is_open()) {
         std::cerr << "Could not open file" << std::endl;
         return false;
     }
-	std::vector<std::vector<double>> in;
-	std::string line;
-	while (line.size() == 0 || line[0] == '#'){
-		getline(ifs,line);
-	}
-	std::stringstream ss;
-	ss.str(line);
-	double val;
-	while ( ss >> val) in.push_back({val});
-	int ncol = in.size();
-	int nline = 1;
-	while (getline(ifs,line)){
+    std::vector<std::vector<double>> in;
+    std::string line;
+    while (line.size() == 0 || line[0] == '#') {
+        getline(ifs, line);
+    }
+    std::stringstream ss;
+    ss.str(line);
+    double val;
+    while (ss >> val)
+        in.push_back({val});
+    int ncol = in.size();
+    int nline = 1;
+    while (getline(ifs, line)) {
         if (line.size() == 0 || line[0] == '#') continue;
         ss.clear();
-		ss.str(line);
-		int icol = 0;
-		while (ss >> val){
-			in[icol++].push_back(val);
-		}
-		if (icol != ncol) {
-			std::cerr << "something is wrong!" << std::endl;
-			return false;
-		}
+        ss.str(line);
+        int icol = 0;
+        while (ss >> val) {
+            in[icol++].push_back(val);
+        }
+        if (icol != ncol) {
+            std::cerr << "something is wrong!" << std::endl;
+            return false;
+        }
         nline++;
-	}
+    }
     ifs.close();
 
     if (_col != ncol) {
@@ -212,30 +212,30 @@ bool open_file(const char *filename, int _col, int _lin, double _sum, int _idx_c
     }
     if (_lin != nline) {
         std::cerr << "Unexpected number of lines" << std::endl;
-        std::cerr << "Expected " << _lin << ", found " << nline << std::endl; 
+        std::cerr << "Expected " << _lin << ", found " << nline << std::endl;
         return false;
     }
 
-    if (_idx_col >= 0){
+    if (_idx_col >= 0) {
         double sum_col = 0;
-        if (_idx_col == 0){
+        if (_idx_col == 0) {
             // 0 --> sum all contents (=> for 2D matrix)
-            for (const auto& vec: in){
-                for (const auto& x: vec){
+            for (const auto& vec : in) {
+                for (const auto& x : vec) {
                     sum_col += x;
                 }
             }
         }
-        else{
-            if (_idx_col > ncol){
+        else {
+            if (_idx_col > ncol) {
                 std::cerr << "bad sum index" << std::endl;
                 return false;
             }
-            for (const auto& x: in[_idx_col-1]){
+            for (const auto& x : in[_idx_col - 1]) {
                 sum_col += x;
             }
         }
-        if (fabs(_sum - sum_col) > 1e-6){
+        if (fabs(_sum - sum_col) > 1e-6) {
             std::cerr << "Unexpected sum" << std::endl;
             std::cerr << "Expected " << _sum << ", found " << sum_col << std::endl;
             return false;

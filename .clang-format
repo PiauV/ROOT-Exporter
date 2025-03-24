@@ -1,0 +1,28 @@
+Language: Cpp
+Standard: Cpp11
+
+UseTab: false
+IndentWidth: 4
+AllowShortIfStatementsOnASingleLine: true
+IndentCaseLabels: true
+ColumnLimit: 0
+PointerAlignment: Left
+SeparateDefinitionBlocks: Always
+IndentAccessModifiers: false
+AccessModifierOffset: -4
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: false
+  AfterFunction: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterExternBlock: false
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: true
