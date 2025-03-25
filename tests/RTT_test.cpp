@@ -1,15 +1,13 @@
-#ifndef __CINT__
-
+#include "RTT_test.hh"
 #include "ROOTToText.hh"
+#include "macros.hh"
 
-#include "TApplication.h"
 #include "TGraph.h"
 #include "TGraph2D.h"
 #include "TGraphErrors.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
-#include "TROOT.h"
 #include "TString.h"
 #include "TSystem.h"
 
@@ -17,27 +15,6 @@
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
-
-void RTT_test();
-void TestRTTDefault();
-void TestRTTOutput();
-bool open_file(const char* filename, int _col, int _lin, double _sum = 0, int _idx_col = -1);
-
-int main(int argc, char** argv) {
-    gROOT->SetBatch();
-    TApplication theApp("App", &argc, argv);
-    RTT_test();
-    return EXIT_SUCCESS;
-}
-
-#endif
-
-void RTT_test() {
-    TestRTTDefault();
-    TestRTTOutput();
-}
-
-#include "macros.hh"
 
 void TestRTTDefault() {
     BEGIN_TEST();

@@ -1,8 +1,7 @@
-#ifndef __CINT__
-
+#include "DataType_test.hh"
 #include "DataType.hh"
+#include "macros.hh"
 
-#include "TApplication.h"
 #include "TF1.h"
 #include "TF12.h"
 #include "TF2.h"
@@ -17,24 +16,8 @@
 #include "TLegend.h"
 #include "TPaveText.h"
 #include "TProfile.h"
-#include "TROOT.h"
-#include "TString.h"
-#include "TSystem.h"
 
 #include <iostream>
-
-void TestDataType();
-
-int main(int argc, char** argv) {
-    gROOT->SetBatch();
-    TApplication theApp("App", &argc, argv);
-    TestDataType();
-    return EXIT_SUCCESS;
-}
-
-#endif
-
-#include "macros.hh"
 
 void TestDataType() {
     BEGIN_TEST();

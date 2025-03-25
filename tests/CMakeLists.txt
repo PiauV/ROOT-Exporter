@@ -1,16 +1,21 @@
-add_executable(TestDT DataType_test.cpp macros.hh)
-target_link_libraries(TestDT PUBLIC libROOTToText libGraf)
+add_executable(TestExPaD 
+        TestExPaD.cpp 
+        macros.hh
+        DataType_test.cpp 
+        DataType_test.hh 
+        RTT_test.cpp
+        RTT_test.hh
+)
 
-add_executable(TestRTT RTT_test.cpp macros.hh)
-target_link_libraries(TestRTT PUBLIC libROOTToText)
+target_link_libraries(TestExPaD PUBLIC libROOTToText libGraf)
 
 if (MSVC)
         # in Windows, it is necessary to copy the shared library (dll) to the same folder as the executable
         add_custom_command(
-                TARGET TestRTT
+                TARGET TestExPaD
                 COMMAND ${CMAKE_COMMAND} -E copy
                         $<TARGET_FILE:libROOTToText>
-                        $<TARGET_FILE_DIR:TestRTT>
-                DEPENDS libROOTToText TestRTT
+                        $<TARGET_FILE_DIR:TestExPaD>
+                DEPENDS libROOTToText TestExPaD
         )
 endif()
