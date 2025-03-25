@@ -1,3 +1,6 @@
+#ifndef MACRO_TESTS
+#define MACRO_TESTS
+
 int nfailed = 0;
 int npassed = 0;
 int ntest = 0;
@@ -45,3 +48,5 @@ int ntest = 0;
         nfailed++;                                                                                                         \
     }                                                                                                                      \
 }
+
+#endif

@@ -1,5 +1,7 @@
-add_executable(TestRTT RTT_test.cpp macros.hh)
+add_executable(TestDT DataType_test.cpp macros.hh)
+target_link_libraries(TestDT PUBLIC libROOTToText libGraf)
 
+add_executable(TestRTT RTT_test.cpp macros.hh)
 target_link_libraries(TestRTT PUBLIC libROOTToText)
 
 if (MSVC)

@@ -19,6 +19,8 @@
 #include <stdio.h>
 
 void RTT_test();
+void TestRTTDefault();
+void TestRTTOutput();
 bool open_file(const char* filename, int _col, int _lin, double _sum = 0, int _idx_col = -1);
 
 int main(int argc, char** argv) {
@@ -29,6 +31,11 @@ int main(int argc, char** argv) {
 }
 
 #endif
+
+void RTT_test() {
+    TestRTTDefault();
+    TestRTTOutput();
+}
 
 #include "macros.hh"
 
@@ -164,11 +171,6 @@ void TestRTTOutput() {
     SIMPLE_TEST(open_file("./output/h2_columns.txt", 3, N * N, sum_z, 3));
 
     END_TEST();
-}
-
-void RTT_test() {
-    TestRTTDefault();
-    TestRTTOutput();
 }
 
 bool open_file(const char* filename, int _col, int _lin, double _sum, int _idx_col) {
