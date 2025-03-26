@@ -50,4 +50,9 @@ extern int ntest;
         nfailed++;                                                                                                          \
     }
 
+#define EXCEPTION_CAUGHT(e)                                                                      \
+    std::cout << "Exception caught in " << __FUNCTION__ << " on line " << __LINE__ << std::endl; \
+    std::cout << e.what() << std::endl;                                                          \
+    nfailed++;
+
 #endif

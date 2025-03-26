@@ -147,6 +147,13 @@ void TestRTTOutput() {
     SIMPLE_TEST(open_file("./output/gre_horizontal_errors.txt", 4, N, sum_ey, 4));
     SIMPLE_TEST(open_file("./output/h2_columns.txt", 3, N * N, sum_z, 3));
 
+    delete h;
+    delete h2;
+    delete h3;
+    delete gr;
+    delete gre;
+    delete gr2d;
+
     END_TEST();
 }
 

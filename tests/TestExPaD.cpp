@@ -4,6 +4,7 @@
 #include "TROOT.h"
 
 #include "DataType_test.hh"
+#include "ExPlot_test.hh"
 #include "RTT_test.hh"
 
 int nfailed = 0;
@@ -21,8 +22,9 @@ int main(int argc, char** argv) {
 
 #endif
 
-void start_tests(){
+void start_tests() {
     TestDataType();
     TestRTTDefault();
     TestRTTOutput();
+    TestPlotSerializer();
 }
