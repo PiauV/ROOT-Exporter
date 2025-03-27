@@ -12,5 +12,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src ${ROOT_INCLUDE_DIRS})
 set(CMAKE_CXX_FLAGS "${ROOT_CXX_FLAGS}")
 link_directories(${ROOT_LIBRARY_DIR})
 
+enable_testing()
+
 add_subdirectory(src)
 add_subdirectory(tests)

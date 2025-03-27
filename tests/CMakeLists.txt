@@ -1,3 +1,5 @@
+include(CTest)
+
 add_executable(TestExPaD 
         TestExPaD.cpp 
         macros.hh
@@ -22,3 +24,5 @@ if (MSVC)
                 DEPENDS libROOTToText libExPlot TestExPaD
         )
 endif()
+
+add_test(NAME TestExPaD COMMAND TestExPaD)
