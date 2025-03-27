@@ -4,6 +4,7 @@
 extern int nfailed;
 extern int npassed;
 extern int ntest;
+extern bool pass_all_tests;
 
 #define BEGIN_TEST()                                                                    \
     std::cout << "### TEST " << ++ntest << " .......... " << __FUNCTION__ << std::endl; \
@@ -17,7 +18,8 @@ extern int ntest;
     else                                                                           \
         std::cout << "-->\033[1;32m PASSED TEST " << ntest << "\033[0m"            \
                   << " (" << npassed << " units)"                                  \
-                  << std::endl;
+                  << std::endl;                                                    \
+    pass_all_tests = pass_all_tests && (nfailed == 0);
 
 #define SIMPLE_TEST(x)                                                                              \
     if (!(x)) {                                                                                     \

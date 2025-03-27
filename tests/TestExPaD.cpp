@@ -10,6 +10,7 @@
 int nfailed = 0;
 int npassed = 0;
 int ntest = 0;
+bool pass_all_tests = true;
 
 void start_tests();
 
@@ -17,7 +18,7 @@ int main(int argc, char** argv) {
     gROOT->SetBatch();
     TApplication theApp("App", &argc, argv);
     start_tests();
-    return EXIT_SUCCESS;
+    return pass_all_tests ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 #endif
