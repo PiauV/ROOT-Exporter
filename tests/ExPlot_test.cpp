@@ -25,11 +25,13 @@ void TestPlotSerializer() {
     h->FillRandom("f", 100);
     h->Draw();
     f->Draw("same");
+    c1->Update(); // necessary to get the title in the list of primitives
     Expad::PlotSerializer* ps = nullptr;
     try {
         ps = new Expad::PlotSerializer(gPad);
         SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
         COMPARE_TSTRING(ps->GetDatasetLabel(0), "h");
+        COMPARE_TSTRING(ps->GetPlotTitle(), "h");
         COMPARE_TSTRING(ps->GetXaxisTitle(), "xtitle");
         COMPARE_TSTRING(ps->GetYaxisTitle(), "ytitle");
     }
@@ -41,6 +43,7 @@ void TestPlotSerializer() {
     ps = nullptr;
     delete h;
     delete f;
+    delete c1;
 
     // CASE 2 - multigraph
     TCanvas* c2 = new TCanvas();
@@ -53,14 +56,19 @@ void TestPlotSerializer() {
     TGraphErrors* gre = new TGraphErrors(2, x, y2, 0, ey);
     gre->SetLineWidth(1);
     TMultiGraph* mg = new TMultiGraph();
+    mg->SetTitle("title;x;y");
     mg->Add(gr);
     mg->Add(gre);
     mg->Draw("ap");
+    c2->Update(); // necessary to get the title in the list of primitives
     try {
         ps = new Expad::PlotSerializer(gPad);
         SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
         SIMPLE_TEST(ps->GetDatasetProperties(0).line.size == 2);
         SIMPLE_TEST(ps->GetDatasetProperties(1).line.size == 1);
+        COMPARE_TSTRING(ps->GetPlotTitle(), "title");
+        COMPARE_TSTRING(ps->GetXaxisTitle(), "x");
+        COMPARE_TSTRING(ps->GetYaxisTitle(), "y");
     }
     catch (const std::exception& e) {
         EXCEPTION_CAUGHT(e);
@@ -69,5 +77,6 @@ void TestPlotSerializer() {
     delete gr;
     delete gre;
     delete mg;
+    delete c2;
     END_TEST();
 }

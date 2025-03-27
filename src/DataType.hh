@@ -14,7 +14,8 @@ enum DataType {
     Graph2D = 12,
     Function1D = 3,
     Function2D = 13,
-    MultiGraph1D = 4
+    MultiGraph1D = 4,
+    Text = 101
 };
 
 DataType GetDataType(const TObject* obj);

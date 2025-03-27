@@ -21,7 +21,7 @@ DataType GetDataType(const TObject* obj) {
     else if (obj->InheritsFrom("TGraph2D")) {
         return Graph2D;
     }
-    else if (obj->InheritsFrom("TMultiGraph")){
+    else if (obj->InheritsFrom("TMultiGraph")) {
         return MultiGraph1D;
     }
     else if (obj->InheritsFrom("TF1")) {
@@ -29,6 +29,9 @@ DataType GetDataType(const TObject* obj) {
             return Function2D;
         }
         return Function1D;
+    }
+    else if (obj->InheritsFrom("TPaveText")) {
+        return Text;
     }
     return Undefined;
 }

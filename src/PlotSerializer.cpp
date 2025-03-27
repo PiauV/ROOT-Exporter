@@ -7,7 +7,9 @@
 #include "TList.h"
 #include "TMultiGraph.h"
 #include "TPad.h"
+#include "TPaveText.h"
 #include "TROOT.h"
+#include "TText.h"
 
 namespace Expad {
 
@@ -30,6 +32,10 @@ TString PlotSerializer::GetDatasetLabel(int i) const {
     return TString(pp_.data.at(i).label);
 }
 
+TString PlotSerializer::GetPlotTitle() const {
+    return TString(pp_.title);
+}
+
 TString PlotSerializer::GetXaxisTitle() const {
     // return TString::Format("%s from %.1f to %.1f", pp_.xaxis.title, pp_.xaxis.min, pp_.xaxis.max);
     return TString(pp_.xaxis.title);
@@ -48,8 +54,17 @@ void PlotSerializer::ExtractPadProperties() {
                 // 1D data
                 StoreDataWithAxis(obj, data, axis_needed);
             }
-            else {
+            else if (data < 100) {
                 throw std::domain_error("2D/3D plots are not supported yet.");
+            }
+            else {
+                // other graphics entities (text, legend, ...)
+                if (data == Text) {
+                    if (strcmp(obj->GetName(), "title") == 0) {
+                        // title of the plot
+                        pp_.title = ((TPaveText*)obj)->GetLine(0)->GetTitle();
+                    }
+                }
             }
         }
     }

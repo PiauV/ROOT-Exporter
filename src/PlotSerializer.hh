@@ -59,6 +59,7 @@ public:
     int GetNumberOfDatasets() const;
     DataProperties1D GetDatasetProperties(int i) const;
     TString GetDatasetLabel(int i) const;
+    TString GetPlotTitle() const;
     TString GetXaxisTitle() const;
     TString GetYaxisTitle() const;
 

@@ -55,9 +55,11 @@ void TestDataType() {
     SIMPLE_TEST(Expad::GetDataType(f12) == Expad::Function1D);
     SIMPLE_TEST(Expad::GetDataType(f2) == Expad::Function2D);
 
+    // text
+    SIMPLE_TEST(Expad::GetDataType(txt) == Expad::Text);
+
     // others (not supported for now)
     SIMPLE_TEST(Expad::GetDataType(leg) == Expad::Undefined);
-    SIMPLE_TEST(Expad::GetDataType(txt) == Expad::Undefined);
     SIMPLE_TEST(Expad::GetDataType(ltx) == Expad::Undefined);
     SIMPLE_TEST(Expad::GetDataType(frm) == Expad::Undefined);
 
