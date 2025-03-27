@@ -5,6 +5,7 @@
 #include "TGraph.h"
 #include "TH1.h"
 #include "TList.h"
+#include "TMultiGraph.h"
 #include "TPad.h"
 #include "TROOT.h"
 
@@ -21,6 +22,10 @@ int PlotSerializer::GetNumberOfDatasets() const {
     return pp_.data.size();
 }
 
+DataProperties1D PlotSerializer::GetDatasetProperties(int i) const {
+    return pp_.data.at(i);
+}
+
 TString PlotSerializer::GetDatasetLabel(int i) const {
     return TString(pp_.data.at(i).label);
 }
@@ -35,13 +40,13 @@ TString PlotSerializer::GetYaxisTitle() const {
 }
 
 void PlotSerializer::ExtractPadProperties() {
-    bool setupAxis = true;
+    bool axis_needed = true;
     for (const TObject* obj : *(pad_->GetListOfPrimitives())) {
         DataType data = GetDataType(obj);
         if (data != Undefined) {
             if (data < 10) {
                 // 1D data
-                StoreData(obj, data, setupAxis);
+                StoreDataWithAxis(obj, data, axis_needed);
             }
             else {
                 throw std::domain_error("2D/3D plots are not supported yet.");
@@ -52,28 +57,39 @@ void PlotSerializer::ExtractPadProperties() {
         throw std::runtime_error("ExPaD failed to export this plot (no compatible data was found).");
 }
 
-void PlotSerializer::StoreData(const TObject* obj, DataType data_type, Bool_t& get_axis) {
-    DataProperties1D prop;
-    prop.data = obj;
-    prop.type = data_type;
-    prop.label = obj->GetTitle();
-    const TAttLine* line = dynamic_cast<const TAttLine*>(obj);
-    if (!line)
-        std::cout << "Warning : could not get line attributes from " << obj->GetName() << std::endl;
-    else {
-        prop.line.color = Color(line->GetLineColor());
-        prop.line.size = line->GetLineWidth();
-        prop.line.style = line->GetLineStyle();
+void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
+    if (data_type == MultiGraph1D) {
+        for (const TObject* gr : *(((TMultiGraph*)obj)->GetListOfGraphs())) {
+            StoreData(gr, Graph1D);
+        }
     }
-    const TAttMarker* marker = dynamic_cast<const TAttMarker*>(obj);
-    if (!marker)
-        std::cout << "Warning : could not get marker attributes from " << obj->GetName() << std::endl;
     else {
-        prop.marker.color = Color(marker->GetMarkerColor());
-        prop.marker.size = marker->GetMarkerSize();
-        prop.marker.style = marker->GetMarkerStyle();
+        DataProperties1D prop;
+        prop.data = obj;
+        prop.type = data_type;
+        prop.label = obj->GetTitle();
+        const TAttLine* line = dynamic_cast<const TAttLine*>(obj);
+        if (!line)
+            std::cout << "Warning : could not get line attributes from " << obj->GetName() << std::endl;
+        else {
+            prop.line.color = Color(line->GetLineColor());
+            prop.line.size = line->GetLineWidth();
+            prop.line.style = line->GetLineStyle();
+        }
+        const TAttMarker* marker = dynamic_cast<const TAttMarker*>(obj);
+        if (!marker)
+            std::cout << "Warning : could not get marker attributes from " << obj->GetName() << std::endl;
+        else {
+            prop.marker.color = Color(marker->GetMarkerColor());
+            prop.marker.size = marker->GetMarkerSize();
+            prop.marker.style = marker->GetMarkerStyle();
+        }
+        pp_.data.push_back(prop);
     }
-    pp_.data.push_back(prop);
+}
+
+void PlotSerializer::StoreDataWithAxis(const TObject* obj, DataType data_type, Bool_t& get_axis) {
+    StoreData(obj, data_type);
     if (get_axis) {
         const TH1* h = nullptr;
         switch (data_type) {
@@ -85,6 +101,9 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, Bool_t& g
                 break;
             case Graph1D:
                 h = ((TGraph*)obj)->GetHistogram();
+                break;
+            case MultiGraph1D:
+                h = ((TMultiGraph*)obj)->GetHistogram();
                 break;
             default:
                 throw std::domain_error("Unexpected data type (" + std::to_string(data_type) + ")");
@@ -117,7 +136,7 @@ bool PlotSerializer::GetAxis(const TH1* h) {
     return true;
 }
 
-PlotSerializer::RGBAcolor PlotSerializer::Color(Color_t ci) const {
+RGBAcolor PlotSerializer::Color(Color_t ci) const {
     TColor* color = gROOT->GetColor(ci);
     RGBAcolor c;
     if (color) {

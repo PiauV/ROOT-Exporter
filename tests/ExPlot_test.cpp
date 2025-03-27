@@ -4,7 +4,10 @@
 
 #include "TCanvas.h"
 #include "TF1.h"
+#include "TGraph.h"
+#include "TGraphErrors.h"
 #include "TH1D.h"
+#include "TMultigraph.h"
 #include "TPad.h"
 #include "TROOT.h"
 
@@ -13,11 +16,13 @@
 void TestPlotSerializer() {
     BEGIN_TEST();
     gROOT->SetBatch();
+
+    // CASE 1 - histo & func
+    TCanvas* c1 = new TCanvas();
     TH1D* h = new TH1D("h", "h;xtitle;ytitle", 50, 0, 10);
     TF1* f = new TF1("f", "gaus", 0, 10);
     f->SetParameters(1, 5, 1);
     h->FillRandom("f", 100);
-    TCanvas* c = new TCanvas();
     h->Draw();
     f->Draw("same");
     Expad::PlotSerializer* ps = nullptr;
@@ -33,8 +38,36 @@ void TestPlotSerializer() {
     }
 
     delete ps;
+    ps = nullptr;
     delete h;
     delete f;
 
+    // CASE 2 - multigraph
+    TCanvas* c2 = new TCanvas();
+    Double_t x[2] = {1, 2};
+    Double_t y1[2] = {3, 4};
+    Double_t y2[2] = {2, 5};
+    Double_t ey[2] = {1, 2};
+    TGraph* gr = new TGraph(2, x, y1);
+    gr->SetLineWidth(2);
+    TGraphErrors* gre = new TGraphErrors(2, x, y2, 0, ey);
+    gre->SetLineWidth(1);
+    TMultiGraph* mg = new TMultiGraph();
+    mg->Add(gr);
+    mg->Add(gre);
+    mg->Draw("ap");
+    try {
+        ps = new Expad::PlotSerializer(gPad);
+        SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
+        SIMPLE_TEST(ps->GetDatasetProperties(0).line.size == 2);
+        SIMPLE_TEST(ps->GetDatasetProperties(1).line.size == 1);
+    }
+    catch (const std::exception& e) {
+        EXCEPTION_CAUGHT(e);
+    }
+
+    delete gr;
+    delete gre;
+    delete mg;
     END_TEST();
 }

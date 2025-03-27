@@ -14,6 +14,7 @@
 #include "TH3D.h"
 #include "TLatex.h"
 #include "TLegend.h"
+#include "TMultiGraph.h"
 #include "TPaveText.h"
 #include "TProfile.h"
 
@@ -28,6 +29,7 @@ void TestDataType() {
     TGraph* gr = new TGraph();
     TGraph* gre = new TGraphErrors();
     TGraph2D* gr2D = new TGraph2D();
+    TMultiGraph* mg = new TMultiGraph();
     TF1* f1 = new TF1();
     TF1* f12 = new TF12();
     TF2* f2 = new TF2();
@@ -46,6 +48,7 @@ void TestDataType() {
     SIMPLE_TEST(Expad::GetDataType(gr) == Expad::Graph1D);
     SIMPLE_TEST(Expad::GetDataType(gre) == Expad::Graph1D);
     SIMPLE_TEST(Expad::GetDataType(gr2D) == Expad::Graph2D);
+    SIMPLE_TEST(Expad::GetDataType(mg) == Expad::MultiGraph1D);
 
     // functions
     SIMPLE_TEST(Expad::GetDataType(f1) == Expad::Function1D);
@@ -62,6 +65,7 @@ void TestDataType() {
     SIMPLE_TEST(Expad::Undefined == 0)
     SIMPLE_TEST(Expad::Function1D < 10)
     SIMPLE_TEST(Expad::Graph1D < 10)
+    SIMPLE_TEST(Expad::MultiGraph1D < 10)
     SIMPLE_TEST(Expad::Histo2D < 20)
     SIMPLE_TEST(Expad::Function2D < 20)
     SIMPLE_TEST(Expad::Graph2D < 20)
