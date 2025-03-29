@@ -15,7 +15,15 @@
 
 void TestPlotSerializer() {
     BEGIN_TEST();
-    gROOT->SetBatch();
+
+    Expad::PlotSerializer* ps = nullptr;
+
+    // CASE 0 - empty canvas
+    TCanvas* c0 = new TCanvas();
+    c0->Draw();
+    EXPECTED_EXCEPTION(ps = new Expad::PlotSerializer(gPad), std::runtime_error);
+    delete ps;
+    ps = nullptr;
 
     // CASE 1 - histo & func
     TCanvas* c1 = new TCanvas();
@@ -26,11 +34,10 @@ void TestPlotSerializer() {
     h->Draw();
     f->Draw("same");
     c1->Update(); // necessary to get the title in the list of primitives
-    Expad::PlotSerializer* ps = nullptr;
     try {
         ps = new Expad::PlotSerializer(gPad);
         SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
-        COMPARE_TSTRING(ps->GetDatasetLabel(0), "h");
+        COMPARE_TSTRING(ps->GetDatasetProperties(0).label, "h");
         COMPARE_TSTRING(ps->GetPlotTitle(), "h");
         COMPARE_TSTRING(ps->GetXaxisTitle(), "xtitle");
         COMPARE_TSTRING(ps->GetYaxisTitle(), "ytitle");
@@ -41,8 +48,6 @@ void TestPlotSerializer() {
 
     delete ps;
     ps = nullptr;
-    delete h;
-    delete f;
     delete c1;
 
     // CASE 2 - multigraph
@@ -74,9 +79,11 @@ void TestPlotSerializer() {
         EXCEPTION_CAUGHT(e);
     }
 
-    delete gr;
-    delete gre;
-    delete mg;
+    delete ps;
     delete c2;
+
+    delete mg; // gr and gre are owned by the multigraph (they should not be deleted !)
+    delete h;
+    delete f;
     END_TEST();
 }

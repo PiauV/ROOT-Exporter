@@ -9,6 +9,7 @@
 #include "TPad.h"
 #include "TPaveText.h"
 #include "TROOT.h"
+#include "TString.h"
 #include "TText.h"
 
 namespace Expad {
@@ -20,16 +21,18 @@ PlotSerializer::PlotSerializer(TVirtualPad* pad) : pad_(pad) {
 PlotSerializer::~PlotSerializer() {
 }
 
+void PlotSerializer::Restart() {
+    pp_.data.clear();
+    pp_ = PadProperties();
+    ExtractPadProperties();
+}
+
 int PlotSerializer::GetNumberOfDatasets() const {
     return pp_.data.size();
 }
 
 DataProperties1D PlotSerializer::GetDatasetProperties(int i) const {
     return pp_.data.at(i);
-}
-
-TString PlotSerializer::GetDatasetLabel(int i) const {
-    return TString(pp_.data.at(i).label);
 }
 
 TString PlotSerializer::GetPlotTitle() const {
@@ -80,7 +83,7 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
     }
     else {
         DataProperties1D prop;
-        prop.data = obj;
+        prop.obj = obj;
         prop.type = data_type;
         prop.label = obj->GetTitle();
         const TAttLine* line = dynamic_cast<const TAttLine*>(obj);
@@ -96,7 +99,7 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
             std::cout << "Warning : could not get marker attributes from " << obj->GetName() << std::endl;
         else {
             prop.marker.color = Color(marker->GetMarkerColor());
-            prop.marker.size = marker->GetMarkerSize();
+            prop.marker.size = 10 * marker->GetMarkerSize();
             prop.marker.style = marker->GetMarkerStyle();
         }
         pp_.data.push_back(prop);

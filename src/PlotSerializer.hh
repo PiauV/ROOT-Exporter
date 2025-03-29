@@ -1,10 +1,10 @@
 #ifndef PLOTSERIALIZER_HH
 #define PLOTSERIALIZER_HH
 
-#include <string>
 #include <vector>
 
 #include "Rtypes.h"
+#include "TString.h"
 
 #include "DataType.hh"
 
@@ -22,7 +22,7 @@ struct RGBAcolor {
 };
 
 struct AxisProperties {
-    std::string title;
+    TString title;
     bool log = false;
     double min = 0.0;
     double max = 0.0;
@@ -30,21 +30,21 @@ struct AxisProperties {
 };
 
 struct DrawingStyle {
-    unsigned int style = 0;
-    unsigned int size = 1;
+    unsigned short style = 0;
+    unsigned short size = 1;
     RGBAcolor color;
 };
 
 struct DataProperties1D {
-    const TObject* data;
+    const TObject* obj;
     DataType type;
-    std::string label;
+    TString label;
     DrawingStyle marker;
     DrawingStyle line;
 };
 
 struct PadProperties {
-    std::string title;
+    TString title;
     AxisProperties xaxis;
     AxisProperties yaxis;
     std::vector<DataProperties1D> data;
@@ -55,10 +55,11 @@ public:
     PlotSerializer(TVirtualPad* pad);
     ~PlotSerializer();
 
+    void Restart();
+
     // public member functions for checking serialization output
     int GetNumberOfDatasets() const;
     DataProperties1D GetDatasetProperties(int i) const;
-    TString GetDatasetLabel(int i) const;
     TString GetPlotTitle() const;
     TString GetXaxisTitle() const;
     TString GetYaxisTitle() const;
