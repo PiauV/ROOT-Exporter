@@ -10,6 +10,7 @@
 
 class TH1;
 class TVirtualPad;
+class TLegend;
 class TObject;
 
 namespace Expad {
@@ -48,6 +49,7 @@ struct PadProperties {
     AxisProperties xaxis;
     AxisProperties yaxis;
     std::vector<DataProperties1D> data;
+    unsigned short legend = 0;
 };
 
 class PlotSerializer {
@@ -63,12 +65,14 @@ public:
     TString GetPlotTitle() const;
     TString GetXaxisTitle() const;
     TString GetYaxisTitle() const;
+    int GetLegendPosition() const;
 
 private:
     void ExtractPadProperties();
     void StoreData(const TObject* obj, DataType data_type);
     void StoreDataWithAxis(const TObject* obj, DataType data_type, Bool_t& get_axis);
     bool GetAxis(const TH1* h);
+    bool GetLegend(const TLegend* leg);
     RGBAcolor Color(Color_t color) const;
 
 private:

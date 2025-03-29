@@ -4,6 +4,8 @@
 #include "TF1.h"
 #include "TGraph.h"
 #include "TH1.h"
+#include "TLegend.h"
+#include "TLegendEntry.h"
 #include "TList.h"
 #include "TMultiGraph.h"
 #include "TPad.h"
@@ -48,14 +50,29 @@ TString PlotSerializer::GetYaxisTitle() const {
     return TString(pp_.yaxis.title);
 }
 
+int PlotSerializer::GetLegendPosition() const {
+    return pp_.legend;
+}
+
 void PlotSerializer::ExtractPadProperties() {
     bool axis_needed = true;
+    const TLegend* legend = nullptr;
     for (const TObject* obj : *(pad_->GetListOfPrimitives())) {
         DataType data = GetDataType(obj);
         if (data != Undefined) {
             if (data < 10) {
                 // 1D data
                 StoreDataWithAxis(obj, data, axis_needed);
+                if (legend) {
+                    // Update this object's label (legend has already been read)
+                    for (const TObject* obj : *legend->GetListOfPrimitives()) {
+                        const TLegendEntry* entry = static_cast<const TLegendEntry*>(obj);
+                        const TObject* entry_obj = entry->GetObject();
+                        if (entry_obj != obj) continue;
+                        pp_.data.back().label = entry->GetLabel();
+                        break; // obj found : end the loop
+                    }
+                }
             }
             else if (data < 100) {
                 throw std::domain_error("2D/3D plots are not supported yet.");
@@ -67,6 +84,12 @@ void PlotSerializer::ExtractPadProperties() {
                         // title of the plot
                         pp_.title = ((TPaveText*)obj)->GetLine(0)->GetTitle();
                     }
+                }
+                else if (data == Legend) {
+                    if (legend)
+                        throw std::runtime_error("A legend has already been registered.");
+                    legend = dynamic_cast<const TLegend*>(obj);
+                    GetLegend(legend);
                 }
             }
         }
@@ -151,6 +174,29 @@ bool PlotSerializer::GetAxis(const TH1* h) {
     pp_.yaxis.max = h->GetMaximum();
     pp_.yaxis.log = (pad_->GetLogy() == 1);
 
+    return true;
+}
+
+bool PlotSerializer::GetLegend(const TLegend* leg) {
+    if (!leg) return false;
+    // approximate position of the legend
+    // (1 -> top left ; 2 -> top right ; 3 -> bottom left ; 4 -> bottom right)
+    pp_.legend = 1;
+    if (leg->GetX1NDC() + leg->GetX2NDC() > 1.) pp_.legend += 1;
+    if (leg->GetY1NDC() + leg->GetY2NDC() < 1.) pp_.legend += 2;
+    // Update labels for objects that have already been registered
+    for (const TObject* obj : *leg->GetListOfPrimitives()) {
+        const TLegendEntry* entry = static_cast<const TLegendEntry*>(obj);
+        const TObject* entry_obj = entry->GetObject();
+        TString label = entry->GetLabel();
+        if (label.CompareTo(entry_obj->GetTitle()) == 0) continue; // the label is the object title, no need to change anything
+        for (DataProperties1D& dp : pp_.data) {
+            if (dp.obj == entry_obj) {
+                dp.label = label;
+                break; // obj found : end the loop
+            }
+        }
+    }
     return true;
 }
 

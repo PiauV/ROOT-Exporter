@@ -7,6 +7,7 @@
 #include "TGraph.h"
 #include "TGraphErrors.h"
 #include "TH1D.h"
+#include "TLegend.h"
 #include "TMultigraph.h"
 #include "TPad.h"
 #include "TROOT.h"
@@ -38,9 +39,25 @@ void TestPlotSerializer() {
         ps = new Expad::PlotSerializer(gPad);
         SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
         COMPARE_TSTRING(ps->GetDatasetProperties(0).label, "h");
+        COMPARE_TSTRING(ps->GetDatasetProperties(1).label, "gaus");
+        SIMPLE_TEST(ps->GetLegendPosition() == 0);
         COMPARE_TSTRING(ps->GetPlotTitle(), "h");
         COMPARE_TSTRING(ps->GetXaxisTitle(), "xtitle");
         COMPARE_TSTRING(ps->GetYaxisTitle(), "ytitle");
+    }
+    catch (const std::exception& e) {
+        EXCEPTION_CAUGHT(e);
+    }
+    gPad->BuildLegend();
+    h->SetTitle("title");
+    c1->Update();
+    try {
+        ps->Restart();
+        SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
+        SIMPLE_TEST(ps->GetLegendPosition() > 0);
+        COMPARE_TSTRING(ps->GetDatasetProperties(0).label, "h"); // should still be 'h' (legend built before the title was changed)
+        COMPARE_TSTRING(ps->GetDatasetProperties(1).label, "gaus");
+        COMPARE_TSTRING(ps->GetPlotTitle(), "title"); // title has changed
     }
     catch (const std::exception& e) {
         EXCEPTION_CAUGHT(e);
@@ -65,15 +82,25 @@ void TestPlotSerializer() {
     mg->Add(gr);
     mg->Add(gre);
     mg->Draw("ap");
+    TLegend* legend = new TLegend(0.5, 0.6, 0.9, 0.9);
+    legend->AddEntry(gr, "graph1");
+    legend->AddEntry(gre, "graph2");
+    legend->AddEntry(f, "function");
+    f->Draw("same");
+    legend->Draw();
     c2->Update(); // necessary to get the title in the list of primitives
     try {
         ps = new Expad::PlotSerializer(gPad);
-        SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
+        SIMPLE_TEST(ps->GetNumberOfDatasets() == 3);
         SIMPLE_TEST(ps->GetDatasetProperties(0).line.size == 2);
         SIMPLE_TEST(ps->GetDatasetProperties(1).line.size == 1);
         COMPARE_TSTRING(ps->GetPlotTitle(), "title");
         COMPARE_TSTRING(ps->GetXaxisTitle(), "x");
         COMPARE_TSTRING(ps->GetYaxisTitle(), "y");
+        SIMPLE_TEST(ps->GetLegendPosition() > 0);
+        COMPARE_TSTRING(ps->GetDatasetProperties(0).label, "graph1");
+        COMPARE_TSTRING(ps->GetDatasetProperties(1).label, "graph2");
+        COMPARE_TSTRING(ps->GetDatasetProperties(2).label, "function");
     }
     catch (const std::exception& e) {
         EXCEPTION_CAUGHT(e);
@@ -85,5 +112,6 @@ void TestPlotSerializer() {
     delete mg; // gr and gre are owned by the multigraph (they should not be deleted !)
     delete h;
     delete f;
+    delete legend;
     END_TEST();
 }
