@@ -59,7 +59,7 @@ void PlotSerializer::ExtractPadProperties() {
             }
             else {
                 // other graphics entities (text, legend, ...)
-                if (data == Text) {
+                if (data == TextBox) {
                     if (strcmp(obj->GetName(), "title") == 0) {
                         // title of the plot
                         pp_.title = ((TPaveText*)obj)->GetLine(0)->GetTitle();

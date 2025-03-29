@@ -2,6 +2,7 @@
 #include "DataType.hh"
 #include "macros.hh"
 
+#include "TCanvas.h"
 #include "TF1.h"
 #include "TF12.h"
 #include "TF2.h"
@@ -17,6 +18,7 @@
 #include "TMultiGraph.h"
 #include "TPaveText.h"
 #include "TProfile.h"
+#include "TText.h"
 
 #include <iostream>
 
@@ -34,9 +36,11 @@ void TestDataType() {
     TF1* f12 = new TF12();
     TF2* f2 = new TF2();
     TLegend* leg = new TLegend();
+    TText* txt = new TText();
     TLatex* ltx = new TLatex();
-    TPaveText* txt = new TPaveText();
+    TPaveText* pvtxt = new TPaveText();
     TFrame* frm = new TFrame();
+    TCanvas* c = new TCanvas();
 
     // histograms
     SIMPLE_TEST(Expad::GetDataType(h1) == Expad::Histo1D);
@@ -56,12 +60,16 @@ void TestDataType() {
     SIMPLE_TEST(Expad::GetDataType(f2) == Expad::Function2D);
 
     // text
-    SIMPLE_TEST(Expad::GetDataType(txt) == Expad::Text);
+    SIMPLE_TEST(Expad::GetDataType(pvtxt) == Expad::TextBox);
+    SIMPLE_TEST(Expad::GetDataType(txt) == Expad::BareText);
+    SIMPLE_TEST(Expad::GetDataType(ltx) == Expad::BareText);
 
-    // others (not supported for now)
-    SIMPLE_TEST(Expad::GetDataType(leg) == Expad::Undefined);
-    SIMPLE_TEST(Expad::GetDataType(ltx) == Expad::Undefined);
+    // legend
+    SIMPLE_TEST(Expad::GetDataType(leg) == Expad::Legend);
+
+    // others (not supported)
     SIMPLE_TEST(Expad::GetDataType(frm) == Expad::Undefined);
+    SIMPLE_TEST(Expad::GetDataType(c) == Expad::Undefined);
 
     // check DataType numbering scheme (undef/1D/2D/3D)
     SIMPLE_TEST(Expad::Undefined == 0)

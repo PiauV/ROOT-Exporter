@@ -31,7 +31,13 @@ DataType GetDataType(const TObject* obj) {
         return Function1D;
     }
     else if (obj->InheritsFrom("TPaveText")) {
-        return Text;
+        return TextBox;
+    }
+    else if (obj->InheritsFrom("TText")) {
+        return BareText;
+    }
+    else if (obj->InheritsFrom("TLegend")) {
+        return Legend;
     }
     return Undefined;
 }
