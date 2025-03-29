@@ -1,10 +1,14 @@
 #ifndef MACRO_TESTS
 #define MACRO_TESTS
 
+#include "TSystem.h"
+
 extern int nfailed;
 extern int npassed;
 extern int ntest;
 extern bool pass_all_tests;
+
+#define __FILENAME__ gSystem->BaseName(__FILE__)
 
 #define BEGIN_TEST()                                                                    \
     std::cout << "### TEST " << ++ntest << " .......... " << __FUNCTION__ << std::endl; \
@@ -21,40 +25,46 @@ extern bool pass_all_tests;
                   << std::endl;                                                    \
     pass_all_tests = pass_all_tests && (nfailed == 0);
 
-#define SIMPLE_TEST(x)                                                                              \
-    if (!(x)) {                                                                                     \
-        std::cout << "Error: test " << __FUNCTION__ << " failed on line " << __LINE__ << std::endl; \
-        nfailed++;                                                                                  \
-    }                                                                                               \
-    else                                                                                            \
+#define SIMPLE_TEST(x)                                                           \
+    if (!(x)) {                                                                  \
+        std::cout << "Error: test " << __FUNCTION__ << " failed" << std::endl;   \
+        std::cout << "[" << __FILENAME__ << ":" << __LINE__ << "]" << std::endl; \
+        nfailed++;                                                               \
+    }                                                                            \
+    else                                                                         \
         npassed++;
 
-#define COMPARE_TSTRING(str, ref)                                                     \
-    if (str.CompareTo(ref) != 0) {                                                    \
-        std::cout << "Error: test " << __FUNCTION__ << " failed on line " << __LINE__ \
-                  << " - expected " << ref << " but got " << str << std::endl;        \
-        nfailed++;                                                                    \
-    }                                                                                 \
-    else                                                                              \
+#define COMPARE_TSTRING(str, ref)                                                \
+    if (str.CompareTo(ref) != 0) {                                               \
+        std::cout << "Error: test " << __FUNCTION__ << " failed"                 \
+                  << " - expected \'" << ref << "\' but got \'" << str << "\'"   \
+                  << std::endl;                                                  \
+        std::cout << "[" << __FILENAME__ << ":" << __LINE__ << "]" << std::endl; \
+        nfailed++;                                                               \
+    }                                                                            \
+    else                                                                         \
         npassed++;
 
-#define EXPECTED_EXCEPTION(expr, ExceptionType)                                                                             \
-    try {                                                                                                                   \
-        expr;                                                                                                               \
-        std::cout << "Error: test " << __FUNCTION__ << " failed on line " << __LINE__ << " (no exception)" << std::endl;    \
-        nfailed++;                                                                                                          \
-    }                                                                                                                       \
-    catch (const ExceptionType&) {                                                                                          \
-        npassed++;                                                                                                          \
-    }                                                                                                                       \
-    catch (...) {                                                                                                           \
-        std::cout << "Error: test " << __FUNCTION__ << " failed on line " << __LINE__ << " (wrong exception)" << std::endl; \
-        nfailed++;                                                                                                          \
+#define EXPECTED_EXCEPTION(expr, ExceptionType)                                                          \
+    try {                                                                                                \
+        expr;                                                                                            \
+        std::cout << "Error: test " << __FUNCTION__ << " failed (no exception was thrown)" << std::endl; \
+        std::cout << "[" << __FILENAME__ << ":" << __LINE__ << "]" << std::endl;                         \
+        nfailed++;                                                                                       \
+    }                                                                                                    \
+    catch (const ExceptionType&) {                                                                       \
+        npassed++;                                                                                       \
+    }                                                                                                    \
+    catch (...) {                                                                                        \
+        std::cout << "Error: test " << __FUNCTION__ << " failed (wrong exception)" << std::endl;         \
+        std::cout << "[" << __FILENAME__ << ":" << __LINE__ << "]" << std::endl;                         \
+        nfailed++;                                                                                       \
     }
 
-#define EXCEPTION_CAUGHT(e)                                                                      \
-    std::cout << "Exception caught in " << __FUNCTION__ << " on line " << __LINE__ << std::endl; \
-    std::cout << e.what() << std::endl;                                                          \
+#define EXCEPTION_CAUGHT(e)                                                  \
+    std::cout << "Exception caught in " << __FUNCTION__ << std::endl;        \
+    std::cout << e.what() << std::endl;                                      \
+    std::cout << "[" << __FILENAME__ << ":" << __LINE__ << "]" << std::endl; \
     nfailed++;
 
 #endif

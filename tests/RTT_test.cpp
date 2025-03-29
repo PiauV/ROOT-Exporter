@@ -16,7 +16,7 @@
 #include <sstream>
 #include <stdio.h>
 
-void TestRTTDefault() {
+void TestRTTConfig() {
     BEGIN_TEST();
     // file extention - default extension
     const TString default = gRTT->GetFileExtension();
@@ -134,18 +134,18 @@ void TestRTTOutput() {
         }
     }
 
-    SIMPLE_TEST(open_file("./output/h.txt", 2, N, sum_y, 2));
-    SIMPLE_TEST(open_file("./output/h2.txt", N, N, sum_z, 0));
-    SIMPLE_TEST(open_file("./output/gr.txt", 2, N, sum_y, 2));
-    SIMPLE_TEST(open_file("./output/gre.txt", 3, N, sum_y, 2));
-    SIMPLE_TEST(open_file("./output/gre.txt", 3, N, sum_ey, 3));
-    SIMPLE_TEST(open_file("./output/gr2d.txt", 3, N * N, sum_z, 3));
-    SIMPLE_TEST(open_file("./output/h_with_errors.txt", 3, N, sum_y, 2));
-    SIMPLE_TEST(open_file("./output/h_lowedge_and_errors.dat", 3, N, sum_ey, 3));
-    SIMPLE_TEST(open_file("./output/gre_horizontal_errors.txt", 4, N, sum_y, 2));
-    SIMPLE_TEST(open_file("./output/gre_horizontal_errors.txt", 4, N, sum_ex, 3));
-    SIMPLE_TEST(open_file("./output/gre_horizontal_errors.txt", 4, N, sum_ey, 4));
-    SIMPLE_TEST(open_file("./output/h2_columns.txt", 3, N * N, sum_z, 3));
+    SIMPLE_TEST(check_file_content("./output/h.txt", 2, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/h2.txt", N, N, sum_z, 0));
+    SIMPLE_TEST(check_file_content("./output/gr.txt", 2, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/gre.txt", 3, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/gre.txt", 3, N, sum_ey, 3));
+    SIMPLE_TEST(check_file_content("./output/gr2d.txt", 3, N * N, sum_z, 3));
+    SIMPLE_TEST(check_file_content("./output/h_with_errors.txt", 3, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/h_lowedge_and_errors.dat", 3, N, sum_ey, 3));
+    SIMPLE_TEST(check_file_content("./output/gre_horizontal_errors.txt", 4, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/gre_horizontal_errors.txt", 4, N, sum_ex, 3));
+    SIMPLE_TEST(check_file_content("./output/gre_horizontal_errors.txt", 4, N, sum_ey, 4));
+    SIMPLE_TEST(check_file_content("./output/h2_columns.txt", 3, N * N, sum_z, 3));
 
     delete h;
     delete h2;
@@ -157,7 +157,7 @@ void TestRTTOutput() {
     END_TEST();
 }
 
-bool open_file(const char* filename, int _col, int _lin, double _sum, int _idx_col) {
+bool check_file_content(const char* filename, int _col, int _lin, double _sum, int _idx_col) {
     std::ifstream ifs(filename);
     if (!ifs.is_open()) {
         std::cerr << "Could not open file" << std::endl;

@@ -11,7 +11,7 @@ add_executable(TestExPaD
         ExPlot_test.hh
 )
 
-target_link_libraries(TestExPaD PUBLIC libROOTToText libExPlot libGraf libGpad)
+target_link_libraries(TestExPaD PUBLIC libROOTToText libExPlot libGpad)
 
 if (MSVC)
         # in Windows, it is necessary to copy the shared library (dll) to the same folder as the executable
