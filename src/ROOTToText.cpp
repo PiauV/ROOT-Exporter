@@ -25,6 +25,7 @@ ROOTToText::ROOTToText() {
     defaultExtension_ = ".txt";
     defaultDirectory_ = "./";
     cc_ = '#';
+    verb_ = false;
 }
 
 ROOTToText::~ROOTToText() {
@@ -91,10 +92,10 @@ void ROOTToText::SetDirectory(TString dir) {
     // std::cerr << "Keeping the previous directory: " << defaultDirectory_ << std::endl;
 }
 
-TString ROOTToText::GetFilePath(const TObject* obj, char* filename) const {
+TString ROOTToText::GetFilePath(const TObject* obj, const char* filename) const {
     TString str(filename);
 
-    // if no filename is given, use the histogram name
+    // if no filename is given, use the object name
     TPRegexp anything("^.*[a-zA-Z0-9]+.*$");
     if (!anything.MatchB(str)) {
         str.Append(TString(obj->GetName()));
@@ -102,10 +103,10 @@ TString ROOTToText::GetFilePath(const TObject* obj, char* filename) const {
     str.ReplaceAll(' ', '_');
 
     // check that filename ends with a file extension
-    // if not, add the default ".txt" extension
-    TPRegexp fileExt("\\.[a-z]+$");
+    // if not, add the default extension
+    TPRegexp fileExt("\\.[a-zA-Z0-9]+$");
     if (!fileExt.MatchB(str))
-        str.Append(".txt");
+        str.Append(defaultExtension_);
 
     if (!gSystem->IsAbsoluteFileName(str) && !str.BeginsWith("./")) {
         gSystem->PrependPathName(defaultDirectory_, str);
@@ -114,11 +115,11 @@ TString ROOTToText::GetFilePath(const TObject* obj, char* filename) const {
     return str;
 }
 
-bool ROOTToText::SaveObject(const TObject* obj, char* filename, Option_t* opt) const {
+bool ROOTToText::SaveObject(const TObject* obj, const char* filename, Option_t* opt) const {
     return SaveObject(obj, GetDataType(obj), filename, opt);
 }
 
-bool ROOTToText::SaveObject(const TObject* obj, DataType dt, char* filename, Option_t* opt) const {
+bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filename, Option_t* opt) const {
     switch (dt) {
         case Histo1D:
             return SaveTH1(dynamic_cast<const TH1*>(obj), filename, opt);
@@ -129,14 +130,14 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, char* filename, Opt
         case Graph2D:
             return SaveGraph2D(dynamic_cast<const TGraph2D*>(obj), filename, opt);
         default:
-            TString error_message = TString::Format("This kind of object (%s) is not supported.", obj->Class_Name());
+            TString error_message = TString::Format("This kind of object (%s) is not supported.", obj->IsA()->GetName());
             throw std::invalid_argument(error_message.Data());
             // std::cerr << "This kind of object (" << obj->Class_Name() << ") is not supported" << std::endl;
     }
     return false;
 }
 
-bool ROOTToText::SaveTH1(const TH1* h, char* filename, Option_t* opt) const {
+bool ROOTToText::SaveTH1(const TH1* h, const char* filename, Option_t* opt) const {
     if (!h) {
         std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
         return false;
@@ -184,10 +185,11 @@ bool ROOTToText::SaveTH1(const TH1* h, char* filename, Option_t* opt) const {
     }
 
     ofs.close();
+    if (verb_) std::cout << "Saved " << h->GetName() << " in " << path << std::endl;
     return true;
 }
 
-bool ROOTToText::SaveTH2(const TH2* h, char* filename, Option_t* opt) const {
+bool ROOTToText::SaveTH2(const TH2* h, const char* filename, Option_t* opt) const {
     if (!h) {
         std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
         return false;
@@ -266,19 +268,19 @@ bool ROOTToText::SaveTH2(const TH2* h, char* filename, Option_t* opt) const {
             ofs << std::endl;
         }
     }
-
     ofs.close();
+    if (verb_) std::cout << "Saved " << h->GetName() << " in " << path << std::endl;
     return true;
 }
 
-bool ROOTToText::SaveGraph(const TGraph* gr, char* filename, Option_t* opt) const {
+bool ROOTToText::SaveGraph(const TGraph* gr, const char* filename, Option_t* opt) const {
     if (!gr) {
         std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
         return false;
     }
 
     if (gr->IsA() != TGraph::Class() && gr->IsA() != TGraphErrors::Class())
-        std::cerr << "Warning: only limited support for class " << gr->Class_Name() << std::endl;
+        std::cerr << "Warning: only limited support for class " << gr->IsA()->GetName() << std::endl;
 
     TString option(opt);
     option.ToUpper();
@@ -335,10 +337,11 @@ bool ROOTToText::SaveGraph(const TGraph* gr, char* filename, Option_t* opt) cons
     }
     ofs.close();
     delete[] idx;
+    if (verb_) std::cout << "Saved " << gr->GetName() << " in " << path << std::endl;
     return true;
 }
 
-bool ROOTToText::SaveGraph2D(const TGraph2D* gr, char* filename, Option_t* opt) const {
+bool ROOTToText::SaveGraph2D(const TGraph2D* gr, const char* filename, Option_t* opt) const {
     if (!gr) {
         std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
         return false;

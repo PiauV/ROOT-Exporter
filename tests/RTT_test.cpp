@@ -25,6 +25,7 @@ void TestRTTConfig() {
     SIMPLE_TEST(TString(default(1, default.Length())).IsAlnum());
 
     // file extention - correct argument
+    COMPARE_TSTRING(gRTT->GetFileExtension(), ".txt");
     gRTT->SetFileExtension(".t");
     COMPARE_TSTRING(gRTT->GetFileExtension(), ".t");
     gRTT->SetFileExtension("dat");
@@ -45,8 +46,8 @@ void TestRTTConfig() {
     gRTT->SetDirectory("");
     COMPARE_TSTRING(gRTT->GetDirectory(), "./");
     gRTT->SetDirectory(dir_name2);
-    TString out_dir(gSystem->UnixPathName(gRTT->GetDirectory())); // small trick otherwise the test fails in Windows
-    COMPARE_TSTRING(out_dir, dir_name1);
+    TString rtt_dir(gSystem->UnixPathName(gRTT->GetDirectory())); // small trick otherwise the test fails in Windows
+    COMPARE_TSTRING(rtt_dir, dir_name1);
     EXPECTED_EXCEPTION(gRTT->SetDirectory(__FILE__), std::invalid_argument);
     END_TEST();
 }
@@ -105,6 +106,7 @@ void TestRTTOutput() {
     }
 
     gRTT->SetDirectory("./output");
+    gRTT->SetFileExtension(".txt");
 
     // simple saves
     SIMPLE_TEST(gRTT->SaveObject(h));
@@ -134,6 +136,7 @@ void TestRTTOutput() {
         }
     }
 
+    // gRTT->SetVerbose(true);
     SIMPLE_TEST(check_file_content("./output/h.txt", 2, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/h2.txt", N, N, sum_z, 0));
     SIMPLE_TEST(check_file_content("./output/gr.txt", 2, N, sum_y, 2));
