@@ -2,12 +2,14 @@
 #include "ROOTToText.hh"
 #include "macros.hh"
 
+#include "TF1.h"
 #include "TGraph.h"
 #include "TGraph2D.h"
 #include "TGraphErrors.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
+#include "TMultiGraph.h"
 #include "TString.h"
 #include "TSystem.h"
 
@@ -94,6 +96,11 @@ void TestRTTOutput() {
     gre->SetName("gre");
     gre->SetTitle("graph_with_errors");
 
+    // TMultiGraph
+    TMultiGraph* mg = new TMultiGraph("mg", "multigraph");
+    mg->Add(gr);
+    mg->Add(gre);
+
     // TGraph2D
     TGraph2D* gr2d = new TGraph2D(N * N);
     gr2d->SetName("gr2d");
@@ -105,6 +112,9 @@ void TestRTTOutput() {
         }
     }
 
+    // TF1
+    TF1* f = new TF1("func", "x+1", 1, 3);
+
     gRTT->SetDirectory("./output");
     gRTT->SetFileExtension(".txt");
 
@@ -113,7 +123,9 @@ void TestRTTOutput() {
     SIMPLE_TEST(gRTT->SaveObject(h2));
     SIMPLE_TEST(gRTT->SaveObject(gr));
     SIMPLE_TEST(gRTT->SaveObject(gre));
+    SIMPLE_TEST(gRTT->SaveObject(mg));
     SIMPLE_TEST(gRTT->SaveObject(gr2d));
+    SIMPLE_TEST(gRTT->SaveObject(f, "", "N3"));
     EXPECTED_EXCEPTION(gRTT->SaveObject(h3), std::invalid_argument);
 
     // saving with options and filenames
@@ -142,7 +154,10 @@ void TestRTTOutput() {
     SIMPLE_TEST(check_file_content("./output/gr.txt", 2, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/gre.txt", 3, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/gre.txt", 3, N, sum_ey, 3));
+    SIMPLE_TEST(check_file_content("./output/mg_gr.txt", 2, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/mg_gre.txt", 3, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/gr2d.txt", 3, N * N, sum_z, 3));
+    SIMPLE_TEST(check_file_content("./output/func.txt", 2, 3, 2 + 3 + 4, 2));
     SIMPLE_TEST(check_file_content("./output/h_with_errors.txt", 3, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/h_lowedge_and_errors.dat", 3, N, sum_ey, 3));
     SIMPLE_TEST(check_file_content("./output/gre_horizontal_errors.txt", 4, N, sum_y, 2));
@@ -153,9 +168,9 @@ void TestRTTOutput() {
     delete h;
     delete h2;
     delete h3;
-    delete gr;
-    delete gre;
+    delete mg;
     delete gr2d;
+    delete f;
 
     END_TEST();
 }

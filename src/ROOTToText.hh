@@ -9,7 +9,9 @@
 class TH1;
 class TH2;
 class TGraph;
+class TMultiGraph;
 class TGraph2D;
+class TF1;
 
 namespace Expad {
 
@@ -34,9 +36,9 @@ public:
     bool SaveTH1(const TH1* h, const char* filename = "", Option_t* opt = "") const;
     bool SaveTH2(const TH2* h, const char* filename = "", Option_t* opt = "") const;
     bool SaveGraph(const TGraph* gr, const char* filename = "", Option_t* opt = "") const;
+    bool SaveMultiGraph(const TMultiGraph* mg, const char* filename = "", Option_t* opt = "") const;
     bool SaveGraph2D(const TGraph2D* gr, const char* filename = "", Option_t* opt = "") const;
-    // TMultiGraph ?
-    // TF1 ? (evaluated)
+    bool SaveTF1(const TF1* f, const char* filename = "", Option_t* opt = "") const;
 
 private:
     ROOTToText();

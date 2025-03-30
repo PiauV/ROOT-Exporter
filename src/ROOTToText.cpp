@@ -1,12 +1,14 @@
 #include "ROOTToText.hh"
 
 #include "TClass.h"
+#include "TF1.h"
 #include "TGraph.h"
 #include "TGraph2D.h"
 #include "TGraphErrors.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TMath.h"
+#include "TMultiGraph.h"
 #include "TPRegexp.h"
 #include "TSystem.h"
 
@@ -129,6 +131,10 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filenam
             return SaveGraph(dynamic_cast<const TGraph*>(obj), filename, opt);
         case Graph2D:
             return SaveGraph2D(dynamic_cast<const TGraph2D*>(obj), filename, opt);
+        case MultiGraph1D:
+            return SaveMultiGraph(dynamic_cast<const TMultiGraph*>(obj), filename, opt);
+        case Function1D:
+            return SaveTF1(dynamic_cast<const TF1*>(obj), filename, opt);
         default:
             TString error_message = TString::Format("This kind of object (%s) is not supported.", obj->IsA()->GetName());
             throw std::invalid_argument(error_message.Data());
@@ -341,6 +347,47 @@ bool ROOTToText::SaveGraph(const TGraph* gr, const char* filename, Option_t* opt
     return true;
 }
 
+bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, const char* filename, Option_t* opt) const {
+    if (!mg) {
+        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
+        return false;
+    }
+
+    // TString option(opt);
+    // option.ToUpper();
+
+    // the title of the graphs will be basename_graphtitle
+    TString basename(filename);
+    if (basename.IsWhitespace()) {
+        basename = mg->GetName();
+        if (basename.IsNull()) basename = "Graph";
+    }
+    Ssiz_t s = basename.Length();
+    TPRegexp has_ext("\\.[a-zA-Z0-9]+$");
+    if (has_ext.MatchB(basename)) {
+        s = basename.Last('.');
+    }
+
+    bool res = true;
+    int idx = 0;
+    // loop over all graphs stored in the multigraph, and save them
+    for (const TObject* gr : *mg->GetListOfGraphs()) {
+        idx++;
+        TString gr_name = gr->GetName();
+        if (gr_name.CompareTo("Graph") == 0) {
+            // default name --> replace it with an index
+            // because if all graphs have the same name it will not work !!
+            gr_name = TString::Itoa(++idx, 10);
+        }
+        // set the filename corresponding to this graph
+        TString filename_graph(basename);
+        filename_graph.Insert(s, "_" + gr_name);
+        // save it
+        res = res && SaveGraph(dynamic_cast<const TGraph*>(gr), filename_graph.Data(), opt);
+    }
+    return res;
+}
+
 bool ROOTToText::SaveGraph2D(const TGraph2D* gr, const char* filename, Option_t* opt) const {
     if (!gr) {
         std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
@@ -393,6 +440,58 @@ bool ROOTToText::SaveGraph2D(const TGraph2D* gr, const char* filename, Option_t*
     }
     ofs.close();
     delete[] idx;
+    if (verb_) std::cout << "Saved " << gr->GetName() << " in " << path << std::endl;
+    return true;
+}
+
+bool ROOTToText::SaveTF1(const TF1* f, const char* filename, Option_t* opt) const {
+    if (!f) {
+        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
+        return false;
+    }
+
+    TString option(opt);
+    option.ToUpper();
+
+    // number of points for evaluation
+    int npoints = -1;
+    if (option.Contains("N")) {
+        TPRegexp pattern("N(\\d+)");
+        TObjArray* strL = pattern.MatchS(option);
+        if (strL->GetSize() > 1) {
+            // strL contains the whole string matching the regex (0) and the captured group (1)
+            // we are only interested in the captured group (i.e. the figures)
+            npoints = ((TObjString*)strL->At(1))->GetString().Atoi();
+        }
+    }
+    if (npoints <= 0) npoints = 100;
+
+    // function range
+    Double_t xmin, xmax;
+    f->GetRange(xmin, xmax);
+
+    TString path = GetFilePath(f, filename);
+    std::ofstream ofs(path);
+    if (!ofs.is_open()) {
+        std::cerr << "Error: could not open file " << path << std::endl;
+        return false;
+    }
+
+    if (headerTitle_)
+        ofs << cc_ << " Function " << f->GetName() << " : x -> " << f->GetExpFormula("CLINGP") << std::endl;
+
+    if (headerAxis_) {
+        ofs << cc_ << " 1:X - from " << xmin << " to " << xmax << std::endl;
+        ofs << cc_ << " 2:Y=" << f->GetName() << "(X)" << std::endl;
+    }
+
+    double dx = (xmax - xmin) / ((double)npoints - 1);
+    for (int i = 0; i < npoints; i++) {
+        double xi = xmin + dx * i;
+        ofs << xi << " " << f->Eval(xi) << std::endl;
+    }
+    ofs.close();
+    if (verb_) std::cout << "Saved " << f->GetName() << " in " << path << std::endl;
     return true;
 }
 
