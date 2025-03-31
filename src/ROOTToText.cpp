@@ -140,7 +140,7 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filenam
             throw std::invalid_argument(error_message.Data());
             // std::cerr << "This kind of object (" << obj->Class_Name() << ") is not supported" << std::endl;
     }
-    return false;
+    // return false; // <--- unreachable code
 }
 
 bool ROOTToText::SaveTH1(const TH1* h, const char* filename, Option_t* opt) const {
