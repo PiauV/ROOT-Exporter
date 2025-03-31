@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.17)
 
-project(RTT LANGUAGES CXX)
+project(ExPaD LANGUAGES CXX)
 
 # set(ROOT_CONFIG_DEBUG true)
 

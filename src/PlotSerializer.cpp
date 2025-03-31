@@ -75,7 +75,7 @@ void PlotSerializer::ExtractPadProperties() {
                 }
             }
             else if (data < 100) {
-                throw std::domain_error("2D/3D plots are not supported yet.");
+                throw std::invalid_argument("2D/3D plots are not supported yet.");
             }
             else {
                 // other graphics entities (text, legend, ...)
@@ -147,7 +147,7 @@ void PlotSerializer::StoreDataWithAxis(const TObject* obj, DataType data_type, B
                 h = ((TMultiGraph*)obj)->GetHistogram();
                 break;
             default:
-                throw std::domain_error("Unexpected data type (" + std::to_string(data_type) + ")");
+                throw std::invalid_argument("Unexpected data type (" + std::to_string(data_type) + ")");
         }
 
         if (GetAxis(h))

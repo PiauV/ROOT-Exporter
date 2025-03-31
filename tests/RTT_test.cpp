@@ -40,8 +40,8 @@ void TestRTTConfig() {
     EXPECTED_EXCEPTION(gRTT->SetFileExtension(" "), std::invalid_argument);
 
     // default directory
-    const TString dir_name1 = "./temp_for_test_only";
-    const TString dir_name2 = "temp_for_test_only";
+    const TString dir_name1 = "./temp";
+    const TString dir_name2 = "temp";
     gSystem->mkdir(dir_name1);
     gRTT->SetDirectory(dir_name1);
     COMPARE_TSTRING(gRTT->GetDirectory(), dir_name1);

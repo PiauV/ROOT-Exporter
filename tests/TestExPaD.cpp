@@ -11,12 +11,9 @@ int ntest = 0;
 bool pass_all_tests = true;
 
 int main(int argc, char** argv) {
-    // terminate handler (e.g., in case of unhandled exception)
+    // terminate handler
     std::set_terminate([]() {
-        // I would prefer to rethrow unhandled exception (if any), but there is a MVSC bug (fixed in Visual Studio 2019)
-        // see https://developercommunity.visualstudio.com/t/msconnect-3133821-stdterminate-and-stdcurrent-exce/246253
-        // so for now let's just print minimal information
-        printf("FATAL ERROR: test was terminated (there could be an uncaught exception)");
+        printf("FATAL ERROR: test was terminated");
         std::exit(EXIT_FAILURE);
     });
 
@@ -24,10 +21,25 @@ int main(int argc, char** argv) {
     gROOT->SetBatch();
 
     // perform the tests
-    TestDataType();
-    TestRTTConfig();
-    TestRTTOutput();
-    TestPlotSerializer();
+    // (the tests are placed inside a try-catch block to avoid unhandled exceptions)
+    try {
+        TestDataType();
+        TestRTTConfig();
+        TestRTTOutput();
+        TestPlotSerializer();
+    }
+    catch (const std::invalid_argument& ex) {
+        printf("Invalid argument: %s\n", ex.what());
+        return EXIT_FAILURE;
+    }
+    catch (const std::runtime_error& ex) {
+        printf("Runtime error: %s\n", ex.what());
+        return EXIT_FAILURE;
+    }
+    catch (const std::exception& ex) {
+        printf("Error: %s\n", ex.what());
+        return EXIT_FAILURE;
+    }
 
     return pass_all_tests ? EXIT_SUCCESS : EXIT_FAILURE;
 }
