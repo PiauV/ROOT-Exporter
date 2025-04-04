@@ -23,6 +23,12 @@ set(CMAKE_CXX_FLAGS "${ROOT_CXX_FLAGS}")
 include_directories(SYSTEM ${ROOT_INCLUDE_DIRS}) # to avoid warnings coming from ROOT headers... does not really seem to work on Windows, though
 link_directories(${ROOT_LIBRARY_DIR})
 
+if(${ROOT_VERSION} VERSION_GREATER_EQUAL "6")
+    set(ROOT_LIBS Core Rint Hist Graf Gpad)
+else()
+    set(ROOT_LIBS Core Cint Hist Graf Gpad)
+endif()
+
 enable_testing()
 
 add_subdirectory(src)

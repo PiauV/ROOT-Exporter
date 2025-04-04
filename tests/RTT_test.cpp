@@ -21,10 +21,10 @@
 void TestRTTConfig() {
     BEGIN_TEST();
     // file extention - default extension
-    const TString default = gRTT->GetFileExtension();
-    SIMPLE_TEST(default.Length() > 1);
-    SIMPLE_TEST(default[ 0 ] == '.');
-    SIMPLE_TEST(TString(default(1, default.Length())).IsAlnum());
+    const TString ext = gRTT->GetFileExtension();
+    SIMPLE_TEST(ext.Length() > 1);
+    SIMPLE_TEST(ext[0] == '.');
+    SIMPLE_TEST(TString(ext(1, ext.Length())).IsAlnum());
 
     // file extention - correct argument
     COMPARE_TSTRING(gRTT->GetFileExtension(), ".txt");

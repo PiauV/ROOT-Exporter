@@ -57,20 +57,20 @@ int PlotSerializer::GetLegendPosition() const {
 void PlotSerializer::ExtractPadProperties() {
     bool axis_needed = true;
     const TLegend* legend = nullptr;
-    for (const TObject* obj : *(pad_->GetListOfPrimitives())) {
-        DataType data = GetDataType(obj);
+    for (const TObject* obj_p : *(pad_->GetListOfPrimitives())) {
+        DataType data = GetDataType(obj_p);
         if (data != Undefined) {
             if (data < 10) {
                 // 1D data
-                StoreDataWithAxis(obj, data, axis_needed);
+                StoreDataWithAxis(obj_p, data, axis_needed);
                 if (legend) {
                     // Update this object's label (legend has already been read)
-                    for (const TObject* obj : *legend->GetListOfPrimitives()) {
-                        const TLegendEntry* entry = static_cast<const TLegendEntry*>(obj);
+                    for (const TObject* obj_l : *legend->GetListOfPrimitives()) {
+                        const TLegendEntry* entry = static_cast<const TLegendEntry*>(obj_l);
                         const TObject* entry_obj = entry->GetObject();
-                        if (entry_obj != obj) continue;
+                        if (entry_obj != obj_l) continue;
                         pp_.data.back().label = entry->GetLabel();
-                        break; // obj found : end the loop
+                        break; // obj_l found : end the loop
                     }
                 }
             }
@@ -80,15 +80,15 @@ void PlotSerializer::ExtractPadProperties() {
             else {
                 // other graphics entities (text, legend, ...)
                 if (data == TextBox) {
-                    if (strcmp(obj->GetName(), "title") == 0) {
+                    if (strcmp(obj_p->GetName(), "title") == 0) {
                         // title of the plot
-                        pp_.title = ((TPaveText*)obj)->GetLine(0)->GetTitle();
+                        pp_.title = ((TPaveText*)obj_p)->GetLine(0)->GetTitle();
                     }
                 }
                 else if (data == Legend) {
                     if (legend)
                         throw std::runtime_error("A legend has already been registered.");
-                    legend = dynamic_cast<const TLegend*>(obj);
+                    legend = dynamic_cast<const TLegend*>(obj_p);
                     GetLegend(legend);
                 }
             }
@@ -160,14 +160,14 @@ void PlotSerializer::StoreDataWithAxis(const TObject* obj, DataType data_type, B
 bool PlotSerializer::GetAxis(const TH1* h) {
     if (!h) return false;
 
-    TAxis* xx = h->GetXaxis();
+    const TAxis* xx = h->GetXaxis();
     pp_.xaxis.title = xx->GetTitle();
     pp_.xaxis.color = Color(xx->GetAxisColor());
     pp_.xaxis.min = h->GetBinLowEdge(xx->GetFirst());
     pp_.xaxis.max = h->GetBinLowEdge(xx->GetLast() + 1);
     pp_.xaxis.log = (pad_->GetLogx() == 1);
 
-    TAxis* yy = h->GetYaxis();
+    const TAxis* yy = h->GetYaxis();
     pp_.yaxis.title = yy->GetTitle();
     pp_.yaxis.color = Color(yy->GetAxisColor());
     pp_.yaxis.min = h->GetMinimum();

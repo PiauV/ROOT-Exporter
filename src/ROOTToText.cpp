@@ -9,6 +9,7 @@
 #include "TH2.h"
 #include "TMath.h"
 #include "TMultiGraph.h"
+#include "TObjString.h"
 #include "TPRegexp.h"
 #include "TSystem.h"
 

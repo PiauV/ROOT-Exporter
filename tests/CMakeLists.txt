@@ -13,7 +13,7 @@ add_executable(TestExPaD
 
 set(test_dir $<TARGET_FILE_DIR:TestExPaD>)
 
-target_link_libraries(TestExPaD PUBLIC libROOTToText libExPlot libGpad)
+target_link_libraries(TestExPaD PUBLIC libROOTToText libExPlot)
 
 add_test(NAME TestExPaD COMMAND TestExPaD WORKING_DIRECTORY ${test_dir})
 
@@ -33,6 +33,6 @@ if (MSVC)
                         $<TARGET_FILE:libROOTToText>
                         $<TARGET_FILE:libExPlot>
                         ${test_dir}
-                DEPENDS libROOTToText libExPlot TestExPaD
+                DEPENDS libROOTToText libExPlot
         )
 endif()

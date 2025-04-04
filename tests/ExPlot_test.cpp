@@ -8,7 +8,7 @@
 #include "TGraphErrors.h"
 #include "TH1D.h"
 #include "TLegend.h"
-#include "TMultigraph.h"
+#include "TMultiGraph.h"
 #include "TPad.h"
 #include "TROOT.h"
 
