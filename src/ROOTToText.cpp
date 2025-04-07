@@ -49,9 +49,101 @@ void ROOTToText::SetFileExtension(TString ext) {
         defaultExtension_.Prepend('.');
 }
 
+bool ROOTToText::SaveObject(const TObject* obj, const char* filename, Option_t* opt) const {
+    return SaveObject(obj, GetDataType(obj), filename, opt);
+}
+
+bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filename, Option_t* opt) const {
+    if (!obj) {
+        std::cerr << "Error: null pointer" << std::endl;
+        return false;
+    }
+
+    if (dt == MultiGraph1D) {
+        return SaveMultiGraph(dynamic_cast<const TMultiGraph*>(obj), filename, opt);
+    }
+
+    TString option(opt);
+    option.ToUpper();
+
+    TString path = GetFilePath(obj, filename);
+    std::ofstream ofs(path);
+    if (!ofs.is_open()) {
+        std::cerr << "Error: could not open file " << path << std::endl;
+        return false;
+    }
+
+    switch (dt) {
+        case Histo1D:
+            WriteTH1(dynamic_cast<const TH1*>(obj), option, ofs);
+            break;
+        case Histo2D:
+            WriteTH2(dynamic_cast<const TH2*>(obj), option, ofs);
+            break;
+        case Graph1D:
+            WriteGraph(dynamic_cast<const TGraph*>(obj), option, ofs);
+            break;
+        case Graph2D:
+            WriteGraph2D(dynamic_cast<const TGraph2D*>(obj), option, ofs);
+            break;
+        case Function1D:
+            WriteTF1(dynamic_cast<const TF1*>(obj), option, ofs);
+            break;
+        default:
+            TString error_message = TString::Format("This kind of object (%s) is not supported.", obj->IsA()->GetName());
+            throw std::invalid_argument(error_message.Data());
+            // std::cerr << "This kind of object (" << obj->Class_Name() << ") is not supported" << std::endl;
+    }
+
+    ofs.close();
+    if (verb_) std::cout << "Saved " << obj->GetName() << " in " << path << std::endl;
+    return true;
+}
+
+bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, const char* filename, Option_t* opt) const {
+    if (!mg) {
+        std::cerr << "Error: null pointer" << std::endl;
+        return false;
+    }
+
+    // TString option(opt);
+    // option.ToUpper();
+
+    // the title of the graphs will be basename_graphname
+    TString basename(filename);
+    if (basename.IsWhitespace()) {
+        basename = mg->GetName();
+        if (basename.IsNull()) basename = "Graph";
+    }
+    Ssiz_t s = basename.Length();
+    TPRegexp has_ext("\\.[a-zA-Z0-9]+$");
+    if (has_ext.MatchB(basename)) {
+        s = basename.Last('.');
+    }
+
+    bool res = true;
+    int idx = 0;
+    // loop over all graphs stored in the multigraph, and save them
+    for (const TObject* gr : *mg->GetListOfGraphs()) {
+        idx++;
+        TString gr_name = gr->GetName();
+        if (gr_name.CompareTo("Graph") == 0) {
+            // default name --> replace it with an index
+            // because if all graphs have the same name it will not work !!
+            gr_name = TString::Itoa(++idx, 10);
+        }
+        // set the filename corresponding to this graph
+        TString filename_graph(basename);
+        filename_graph.Insert(s, "_" + gr_name);
+        // save it
+        res = res && SaveObject(gr, Graph1D, filename_graph.Data(), opt);
+    }
+    return res;
+}
+
 void ROOTToText::SetDirectory(TString dir) {
     // a cleaner implementation would use std::filesystem (or std::experimental::filesystem)
-    // but it it would limit compatibility with some old compiler since it is a C++17 feature
+    // but it it would limit compatibility with some old compiler since it is a C++17 feature (and it may require additional libs)
     TString path(dir);
     if (dir.Length() == 0) {
         // empty string -> current directory
@@ -118,49 +210,9 @@ TString ROOTToText::GetFilePath(const TObject* obj, const char* filename) const 
     return str;
 }
 
-bool ROOTToText::SaveObject(const TObject* obj, const char* filename, Option_t* opt) const {
-    return SaveObject(obj, GetDataType(obj), filename, opt);
-}
-
-bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filename, Option_t* opt) const {
-    switch (dt) {
-        case Histo1D:
-            return SaveTH1(dynamic_cast<const TH1*>(obj), filename, opt);
-        case Histo2D:
-            return SaveTH2(dynamic_cast<const TH2*>(obj), filename, opt);
-        case Graph1D:
-            return SaveGraph(dynamic_cast<const TGraph*>(obj), filename, opt);
-        case Graph2D:
-            return SaveGraph2D(dynamic_cast<const TGraph2D*>(obj), filename, opt);
-        case MultiGraph1D:
-            return SaveMultiGraph(dynamic_cast<const TMultiGraph*>(obj), filename, opt);
-        case Function1D:
-            return SaveTF1(dynamic_cast<const TF1*>(obj), filename, opt);
-        default:
-            TString error_message = TString::Format("This kind of object (%s) is not supported.", obj->IsA()->GetName());
-            throw std::invalid_argument(error_message.Data());
-            // std::cerr << "This kind of object (" << obj->Class_Name() << ") is not supported" << std::endl;
-    }
-    // return false; // <--- unreachable code
-}
-
-bool ROOTToText::SaveTH1(const TH1* h, const char* filename, Option_t* opt) const {
-    if (!h) {
-        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
-        return false;
-    }
-
-    TString option(opt);
-    option.ToUpper();
+void ROOTToText::WriteTH1(const TH1* h, const TString& option, std::ofstream& ofs) const {
     bool low_edge = option.Contains('L');
     bool with_errors = option.Contains('E');
-
-    TString path = GetFilePath(h, filename);
-    std::ofstream ofs(path);
-    if (!ofs.is_open()) {
-        std::cerr << "Error: could not open file " << path << std::endl;
-        return false;
-    }
 
     if (headerTitle_)
         ofs << cc_ << " " << h->GetTitle() << std::endl;
@@ -190,20 +242,9 @@ bool ROOTToText::SaveTH1(const TH1* h, const char* filename, Option_t* opt) cons
             ofs << " " << h->GetBinError(i);
         ofs << std::endl;
     }
-
-    ofs.close();
-    if (verb_) std::cout << "Saved " << h->GetName() << " in " << path << std::endl;
-    return true;
 }
 
-bool ROOTToText::SaveTH2(const TH2* h, const char* filename, Option_t* opt) const {
-    if (!h) {
-        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
-        return false;
-    }
-
-    TString option(opt);
-    option.ToUpper();
+void ROOTToText::WriteTH2(const TH2* h, const TString& option, std::ofstream& ofs) const {
     bool in_columns = option.Contains("C");
     // x1, y1, z11
     // x2, y1, z21
@@ -212,15 +253,13 @@ bool ROOTToText::SaveTH2(const TH2* h, const char* filename, Option_t* opt) cons
     // z11 z21 z31 ...
     // z12 z22 z32 ...
     // ...
-
-    TString path = GetFilePath(h, filename);
-    std::ofstream ofs(path);
-    if (!ofs.is_open()) {
-        std::cerr << "Error: could not open file " << path << std::endl;
-        return false;
+    bool glefile = option.Contains("G");
+    if (in_columns && glefile) {
+        std::cerr << "Warning: Changing 2D GLE file format from \'columns\' to \'matrix\'." << std::endl;
+        in_columns = false;
     }
 
-    if (!in_columns && path.EndsWith(".z") && cc_ == '!') {
+    if (glefile) {
         // GLE mandatory header
         int nx = h->GetNbinsX();
         int ny = h->GetNbinsY();
@@ -275,31 +314,14 @@ bool ROOTToText::SaveTH2(const TH2* h, const char* filename, Option_t* opt) cons
             ofs << std::endl;
         }
     }
-    ofs.close();
-    if (verb_) std::cout << "Saved " << h->GetName() << " in " << path << std::endl;
-    return true;
 }
 
-bool ROOTToText::SaveGraph(const TGraph* gr, const char* filename, Option_t* opt) const {
-    if (!gr) {
-        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
-        return false;
-    }
-
+void ROOTToText::WriteGraph(const TGraph* gr, const TString& option, std::ofstream& ofs) const {
     if (gr->IsA() != TGraph::Class() && gr->IsA() != TGraphErrors::Class())
         std::cerr << "Warning: only limited support for class " << gr->IsA()->GetName() << std::endl;
 
-    TString option(opt);
-    option.ToUpper();
     bool with_errors = (gr->IsA() == TGraphErrors::Class());
     bool with_herrors = with_errors && option.Contains("H");
-
-    TString path = GetFilePath(gr, filename);
-    std::ofstream ofs(path);
-    if (!ofs.is_open()) {
-        std::cerr << "Error: could not open file " << path << std::endl;
-        return false;
-    }
 
     if (headerTitle_)
         ofs << cc_ << " " << gr->GetTitle() << std::endl;
@@ -342,69 +364,10 @@ bool ROOTToText::SaveGraph(const TGraph* gr, const char* filename, Option_t* opt
         }
         ofs << std::endl;
     }
-    ofs.close();
     delete[] idx;
-    if (verb_) std::cout << "Saved " << gr->GetName() << " in " << path << std::endl;
-    return true;
 }
 
-bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, const char* filename, Option_t* opt) const {
-    if (!mg) {
-        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
-        return false;
-    }
-
-    // TString option(opt);
-    // option.ToUpper();
-
-    // the title of the graphs will be basename_graphtitle
-    TString basename(filename);
-    if (basename.IsWhitespace()) {
-        basename = mg->GetName();
-        if (basename.IsNull()) basename = "Graph";
-    }
-    Ssiz_t s = basename.Length();
-    TPRegexp has_ext("\\.[a-zA-Z0-9]+$");
-    if (has_ext.MatchB(basename)) {
-        s = basename.Last('.');
-    }
-
-    bool res = true;
-    int idx = 0;
-    // loop over all graphs stored in the multigraph, and save them
-    for (const TObject* gr : *mg->GetListOfGraphs()) {
-        idx++;
-        TString gr_name = gr->GetName();
-        if (gr_name.CompareTo("Graph") == 0) {
-            // default name --> replace it with an index
-            // because if all graphs have the same name it will not work !!
-            gr_name = TString::Itoa(++idx, 10);
-        }
-        // set the filename corresponding to this graph
-        TString filename_graph(basename);
-        filename_graph.Insert(s, "_" + gr_name);
-        // save it
-        res = res && SaveGraph(dynamic_cast<const TGraph*>(gr), filename_graph.Data(), opt);
-    }
-    return res;
-}
-
-bool ROOTToText::SaveGraph2D(const TGraph2D* gr, const char* filename, Option_t* opt) const {
-    if (!gr) {
-        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
-        return false;
-    }
-
-    // TString option(opt);
-    // option.ToUpper();
-
-    TString path = GetFilePath(gr, filename);
-    std::ofstream ofs(path);
-    if (!ofs.is_open()) {
-        std::cerr << "Error: could not open file " << path << std::endl;
-        return false;
-    }
-
+void ROOTToText::WriteGraph2D(const TGraph2D* gr, const TString& /*option*/, std::ofstream& ofs) const {
     if (headerTitle_)
         ofs << cc_ << " " << gr->GetTitle() << std::endl;
 
@@ -439,21 +402,10 @@ bool ROOTToText::SaveGraph2D(const TGraph2D* gr, const char* filename, Option_t*
         ofs << XX[k] << " " << YY[k] << " " << ZZ[k] << std::endl;
         xprev = XX[k];
     }
-    ofs.close();
     delete[] idx;
-    if (verb_) std::cout << "Saved " << gr->GetName() << " in " << path << std::endl;
-    return true;
 }
 
-bool ROOTToText::SaveTF1(const TF1* f, const char* filename, Option_t* opt) const {
-    if (!f) {
-        std::cerr << "Error: null pointer (probably coming from SaveObject)" << std::endl;
-        return false;
-    }
-
-    TString option(opt);
-    option.ToUpper();
-
+void ROOTToText::WriteTF1(const TF1* f, const TString& option, std::ofstream& ofs) const {
     // number of points for evaluation
     int npoints = -1;
     if (option.Contains("N")) {
@@ -471,15 +423,8 @@ bool ROOTToText::SaveTF1(const TF1* f, const char* filename, Option_t* opt) cons
     Double_t xmin, xmax;
     f->GetRange(xmin, xmax);
 
-    TString path = GetFilePath(f, filename);
-    std::ofstream ofs(path);
-    if (!ofs.is_open()) {
-        std::cerr << "Error: could not open file " << path << std::endl;
-        return false;
-    }
-
     if (headerTitle_)
-        ofs << cc_ << " Function " << f->GetName() << " : x -> " << f->GetExpFormula("CLINGP") << std::endl;
+        ofs << cc_ << " Function " << f->GetName() << " : x -> " << f->GetExpFormula("P") << std::endl;
 
     if (headerAxis_) {
         ofs << cc_ << " 1:X - from " << xmin << " to " << xmax << std::endl;
@@ -491,9 +436,6 @@ bool ROOTToText::SaveTF1(const TF1* f, const char* filename, Option_t* opt) cons
         double xi = xmin + dx * i;
         ofs << xi << " " << f->Eval(xi) << std::endl;
     }
-    ofs.close();
-    if (verb_) std::cout << "Saved " << f->GetName() << " in " << path << std::endl;
-    return true;
 }
 
 } // namespace Expad

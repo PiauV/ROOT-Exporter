@@ -33,16 +33,18 @@ public:
 
     bool SaveObject(const TObject* obj, const char* filename = "", Option_t* opt = "") const;
     bool SaveObject(const TObject* obj, DataType dt, const char* filename = "", Option_t* opt = "") const;
-    bool SaveTH1(const TH1* h, const char* filename = "", Option_t* opt = "") const;
-    bool SaveTH2(const TH2* h, const char* filename = "", Option_t* opt = "") const;
-    bool SaveGraph(const TGraph* gr, const char* filename = "", Option_t* opt = "") const;
-    bool SaveMultiGraph(const TMultiGraph* mg, const char* filename = "", Option_t* opt = "") const;
-    bool SaveGraph2D(const TGraph2D* gr, const char* filename = "", Option_t* opt = "") const;
-    bool SaveTF1(const TF1* f, const char* filename = "", Option_t* opt = "") const;
 
 private:
     ROOTToText();
     TString GetFilePath(const TObject* obj, const char* filename) const;
+
+    bool SaveMultiGraph(const TMultiGraph* mg, const char* filename = "", Option_t* opt = "") const;
+
+    void WriteTH1(const TH1* h, const TString& option, std::ofstream& ofs) const;
+    void WriteTH2(const TH2* h, const TString& option, std::ofstream& ofs) const;
+    void WriteGraph(const TGraph* gr, const TString& option, std::ofstream& ofs) const;
+    void WriteGraph2D(const TGraph2D* gr, const TString& option, std::ofstream& ofs) const;
+    void WriteTF1(const TF1* f, const TString& option, std::ofstream& ofs) const;
 
 private:
     bool headerTitle_ = true;
