@@ -24,17 +24,17 @@ PlotSerializer::~PlotSerializer() {
 }
 
 void PlotSerializer::Restart() {
-    pp_.data.clear();
+    pp_.datasets.clear();
     pp_ = PadProperties();
     ExtractPadProperties();
 }
 
 int PlotSerializer::GetNumberOfDatasets() const {
-    return pp_.data.size();
+    return pp_.datasets.size();
 }
 
-DataProperties1D PlotSerializer::GetDatasetProperties(int i) const {
-    return pp_.data.at(i);
+TString PlotSerializer::GetDatasetTitle(int i) const {
+    return pp_.datasets.at(i).label;
 }
 
 TString PlotSerializer::GetPlotTitle() const {
@@ -69,7 +69,7 @@ void PlotSerializer::ExtractPadProperties() {
                         const TLegendEntry* entry = static_cast<const TLegendEntry*>(obj_l);
                         const TObject* entry_obj = entry->GetObject();
                         if (entry_obj != obj_l) continue;
-                        pp_.data.back().label = entry->GetLabel();
+                        pp_.datasets.back().label = entry->GetLabel();
                         break; // obj_l found : end the loop
                     }
                 }
@@ -94,7 +94,7 @@ void PlotSerializer::ExtractPadProperties() {
             }
         }
     }
-    if (!pp_.data.size())
+    if (!pp_.datasets.size())
         throw std::runtime_error("ExPaD failed to export this plot (no compatible data was found).");
 }
 
@@ -105,7 +105,7 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
         }
     }
     else {
-        DataProperties1D prop;
+        PadProperties::Data prop;
         prop.obj = obj;
         prop.type = data_type;
         prop.label = obj->GetTitle();
@@ -113,7 +113,7 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
         if (!line)
             std::cout << "Warning : could not get line attributes from " << obj->GetName() << std::endl;
         else {
-            prop.line.color = Color(line->GetLineColor());
+            prop.line.color = GetColor(line->GetLineColor());
             prop.line.size = line->GetLineWidth();
             prop.line.style = line->GetLineStyle();
         }
@@ -121,11 +121,11 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
         if (!marker)
             std::cout << "Warning : could not get marker attributes from " << obj->GetName() << std::endl;
         else {
-            prop.marker.color = Color(marker->GetMarkerColor());
+            prop.marker.color = GetColor(marker->GetMarkerColor());
             prop.marker.size = 10 * marker->GetMarkerSize();
             prop.marker.style = marker->GetMarkerStyle();
         }
-        pp_.data.push_back(prop);
+        pp_.datasets.push_back(prop);
     }
 }
 
@@ -162,14 +162,14 @@ bool PlotSerializer::GetAxis(const TH1* h) {
 
     const TAxis* xx = h->GetXaxis();
     pp_.xaxis.title = xx->GetTitle();
-    pp_.xaxis.color = Color(xx->GetAxisColor());
+    pp_.xaxis.color = GetColor(xx->GetAxisColor());
     pp_.xaxis.min = h->GetBinLowEdge(xx->GetFirst());
     pp_.xaxis.max = h->GetBinLowEdge(xx->GetLast() + 1);
     pp_.xaxis.log = (pad_->GetLogx() == 1);
 
     const TAxis* yy = h->GetYaxis();
     pp_.yaxis.title = yy->GetTitle();
-    pp_.yaxis.color = Color(yy->GetAxisColor());
+    pp_.yaxis.color = GetColor(yy->GetAxisColor());
     pp_.yaxis.min = h->GetMinimum();
     pp_.yaxis.max = h->GetMaximum();
     pp_.yaxis.log = (pad_->GetLogy() == 1);
@@ -190,9 +190,9 @@ bool PlotSerializer::GetLegend(const TLegend* leg) {
         const TObject* entry_obj = entry->GetObject();
         TString label = entry->GetLabel();
         if (label.CompareTo(entry_obj->GetTitle()) == 0) continue; // the label is the object title, no need to change anything
-        for (DataProperties1D& dp : pp_.data) {
-            if (dp.obj == entry_obj) {
-                dp.label = label;
+        for (PadProperties::Data& d : pp_.datasets) {
+            if (d.obj == entry_obj) {
+                d.label = label;
                 break; // obj found : end the loop
             }
         }
@@ -200,9 +200,9 @@ bool PlotSerializer::GetLegend(const TLegend* leg) {
     return true;
 }
 
-RGBAcolor PlotSerializer::Color(Color_t ci) const {
+PadProperties::Color PlotSerializer::GetColor(Color_t ci) const {
     TColor* color = gROOT->GetColor(ci);
-    RGBAcolor c;
+    PadProperties::Color c;
     if (color) {
         c.red = color->GetRed();
         c.green = color->GetGreen();

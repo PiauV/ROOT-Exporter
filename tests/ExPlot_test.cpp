@@ -38,8 +38,8 @@ void TestPlotSerializer() {
     try {
         ps = new Expad::PlotSerializer(gPad);
         SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
-        COMPARE_TSTRING(ps->GetDatasetProperties(0).label, "h");
-        COMPARE_TSTRING(ps->GetDatasetProperties(1).label, "gaus");
+        COMPARE_TSTRING(ps->GetDatasetTitle(0), "h");
+        COMPARE_TSTRING(ps->GetDatasetTitle(1), "gaus");
         SIMPLE_TEST(ps->GetLegendPosition() == 0);
         COMPARE_TSTRING(ps->GetPlotTitle(), "h");
         COMPARE_TSTRING(ps->GetXaxisTitle(), "xtitle");
@@ -55,8 +55,8 @@ void TestPlotSerializer() {
         ps->Restart();
         SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
         SIMPLE_TEST(ps->GetLegendPosition() > 0);
-        COMPARE_TSTRING(ps->GetDatasetProperties(0).label, "h"); // should still be 'h' (legend built before the title was changed)
-        COMPARE_TSTRING(ps->GetDatasetProperties(1).label, "gaus");
+        COMPARE_TSTRING(ps->GetDatasetTitle(0), "h"); // should still be 'h' (legend built before the title was changed)
+        COMPARE_TSTRING(ps->GetDatasetTitle(1), "gaus");
         COMPARE_TSTRING(ps->GetPlotTitle(), "title"); // title has changed
     }
     catch (const std::exception& e) {
@@ -74,9 +74,7 @@ void TestPlotSerializer() {
     Double_t y2[2] = {2, 5};
     Double_t ey[2] = {1, 2};
     TGraph* gr = new TGraph(2, x, y1);
-    gr->SetLineWidth(2);
     TGraphErrors* gre = new TGraphErrors(2, x, y2, 0, ey);
-    gre->SetLineWidth(1);
     TMultiGraph* mg = new TMultiGraph();
     mg->SetTitle("title;x;y");
     mg->Add(gr);
@@ -92,15 +90,13 @@ void TestPlotSerializer() {
     try {
         ps = new Expad::PlotSerializer(gPad);
         SIMPLE_TEST(ps->GetNumberOfDatasets() == 3);
-        SIMPLE_TEST(ps->GetDatasetProperties(0).line.size == 2);
-        SIMPLE_TEST(ps->GetDatasetProperties(1).line.size == 1);
         COMPARE_TSTRING(ps->GetPlotTitle(), "title");
         COMPARE_TSTRING(ps->GetXaxisTitle(), "x");
         COMPARE_TSTRING(ps->GetYaxisTitle(), "y");
         SIMPLE_TEST(ps->GetLegendPosition() > 0);
-        COMPARE_TSTRING(ps->GetDatasetProperties(0).label, "graph1");
-        COMPARE_TSTRING(ps->GetDatasetProperties(1).label, "graph2");
-        COMPARE_TSTRING(ps->GetDatasetProperties(2).label, "function");
+        COMPARE_TSTRING(ps->GetDatasetTitle(0), "graph1");
+        COMPARE_TSTRING(ps->GetDatasetTitle(1), "graph2");
+        COMPARE_TSTRING(ps->GetDatasetTitle(2), "function");
     }
     catch (const std::exception& e) {
         EXCEPTION_CAUGHT(e);
