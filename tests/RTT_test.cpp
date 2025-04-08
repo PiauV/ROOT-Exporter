@@ -12,6 +12,7 @@
 #include "TMultiGraph.h"
 #include "TString.h"
 #include "TSystem.h"
+#include "TText.h"
 
 #include <fstream>
 #include <iostream>
@@ -115,6 +116,9 @@ void TestRTTOutput() {
     // TF1
     TF1* f = new TF1("func", "x+1", 1, 3);
 
+    // TText
+    TText* text = new TText(0, 0, "100");
+
     gRTT->SetDirectory("./output");
     gRTT->SetFileExtension(".txt");
 
@@ -125,7 +129,6 @@ void TestRTTOutput() {
     SIMPLE_TEST(gRTT->SaveObject(gre));
     SIMPLE_TEST(gRTT->SaveObject(mg));
     SIMPLE_TEST(gRTT->SaveObject(gr2d));
-    SIMPLE_TEST(gRTT->SaveObject(f, "", "N3"));
     EXPECTED_EXCEPTION(gRTT->SaveObject(h3), std::invalid_argument);
 
     // saving with options and filenames
@@ -133,6 +136,24 @@ void TestRTTOutput() {
     SIMPLE_TEST(gRTT->SaveObject(h, "h_lowedge_and_errors.dat", "EL"));
     SIMPLE_TEST(gRTT->SaveObject(gre, "gre_horizontal_errors.txt", "H"));
     SIMPLE_TEST(gRTT->SaveObject(h2, "h2_columns", "C"));
+
+    // Use a custom writer
+    writer fw = [](const TObject* obj, const TString& /*opt*/, std::ofstream& ofs) {
+        auto f = dynamic_cast<const TF1*>(obj);
+        if (f) {
+            ofs << f->Eval(100) << std::endl;
+        }
+        else {
+            ofs << obj->GetTitle() << std::endl;
+        }
+    };
+    // we use the same dummy function for TF1 and TText objects
+    gRTT->AddCustomWriter("TF1", fw);
+    gRTT->AddCustomWriter("TText", fw);
+
+    SIMPLE_TEST(gRTT->SaveObject(f, "", "D N3"));    // save f with default writer
+    SIMPLE_TEST(gRTT->SaveObject(f, "func_custom")); // use custom writer
+    SIMPLE_TEST(gRTT->SaveObject(text, "text"));     // use custom writer (TText is not supported by default)
 
     // read files
     double sum_y = 0;
@@ -164,6 +185,8 @@ void TestRTTOutput() {
     SIMPLE_TEST(check_file_content("./output/gre_horizontal_errors.txt", 4, N, sum_ex, 3));
     SIMPLE_TEST(check_file_content("./output/gre_horizontal_errors.txt", 4, N, sum_ey, 4));
     SIMPLE_TEST(check_file_content("./output/h2_columns.txt", 3, N * N, sum_z, 3));
+    SIMPLE_TEST(check_file_content("./output/text.txt", 1, 1, 100, 0));
+    SIMPLE_TEST(check_file_content("./output/func_custom.txt", 1, 1, 101, 0));
 
     delete h;
     delete h2;
@@ -171,6 +194,7 @@ void TestRTTOutput() {
     delete mg;
     delete gr2d;
     delete f;
+    delete text;
 
     END_TEST();
 }

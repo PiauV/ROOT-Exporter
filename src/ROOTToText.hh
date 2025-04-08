@@ -6,14 +6,29 @@
 
 #include "DataType.hh"
 
+#include <map>
+
 class TH1;
 class TH2;
 class TGraph;
 class TMultiGraph;
 class TGraph2D;
 class TF1;
+class TClass;
+
+// The user writers must have this signature
+// Hence, the object should be cast *inside* the writer, and *must* inherit from TObject
+// This is not the most convenient way, but it is a more straightforward approach than using templates
+// using writer = std::function<void(const TObject* obj, const TString& option, std::ofstream& ofs)>; // not compatible with my old ROOT5 + MSVC 12.0 config
+typedef void (*writer)(const TObject* obj, const TString& option, std::ofstream& ofs);
 
 namespace Expad {
+
+// struct dummyWriter {
+//     void operator()(const TObject* obj, const TString& option, std::ofstream& ofs) {
+//         return;
+//     }
+// };
 
 class ROOTToText {
 public:
@@ -30,6 +45,8 @@ public:
     inline char GetCommentChar() const;
     inline void SetVerbose(bool v);
     // set precision, format ?
+    bool AddCustomWriter(const char* class_name, writer& func);
+    bool RemoveCustomWriter(const char* class_name);
 
     bool SaveObject(const TObject* obj, const char* filename = "", Option_t* opt = "") const;
     bool SaveObject(const TObject* obj, DataType dt, const char* filename = "", Option_t* opt = "") const;
@@ -54,6 +71,7 @@ private:
     static ROOTToText* instance_;
     char cc_;   // comment character
     bool verb_; // verbose
+    std::map<TClass*, writer> userWriters_;
 };
 
 void ROOTToText::SetHeader(bool title, bool axis) {

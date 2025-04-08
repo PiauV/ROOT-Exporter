@@ -59,12 +59,14 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filenam
         return false;
     }
 
-    if (dt == MultiGraph1D) {
-        return SaveMultiGraph(dynamic_cast<const TMultiGraph*>(obj), filename, opt);
-    }
-
     TString option(opt);
     option.ToUpper();
+
+    if (dt == MultiGraph1D) {
+        if (userWriters_.count(obj->IsA()) == 0 || option.Contains("D")) {
+            return SaveMultiGraph(dynamic_cast<const TMultiGraph*>(obj), filename, opt);
+        }
+    }
 
     TString path = GetFilePath(obj, filename);
     std::ofstream ofs(path);
@@ -73,26 +75,46 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filenam
         return false;
     }
 
-    switch (dt) {
-        case Histo1D:
-            WriteTH1(dynamic_cast<const TH1*>(obj), option, ofs);
-            break;
-        case Histo2D:
-            WriteTH2(dynamic_cast<const TH2*>(obj), option, ofs);
-            break;
-        case Graph1D:
-            WriteGraph(dynamic_cast<const TGraph*>(obj), option, ofs);
-            break;
-        case Graph2D:
-            WriteGraph2D(dynamic_cast<const TGraph2D*>(obj), option, ofs);
-            break;
-        case Function1D:
-            WriteTF1(dynamic_cast<const TF1*>(obj), option, ofs);
-            break;
-        default:
-            TString error_message = TString::Format("This kind of object (%s) is not supported.", obj->IsA()->GetName());
-            throw std::invalid_argument(error_message.Data());
-            // std::cerr << "This kind of object (" << obj->Class_Name() << ") is not supported" << std::endl;
+    bool written = false;
+    // "D" -> force Default writer
+    if (!option.Contains("D")) {
+        auto cl = obj->IsA();
+        if (userWriters_.count(cl)) {
+            try {
+                userWriters_.at(cl)(obj, option, ofs);
+            }
+            catch (const std::exception& e) {
+                std::cerr << "Error when using custom writer for class " << cl->GetName() << std::endl;
+                std::cerr << e.what() << '\n';
+                ofs.close();
+                return false;
+            }
+            written = true;
+        }
+    }
+
+    if (!written) {
+        switch (dt) {
+            case Histo1D:
+                WriteTH1(dynamic_cast<const TH1*>(obj), option, ofs);
+                break;
+            case Histo2D:
+                WriteTH2(dynamic_cast<const TH2*>(obj), option, ofs);
+                break;
+            case Graph1D:
+                WriteGraph(dynamic_cast<const TGraph*>(obj), option, ofs);
+                break;
+            case Graph2D:
+                WriteGraph2D(dynamic_cast<const TGraph2D*>(obj), option, ofs);
+                break;
+            case Function1D:
+                WriteTF1(dynamic_cast<const TF1*>(obj), option, ofs);
+                break;
+            default:
+                TString error_message = TString::Format("This kind of object (%s) is not supported, but you could use a custom writer.", obj->IsA()->GetName());
+                throw std::invalid_argument(error_message.Data());
+                // std::cerr << "This kind of object (" << obj->Class_Name() << ") is not supported" << std::endl;
+        }
     }
 
     ofs.close();
@@ -139,6 +161,34 @@ bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, const char* filename, Opt
         res = res && SaveObject(gr, Graph1D, filename_graph.Data(), opt);
     }
     return res;
+}
+
+bool ROOTToText::AddCustomWriter(const char* class_name, writer& func) {
+    auto cl = TClass::GetClass(class_name);
+    if (!cl) {
+        std::cerr << "Error: class " << class_name << " not found in ROOT." << std::endl;
+        return false;
+    }
+    if (!cl->InheritsFrom("TObject")) {
+        std::cerr << "Error: class " << class_name << " does not inherit from TObject." << std::endl;
+        return false;
+    }
+    if (userWriters_.count(cl))
+        std::cout << "Warning: overwritting writer function for class " << class_name << std::endl;
+    userWriters_[cl] = func;
+    return true;
+}
+
+bool ROOTToText::RemoveCustomWriter(const char* class_name) {
+    auto cl = TClass::GetClass(class_name);
+    if (userWriters_.count(cl)) {
+        userWriters_.erase(cl);
+        return true;
+    }
+    else {
+        std::cout << "Warning: did not find user writer function for class " << class_name << std::endl;
+        return false;
+    }
 }
 
 void ROOTToText::SetDirectory(TString dir) {
