@@ -11,6 +11,7 @@
 #pragma link C++ namespace Expad;
 #pragma link C++ enum Expad::DataType;
 #pragma link C++ function Expad::GetDataType;
+#pragma link C++ function Expad::GetDataDimension;
 #pragma link C++ class Expad::ROOTToText;
 #pragma link C++ global gRTT;
 

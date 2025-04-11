@@ -22,6 +22,8 @@ enum DataType {
 
 DataType GetDataType(const TObject* obj);
 
+int GetDataDimension(DataType d);
+
 } // namespace Expad
 
 #endif

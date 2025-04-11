@@ -59,8 +59,8 @@ void PlotSerializer::ExtractPadProperties() {
     const TLegend* legend = nullptr;
     for (const TObject* obj_p : *(pad_->GetListOfPrimitives())) {
         DataType data = GetDataType(obj_p);
-        if (data != Undefined) {
-            if (data < 10) {
+        int dim = GetDataDimension(data);
+        if (dim == 1) {
                 // 1D data
                 StoreDataWithAxis(obj_p, data, axis_needed);
                 if (legend) {
@@ -74,10 +74,11 @@ void PlotSerializer::ExtractPadProperties() {
                     }
                 }
             }
-            else if (data < 100) {
-                throw std::invalid_argument("2D/3D plots are not supported yet.");
+        else if (dim == 2 || dim == 3) {
+            std::cerr << "Warning: 2D/3D plots are not supported yet." << std::endl;
+            // throw std::invalid_argument("2D/3D plots are not supported yet.");
             }
-            else {
+        else if (dim == 0) {
                 // other graphics entities (text, legend, ...)
                 if (data == TextBox) {
                     if (strcmp(obj_p->GetName(), "title") == 0) {
@@ -93,7 +94,6 @@ void PlotSerializer::ExtractPadProperties() {
                 }
             }
         }
-    }
     if (!pp_.datasets.size())
         throw std::runtime_error("ExPaD failed to export this plot (no compatible data was found).");
 }

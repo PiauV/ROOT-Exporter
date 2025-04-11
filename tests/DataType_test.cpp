@@ -72,15 +72,15 @@ void TestDataType() {
     SIMPLE_TEST(Expad::GetDataType(c) == Expad::Undefined);
 
     // check DataType numbering scheme (undef/1D/2D/3D)
-    SIMPLE_TEST(Expad::Undefined == 0)
-    SIMPLE_TEST(Expad::Function1D < 10)
-    SIMPLE_TEST(Expad::Graph1D < 10)
-    SIMPLE_TEST(Expad::MultiGraph1D < 10)
-    SIMPLE_TEST(Expad::Histo2D < 20)
-    SIMPLE_TEST(Expad::Function2D < 20)
-    SIMPLE_TEST(Expad::Graph2D < 20)
-    SIMPLE_TEST(Expad::Histo2D < 20)
-    SIMPLE_TEST(Expad::Histo3D < 30)
+    SIMPLE_TEST(Expad::GetDataDimension(Expad::Undefined) == -1)
+    SIMPLE_TEST(Expad::GetDataDimension(Expad::Function1D) == 1)
+    SIMPLE_TEST(Expad::GetDataDimension(Expad::Graph1D) == 1)
+    SIMPLE_TEST(Expad::GetDataDimension(Expad::MultiGraph1D) == 1)
+    SIMPLE_TEST(Expad::GetDataDimension(Expad::Histo2D) == 2)
+    SIMPLE_TEST(Expad::GetDataDimension(Expad::Function2D) == 2)
+    SIMPLE_TEST(Expad::GetDataDimension(Expad::Graph2D) == 2)
+    SIMPLE_TEST(Expad::GetDataDimension(Expad::Histo2D) == 2)
+    SIMPLE_TEST(Expad::GetDataDimension(Expad::Histo3D) == 3)
 
     END_TEST();
 }

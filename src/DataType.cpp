@@ -42,4 +42,13 @@ DataType GetDataType(const TObject* obj) {
     return Undefined;
 }
 
+int GetDataDimension(DataType d) {
+    if (d == 0)
+        return -1;
+    else if (d >= 100)
+        return 0;
+    else
+        return d / 10 + 1;
+}
+
 } // namespace Expad
