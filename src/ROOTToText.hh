@@ -20,15 +20,10 @@ class TClass;
 // Hence, the object should be cast *inside* the writer, and *must* inherit from TObject
 // This is not the most convenient way, but it is a more straightforward approach than using templates
 // using writer = std::function<void(const TObject* obj, const TString& option, std::ofstream& ofs)>; // not compatible with my old ROOT5 + MSVC 12.0 config
+
 typedef void (*writer)(const TObject* obj, const TString& option, std::ofstream& ofs);
 
 namespace Expad {
-
-// struct dummyWriter {
-//     void operator()(const TObject* obj, const TString& option, std::ofstream& ofs) {
-//         return;
-//     }
-// };
 
 class ROOTToText {
 public:
@@ -50,12 +45,13 @@ public:
 
     bool SaveObject(const TObject* obj, const char* filename = "", Option_t* opt = "") const;
     bool SaveObject(const TObject* obj, DataType dt, const char* filename = "", Option_t* opt = "") const;
+    bool SaveObject(const TObject* obj, DataType dt, TString& filename, Option_t* opt = "") const;
 
 private:
     ROOTToText();
     TString GetFilePath(const TObject* obj, const char* filename) const;
 
-    bool SaveMultiGraph(const TMultiGraph* mg, const char* filename = "", Option_t* opt = "") const;
+    bool SaveMultiGraph(const TMultiGraph* mg, TString& filename, Option_t* opt = "") const;
 
     void WriteTH1(const TH1* h, const TString& option, std::ofstream& ofs) const;
     void WriteTH2(const TH2* h, const TString& option, std::ofstream& ofs) const;

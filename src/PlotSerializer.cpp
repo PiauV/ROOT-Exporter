@@ -61,39 +61,39 @@ void PlotSerializer::ExtractPadProperties() {
         DataType data = GetDataType(obj_p);
         int dim = GetDataDimension(data);
         if (dim == 1) {
-                // 1D data
-                StoreDataWithAxis(obj_p, data, axis_needed);
-                if (legend) {
-                    // Update this object's label (legend has already been read)
-                    for (const TObject* obj_l : *legend->GetListOfPrimitives()) {
-                        const TLegendEntry* entry = static_cast<const TLegendEntry*>(obj_l);
-                        const TObject* entry_obj = entry->GetObject();
-                        if (entry_obj != obj_l) continue;
-                        pp_.datasets.back().label = entry->GetLabel();
-                        break; // obj_l found : end the loop
-                    }
-                }
-            }
-        else if (dim == 2 || dim == 3) {
-            std::cerr << "Warning: 2D/3D plots are not supported yet." << std::endl;
-            // throw std::invalid_argument("2D/3D plots are not supported yet.");
-            }
-        else if (dim == 0) {
-                // other graphics entities (text, legend, ...)
-                if (data == TextBox) {
-                    if (strcmp(obj_p->GetName(), "title") == 0) {
-                        // title of the plot
-                        pp_.title = ((TPaveText*)obj_p)->GetLine(0)->GetTitle();
-                    }
-                }
-                else if (data == Legend) {
-                    if (legend)
-                        throw std::runtime_error("A legend has already been registered.");
-                    legend = dynamic_cast<const TLegend*>(obj_p);
-                    GetLegend(legend);
+            // 1D data
+            StoreDataWithAxis(obj_p, data, axis_needed);
+            if (legend) {
+                // Update this object's label (legend has already been read)
+                for (const TObject* obj_l : *legend->GetListOfPrimitives()) {
+                    const TLegendEntry* entry = static_cast<const TLegendEntry*>(obj_l);
+                    const TObject* entry_obj = entry->GetObject();
+                    if (entry_obj != obj_l) continue;
+                    pp_.datasets.back().label = entry->GetLabel();
+                    break; // obj_l found : end the loop
                 }
             }
         }
+        else if (dim == 2 || dim == 3) {
+            std::cerr << "Warning: 2D/3D plots are not supported yet." << std::endl;
+            // throw std::invalid_argument("2D/3D plots are not supported yet.");
+        }
+        else if (dim == 0) {
+            // other graphics entities (text, legend, ...)
+            if (data == TextBox) {
+                if (strcmp(obj_p->GetName(), "title") == 0) {
+                    // title of the plot
+                    pp_.title = ((TPaveText*)obj_p)->GetLine(0)->GetTitle();
+                }
+            }
+            else if (data == Legend) {
+                if (legend)
+                    throw std::runtime_error("A legend has already been registered.");
+                legend = dynamic_cast<const TLegend*>(obj_p);
+                GetLegend(legend);
+            }
+        }
+    }
     if (!pp_.datasets.size())
         throw std::runtime_error("ExPaD failed to export this plot (no compatible data was found).");
 }
@@ -106,7 +106,6 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
     }
     else {
         PadProperties::Data prop;
-        prop.obj = obj;
         prop.type = data_type;
         prop.label = obj->GetTitle();
         const TAttLine* line = dynamic_cast<const TAttLine*>(obj);
@@ -126,6 +125,7 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
             prop.marker.style = marker->GetMarkerStyle();
         }
         pp_.datasets.push_back(prop);
+        dataObjects_.push_back(obj);
     }
 }
 
@@ -190,9 +190,9 @@ bool PlotSerializer::GetLegend(const TLegend* leg) {
         const TObject* entry_obj = entry->GetObject();
         TString label = entry->GetLabel();
         if (label.CompareTo(entry_obj->GetTitle()) == 0) continue; // the label is the object title, no need to change anything
-        for (PadProperties::Data& d : pp_.datasets) {
-            if (d.obj == entry_obj) {
-                d.label = label;
+        for (int i = 0; i < dataObjects_.size(); i++) {
+            if (dataObjects_[i] == entry_obj) {
+                pp_.datasets.at(i).label = label;
                 break; // obj found : end the loop
             }
         }

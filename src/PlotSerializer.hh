@@ -40,6 +40,9 @@ private:
 private:
     TVirtualPad* pad_;
     PadProperties pp_;
+    std::vector<const TObject*> dataObjects_;
+
+    friend class ExportManager;
 };
 
 } // namespace Expad

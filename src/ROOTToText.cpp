@@ -50,10 +50,16 @@ void ROOTToText::SetFileExtension(TString ext) {
 }
 
 bool ROOTToText::SaveObject(const TObject* obj, const char* filename, Option_t* opt) const {
-    return SaveObject(obj, GetDataType(obj), filename, opt);
+    TString str(filename);
+    return SaveObject(obj, GetDataType(obj), str, opt);
 }
 
 bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filename, Option_t* opt) const {
+    TString str(filename);
+    return SaveObject(obj, GetDataType(obj), str, opt);
+}
+
+bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, Option_t* opt) const {
     if (!obj) {
         std::cerr << "Error: null pointer" << std::endl;
         return false;
@@ -68,7 +74,7 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filenam
         }
     }
 
-    TString path = GetFilePath(obj, filename);
+    TString path = GetFilePath(obj, filename.Data());
     std::ofstream ofs(path);
     if (!ofs.is_open()) {
         std::cerr << "Error: could not open file " << path << std::endl;
@@ -119,10 +125,11 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filenam
 
     ofs.close();
     if (verb_) std::cout << "Saved " << obj->GetName() << " in " << path << std::endl;
+    filename = path;
     return true;
 }
 
-bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, const char* filename, Option_t* opt) const {
+bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, TString& filename, Option_t* opt) const {
     if (!mg) {
         std::cerr << "Error: null pointer" << std::endl;
         return false;
@@ -158,8 +165,9 @@ bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, const char* filename, Opt
         TString filename_graph(basename);
         filename_graph.Insert(s, "_" + gr_name);
         // save it
-        res = res && SaveObject(gr, Graph1D, filename_graph.Data(), opt);
+        res = res && SaveObject(gr, Graph1D, filename_graph, opt);
     }
+    filename = basename;
     return res;
 }
 

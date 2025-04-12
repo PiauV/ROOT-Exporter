@@ -32,11 +32,11 @@ struct PadProperties {
     };
 
     struct Data {
-        const TObject* obj;
         DataType type;
         TString label;
         DrawingStyle marker;
         DrawingStyle line;
+        TString file = "";
     };
 
     TString title;
