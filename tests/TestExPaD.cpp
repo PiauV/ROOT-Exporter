@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
         TestRTTConfig();
         TestRTTOutput();
         TestPlotSerializer();
+        TestExportManager();
     }
     catch (const std::invalid_argument& ex) {
         printf("Invalid argument: %s\n", ex.what());

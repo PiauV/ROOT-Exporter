@@ -26,7 +26,7 @@ ROOTToText::ROOTToText() {
     headerTitle_ = true;
     headerAxis_ = true;
     defaultExtension_ = ".txt";
-    defaultDirectory_ = "./";
+    baseDirectory_ = "./";
     cc_ = '#';
     verb_ = false;
 }
@@ -199,13 +199,17 @@ bool ROOTToText::RemoveCustomWriter(const char* class_name) {
     }
 }
 
+void ROOTToText::ClearCustomWriters() {
+    userWriters_.clear();
+}
+
 void ROOTToText::SetDirectory(TString dir) {
     // a cleaner implementation would use std::filesystem (or std::experimental::filesystem)
     // but it it would limit compatibility with some old compiler since it is a C++17 feature (and it may require additional libs)
     TString path(dir);
     if (dir.Length() == 0) {
         // empty string -> current directory
-        defaultDirectory_ = "./";
+        baseDirectory_ = "./";
         return;
     }
 
@@ -219,21 +223,20 @@ void ROOTToText::SetDirectory(TString dir) {
     if (!gSystem->IsAbsoluteFileName(path) && !path.BeginsWith("./")) {
         // relative directory... to what ?
         // let's assume its relative to current dir
-        // --> prepend path name
-        gSystem->PrependPathName(defaultDirectory_, path);
+        gSystem->PrependPathName("./", path);
     }
 
     if (!gSystem->AccessPathName(path)) {
-        // this path can be accessed
-        defaultDirectory_ = path;
+        // this path exists
+        baseDirectory_ = path;
         return;
     }
 
     if (!gSystem->AccessPathName(gSystem->DirName(path))) {
-        // parent directory can be accessed
+        // parent directory exists
         // we try to make the desired directory
         if (gSystem->mkdir(path) == 0) {
-            defaultDirectory_ = path;
+            baseDirectory_ = path;
             return;
         }
     }
@@ -242,18 +245,17 @@ void ROOTToText::SetDirectory(TString dir) {
     TString error_msg = "path " + path + " cannot be accessed.";
     throw std::runtime_error(error_msg);
     // std::cerr << "Error: path " << path << " cannot be accessed." << std::endl;
-    // std::cerr << "Keeping the previous directory: " << defaultDirectory_ << std::endl;
+    // std::cerr << "Keeping the previous directory: " << baseDirectory_ << std::endl;
 }
 
 TString ROOTToText::GetFilePath(const TObject* obj, const char* filename) const {
     TString str(filename);
 
     // if no filename is given, use the object name
-    TPRegexp anything("^.*[a-zA-Z0-9]+.*$");
-    if (!anything.MatchB(str)) {
-        str.Append(TString(obj->GetName()));
+    if (str.IsWhitespace()) {
+        str = obj->GetName();
+        str.ReplaceAll(' ', '_');
     }
-    str.ReplaceAll(' ', '_');
 
     // check that filename ends with a file extension
     // if not, add the default extension
@@ -261,8 +263,9 @@ TString ROOTToText::GetFilePath(const TObject* obj, const char* filename) const 
     if (!fileExt.MatchB(str))
         str.Append(defaultExtension_);
 
+    gSystem->ExpandPathName(str);
     if (!gSystem->IsAbsoluteFileName(str) && !str.BeginsWith("./")) {
-        gSystem->PrependPathName(defaultDirectory_, str);
+        gSystem->PrependPathName(baseDirectory_, str);
     }
 
     return str;

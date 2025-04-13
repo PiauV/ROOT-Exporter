@@ -42,6 +42,7 @@ public:
     // set precision, format ?
     bool AddCustomWriter(const char* class_name, writer& func);
     bool RemoveCustomWriter(const char* class_name);
+    void ClearCustomWriters();
 
     bool SaveObject(const TObject* obj, const char* filename = "", Option_t* opt = "") const;
     bool SaveObject(const TObject* obj, DataType dt, const char* filename = "", Option_t* opt = "") const;
@@ -63,7 +64,7 @@ private:
     bool headerTitle_ = true;
     bool headerAxis_ = true;
     TString defaultExtension_;
-    TString defaultDirectory_;
+    TString baseDirectory_;
     static ROOTToText* instance_;
     char cc_;   // comment character
     bool verb_; // verbose
@@ -80,7 +81,7 @@ TString ROOTToText::GetFileExtension() const {
 }
 
 TString ROOTToText::GetDirectory() const {
-    return defaultDirectory_;
+    return baseDirectory_;
 }
 
 void ROOTToText::SetCommentChar(char c) {

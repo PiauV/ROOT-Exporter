@@ -19,6 +19,7 @@ target_link_libraries(libROOTToText PUBLIC ${ROOT_LIBS})
 ##### Plot export (ExPlot)
 
 set(EXPLOT_HEADERS
+DataExportManager.hh
 ExportManager.hh
 PlotSerializer.hh
 DataType.hh

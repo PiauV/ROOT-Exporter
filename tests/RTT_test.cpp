@@ -155,6 +155,8 @@ void TestRTTOutput() {
     SIMPLE_TEST(gRTT->SaveObject(f, "func_custom")); // use custom writer
     SIMPLE_TEST(gRTT->SaveObject(text, "text"));     // use custom writer (TText is not supported by default)
 
+    gRTT->ClearCustomWriters();
+
     // read files
     double sum_y = 0;
     double sum_ey = 0;

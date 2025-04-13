@@ -28,8 +28,13 @@ void ExportManager::ExportPad(TVirtualPad* pad, const char* filename) const {
     auto path = GetFilePath(pad, filename);
     TString folder = gSystem->DirName(path);
 
-    if (!gSystem->AccessPathName(path, EAccessMode::kFileExists)) {
-        std::cerr << "Warning: overwriting file " << path << std::endl;
+    if (ext_.Length()) {
+        if (!gSystem->AccessPathName(path, EAccessMode::kFileExists)) {
+            std::cerr << "Warning: overwriting file " << path << std::endl;
+        }
+    }
+    else {
+        folder = path;
     }
 
     if (gSystem->AccessPathName(folder, EAccessMode::kWritePermission)) {
@@ -62,15 +67,21 @@ TString ExportManager::GetFilePath(TVirtualPad* pad, const char* filename) const
         str.ReplaceAll(' ', '_');
     }
 
-    // Add file extension if filename does not end with it
-    if (!str.EndsWith(ext_)) {
-        if (inFolder_) {
-            // "foo/bar" --> "foo/bar/bar.ext"
-            auto basename = gSystem->BaseName(str);
-            gSystem->mkdir(str); // create directory
-            str.Append("/").Append(basename);
+    if (ext_.Length()) {
+        // Add file extension if filename does not end with it
+        if (!str.EndsWith(ext_)) {
+            if (inFolder_) {
+                // "foo/bar" --> "foo/bar/bar.ext"
+                auto basename = gSystem->BaseName(str);
+                gSystem->mkdir(str); // create directory
+                str.Append("/").Append(basename);
+            }
+            str.Append(ext_);
         }
-        str.Append(ext_);
+    }
+    else {
+        // no extension --> filename is actually a folder name
+        if (gSystem->AccessPathName(str)) gSystem->mkdir(str); // create folder if it does not exist
     }
 
     gSystem->ExpandPathName(str);

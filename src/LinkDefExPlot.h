@@ -13,5 +13,7 @@
 #pragma link C++ function Expad::GetDataType;
 #pragma link C++ function Expad::GetDataDimension;
 #pragma link C++ class Expad::PlotSerializer;
+#pragma link C++ class Expad::ExportManager;
+#pragma link C++ class Expad::DataExportManager;
 
 #endif // __CINT__ / __CLING__

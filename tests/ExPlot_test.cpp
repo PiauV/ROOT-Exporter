@@ -1,4 +1,5 @@
 #include "ExPlot_test.hh"
+#include "DataExportManager.hh"
 #include "PlotSerializer.hh"
 #include "macros.hh"
 
@@ -13,6 +14,7 @@
 #include "TROOT.h"
 
 #include <iostream>
+#include <memory>
 
 void TestPlotSerializer() {
     BEGIN_TEST();
@@ -109,5 +111,30 @@ void TestPlotSerializer() {
     delete h;
     delete f;
     delete legend;
+    END_TEST();
+}
+
+void TestExportManager() {
+    BEGIN_TEST();
+    TCanvas* c1 = new TCanvas();
+    TH1D* h = new TH1D("h", "h;xtitle;ytitle", 50, 0, 10);
+    TF1* f = new TF1("f", "gaus", 0, 10);
+    f->SetParameters(1, 5, 1);
+    h->FillRandom("f", 100);
+    h->Draw();
+    f->Draw("same");
+
+    // Data export
+    try {
+        auto dem = std::make_unique<Expad::DataExportManager>();
+        dem->ExportPad(c1, "output/test_export");
+        // RTT was tested previously --> if files exist, their content should be ok
+        SIMPLE_TEST(!gSystem->AccessPathName("output/test_export/h.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/test_export/f.txt"));
+    }
+    catch (const std::exception& e) {
+        EXCEPTION_CAUGHT(e);
+    }
+
     END_TEST();
 }

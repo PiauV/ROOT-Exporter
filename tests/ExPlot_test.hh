@@ -2,5 +2,6 @@
 #define EXPLOT_TEST_HH
 
 void TestPlotSerializer();
+void TestExportManager();
 
 #endif
