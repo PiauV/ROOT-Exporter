@@ -4,6 +4,8 @@
 #include "ROOTToText.hh"
 
 #include "TClass.h"
+#include "TGraph.h"
+#include "TH1.h"
 #include "TSystem.h"
 #include "TVirtualPad.h"
 
@@ -90,6 +92,43 @@ TString ExportManager::GetFilePath(TVirtualPad* pad, const char* filename) const
 }
 
 void ExportManager::SaveData(const TObject* obj, PadProperties::Data& data) const {
+    TString option = "";
+    switch (data.type) {
+        case Graph1D: {
+            auto gr = dynamic_cast<const TGraph*>(obj);
+            if (gr) {
+                if (gr->GetEY()) {
+                    // TGraphErrors
+                    // do not save EX if it is an array of 0
+                    auto EX = gr->GetEX();
+                    auto np = gr->GetN();
+                    bool is_empty_EX = true;
+                    for (int i = 0; i < np; i++) {
+                        if (EX[i] > 0) {
+                            is_empty_EX = false;
+                            break;
+                        };
+                    }
+                    if (!is_empty_EX) {
+                        option = "H";
+                    }
+                }
+            }
+        } break;
+        case Histo1D: {
+            auto h = dynamic_cast<const TH1*>(obj);
+            if (h) {
+                TString opth = h->GetDrawOption();
+                opth.ToUpper();
+                if (!opth.Contains("HIST")) {
+                    option = "E";
+                }
+            }
+        } break;
+        default:
+            break;
+    }
+
     TString filename = "";
     if (gRTT->SaveObject(obj, data.type, filename)) {
         data.file = gSystem->BaseName(filename);

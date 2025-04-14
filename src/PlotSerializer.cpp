@@ -108,6 +108,8 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
         PadProperties::Data prop;
         prop.type = data_type;
         prop.label = obj->GetTitle();
+        TString opt(obj->GetDrawOption());
+        opt.ToUpper();
         const TAttLine* line = dynamic_cast<const TAttLine*>(obj);
         if (!line)
             std::cout << "Warning : could not get line attributes from " << obj->GetName() << std::endl;
@@ -115,6 +117,12 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
             prop.line.color = GetColor(line->GetLineColor());
             prop.line.size = line->GetLineWidth();
             prop.line.style = line->GetLineStyle();
+            if (data_type == Graph1D) {
+                if (!opt.Contains("L")) prop.line.style = 0;
+            }
+            else if (data_type == Histo1D) {
+                if (opt.Contains("P")) prop.line.style = 0;
+            }
         }
         const TAttMarker* marker = dynamic_cast<const TAttMarker*>(obj);
         if (!marker)
@@ -123,6 +131,10 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
             prop.marker.color = GetColor(marker->GetMarkerColor());
             prop.marker.size = 10 * marker->GetMarkerSize();
             prop.marker.style = marker->GetMarkerStyle();
+            if (!opt.Contains("P")) prop.marker.style = 0;
+            if (data_type == Function1D) {
+                prop.marker.style = 0;
+            }
         }
         pp_.datasets.push_back(prop);
         dataObjects_.push_back(obj);

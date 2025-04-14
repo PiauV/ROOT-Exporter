@@ -381,8 +381,15 @@ void ROOTToText::WriteGraph(const TGraph* gr, const TString& option, std::ofstre
     if (gr->IsA() != TGraph::Class() && gr->IsA() != TGraphErrors::Class())
         std::cerr << "Warning: only limited support for class " << gr->IsA()->GetName() << std::endl;
 
-    bool with_errors = (gr->IsA() == TGraphErrors::Class());
-    bool with_herrors = with_errors && option.Contains("H");
+    bool with_errors = true;
+    bool with_herrors = option.Contains("H");
+
+    Double_t* XX = gr->GetX();
+    Double_t* YY = gr->GetY();
+    Double_t* EX = gr->GetEX();
+    Double_t* EY = gr->GetEY();
+    if (!EY) with_errors = with_herrors = false;
+    if (!EX) with_herrors = false;
 
     if (headerTitle_)
         ofs << cc_ << " " << gr->GetTitle() << std::endl;
@@ -407,14 +414,11 @@ void ROOTToText::WriteGraph(const TGraph* gr, const TString& option, std::ofstre
         }
     }
 
-    Double_t* XX = gr->GetX();
-    Double_t* YY = gr->GetY();
-    Double_t* EX = gr->GetEX();
-    Double_t* EY = gr->GetEY();
-    Int_t* idx = new Int_t[gr->GetN()];
-    TMath::Sort(gr->GetN(), XX, idx, false);
+    Int_t np = gr->GetN();
+    Int_t* idx = new Int_t[np];
+    TMath::Sort(np, XX, idx, false);
 
-    for (int i = 0; i < gr->GetN(); i++) {
+    for (int i = 0; i < np; i++) {
         Int_t k = idx[i];
         ofs << XX[k] << " " << YY[k];
         if (with_errors) {
