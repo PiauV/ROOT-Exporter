@@ -12,10 +12,12 @@ namespace Expad {
 
 struct PadProperties {
     struct Color {
-        double red = 0.0;
-        double blue = 0.0;
-        double green = 0.0;
-        double alpha = 0.0;
+        double red;
+        double blue;
+        double green;
+        double alpha;
+        Color(double r, double g, double b, double a = 1) : red(r), green(g), blue(b), alpha(a) {};
+        Color() : Color(0, 0, 0, 1) {};
     };
 
     struct AxisProperties {
@@ -46,6 +48,15 @@ struct PadProperties {
     std::vector<Data> datasets;
     unsigned short legend = 0;
 };
+
+inline bool operator==(const PadProperties::Color& lc, const PadProperties::Color& rc) {
+    double e = 1e-4;
+    return (fabs(lc.alpha - rc.alpha) < e && fabs(lc.red - rc.red) < e && fabs(lc.green - rc.green) < e && fabs(lc.blue - rc.blue) < e);
+}
+
+inline bool operator!=(const PadProperties::Color& lc, const PadProperties::Color& rc) {
+    return !(lc == rc);
+}
 
 } // namespace Expad
 

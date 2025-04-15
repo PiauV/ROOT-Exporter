@@ -1,5 +1,6 @@
 #include "ExPlot_test.hh"
 #include "DataExportManager.hh"
+#include "GleExportManager.hh"
 #include "PlotSerializer.hh"
 #include "macros.hh"
 
@@ -118,11 +119,38 @@ void TestExportManager() {
     BEGIN_TEST();
     TCanvas* c1 = new TCanvas();
     TH1D* h = new TH1D("h", "h;xtitle;ytitle", 50, 0, 10);
-    TF1* f = new TF1("f", "gaus", 0, 10);
-    f->SetParameters(1, 5, 1);
-    h->FillRandom("f", 100);
+    TF1* f = new TF1("f", "gausn", 0, 10);
+    f->SetParameters(200, 5, 1);
+    h->FillRandom("f", 1000);
     h->Draw();
     f->Draw("same");
+
+    TCanvas* c2 = new TCanvas();
+    double x1[5] = {1, 2, 3, 4, 5};
+    double y1[5] = {1, 2, 3, 4, 5};
+    double x2[5] = {1, 2, 5};
+    double y2[3] = {1, 2, 4};
+    double ey2[3] = {1, 1, 1};
+    double x3[2] = {3, 4};
+    double y3[2] = {2.5, 3};
+    double ey3[2] = {0.5, 1.5};
+    double ex3[2] = {0.5, 0.5};
+    TGraph* gr = new TGraph(5, x1, y1);
+    gr->SetName("gr_c2");
+    gr->SetMarkerStyle(2);
+    gr->SetLineColor(kRed);
+    TGraphErrors* gre1 = new TGraphErrors(3, x2, y2, 0, ey2);
+    gre1->SetName("gre1_c2");
+    gre1->SetMarkerStyle(20);
+    gre1->SetMarkerColor(kBlue);
+    TGraphErrors* gre2 = new TGraphErrors(2, x3, y3, ex3, ey3);
+    gre2->SetName("gre2_c2");
+    gre2->SetMarkerStyle(25);
+    gr->Draw("al");
+    gr->GetXaxis()->SetTitle("axis with #Delta symbol");
+    gre1->Draw("p same");
+    gre2->Draw("pl same");
+    c2->Update();
 
     // Data export
     try {
@@ -131,10 +159,33 @@ void TestExportManager() {
         // RTT was tested previously --> if files exist, their content should be ok
         SIMPLE_TEST(!gSystem->AccessPathName("output/test_export/h.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/test_export/f.txt"));
+
+        auto gle_man = std::make_unique<Expad::GleExportManager>();
+        gle_man->SaveInFolder(true);
+        gle_man->ExportPad(c1, "output/c1");
+        SIMPLE_TEST(!gSystem->AccessPathName("output/c1/h.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/c1/f.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/c1/c1.gle"));
+        gle_man->SaveInFolder(false);
+        gle_man->SetDataDirectory("data_c2");
+        gle_man->ExportPad(c2, "output/c2.gle");
+        SIMPLE_TEST(!gSystem->AccessPathName("output/data_c2/gr_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/data_c2/gre1_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/data_c2/gre2_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/c2.gle"));
     }
     catch (const std::exception& e) {
         EXCEPTION_CAUGHT(e);
     }
+
+    delete c1;
+    delete c2;
+
+    delete f;
+    delete h;
+    delete gr;
+    delete gre1;
+    delete gre2;
 
     END_TEST();
 }

@@ -15,5 +15,6 @@
 #pragma link C++ class Expad::PlotSerializer;
 #pragma link C++ class Expad::ExportManager;
 #pragma link C++ class Expad::DataExportManager;
+#pragma link C++ class Expad::GleExportManager;
 
 #endif // __CINT__ / __CLING__

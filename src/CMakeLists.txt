@@ -19,6 +19,7 @@ target_link_libraries(libROOTToText PUBLIC ${ROOT_LIBS})
 ##### Plot export (ExPlot)
 
 set(EXPLOT_HEADERS
+GleExportManager.hh
 DataExportManager.hh
 ExportManager.hh
 PlotSerializer.hh
@@ -26,6 +27,7 @@ DataType.hh
 )
 
 set(EXPLOT_SRC
+GleExportManager.cpp
 ExportManager.cpp
 PlotSerializer.cpp
 DataType.cpp
