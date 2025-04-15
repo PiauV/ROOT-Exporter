@@ -17,6 +17,7 @@ namespace Expad {
 
 ExportManager::ExportManager() {
     ext_ = "";
+    com_ = '#';
     dataDir_ = "";
     inFolder_ = false;
 }
@@ -48,14 +49,16 @@ void ExportManager::ExportPad(TVirtualPad* pad, const char* filename) const {
     if (!dataDir_.IsWhitespace())
         folder.Append("/").Append(dataDir_);
 
-    TString folder_saved = gRTT->GetDirectory();
+    auto rtt_folder = gRTT->GetDirectory();
+    auto rtt_cc = gRTT->GetCommentChar();
     gRTT->SetDirectory(folder);
+    gRTT->SetCommentChar(com_);
+    // std::cout << "RTT directory: " << gRTT->GetDirectory() << " (" << pad->GetName() << ")" << std::endl;
     for (int i = 0; i < ps->dataObjects_.size(); i++) {
-        auto obj = ps->dataObjects_[i];
-        auto data = ps->pp_.datasets[i];
-        SaveData(obj, data);
+        SaveData(ps->dataObjects_[i], ps->pp_.datasets[i]);
     }
-    gRTT->SetDirectory(folder_saved);
+    gRTT->SetDirectory(rtt_folder);
+    gRTT->SetCommentChar(rtt_cc);
 
     WriteToFile(path, ps->pp_);
 }
@@ -74,12 +77,26 @@ TString ExportManager::GetFilePath(TVirtualPad* pad, const char* filename) const
         if (!str.EndsWith(ext_)) {
             if (inFolder_) {
                 // "foo/bar" --> "foo/bar/bar.ext"
-                auto basename = gSystem->BaseName(str);
+                TString basename = gSystem->BaseName(str);
                 gSystem->mkdir(str); // create directory
-                str.Append("/").Append(basename);
+                str.Append("/" + basename);
             }
             str.Append(ext_);
         }
+        else if (inFolder_) {
+            // "foo/bar.ext" --> "foo/bar/bar.ext"
+            auto s1 = str.Last('/');
+            auto s2 = str.Last('.');
+            if (s1 >= 0) {
+                if (s2 < s1) throw std::runtime_error("cannot handle this path : " + str);
+                str.Replace(s1, 0, str(s1, s2 - s1), s2 - s1);
+            }
+            else {
+                str.Prepend(str(0, s2) + "/");
+            }
+            gSystem->mkdir(gSystem->DirName(str)); // create directory
+        }
+        // std::cout << str << std::endl;
     }
     else {
         // no extension --> filename is actually a folder name
@@ -93,12 +110,15 @@ TString ExportManager::GetFilePath(TVirtualPad* pad, const char* filename) const
 
 void ExportManager::SaveData(const TObject* obj, PadProperties::Data& data) const {
     TString option = "";
+    int ncol = 0;
     switch (data.type) {
         case Graph1D: {
             auto gr = dynamic_cast<const TGraph*>(obj);
             if (gr) {
+                ncol = 2;
                 if (gr->GetEY()) {
                     // TGraphErrors
+                    ncol++;
                     // do not save EX if it is an array of 0
                     auto EX = gr->GetEX();
                     auto np = gr->GetN();
@@ -110,6 +130,7 @@ void ExportManager::SaveData(const TObject* obj, PadProperties::Data& data) cons
                         };
                     }
                     if (!is_empty_EX) {
+                        ncol++;
                         option = "H";
                     }
                 }
@@ -118,22 +139,26 @@ void ExportManager::SaveData(const TObject* obj, PadProperties::Data& data) cons
         case Histo1D: {
             auto h = dynamic_cast<const TH1*>(obj);
             if (h) {
+                ncol = 2;
                 TString opth = h->GetDrawOption();
                 opth.ToUpper();
                 if (!opth.Contains("HIST")) {
                     option = "E";
+                    ncol++;
                 }
             }
         } break;
         default:
+            ncol = 2;
             break;
     }
 
     TString filename = "";
-    if (gRTT->SaveObject(obj, data.type, filename)) {
-        data.file = gSystem->BaseName(filename);
+    if (gRTT->SaveObject(obj, data.type, filename, option)) {
+        data.file.first = gSystem->BaseName(filename);
+        data.file.second = ncol;
         if (!dataDir_.IsWhitespace())
-            data.file.Prepend(dataDir_).Prepend("/");
+            data.file.first.Prepend(dataDir_ + "/");
     }
     else {
         std::cerr << "Error: could not save data " << obj->GetName() << " (" << obj->IsA()->GetName() << ")." << std::endl;

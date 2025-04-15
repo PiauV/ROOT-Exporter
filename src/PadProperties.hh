@@ -5,6 +5,7 @@
 
 #include "TString.h"
 
+#include <utility>
 #include <vector>
 
 namespace Expad {
@@ -36,7 +37,7 @@ struct PadProperties {
         TString label;
         DrawingStyle marker;
         DrawingStyle line;
-        TString file = "";
+        std::pair<TString, int> file; // filename ; number of columns
     };
 
     TString title;

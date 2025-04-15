@@ -24,6 +24,7 @@ protected:
 
 protected:
     TString ext_;
+    char com_; // comment char
     TString dataDir_;
     bool inFolder_;
 };
