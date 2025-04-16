@@ -5,6 +5,7 @@
 #include "macros.hh"
 
 #include "TCanvas.h"
+#include "TError.h"
 #include "TF1.h"
 #include "TGraph.h"
 #include "TGraphErrors.h"
@@ -117,6 +118,9 @@ void TestPlotSerializer() {
 
 void TestExportManager() {
     BEGIN_TEST();
+
+    gErrorIgnoreLevel = 1001; // reduce ROOT verbosity (Info) when saving canvas
+
     TCanvas* c1 = new TCanvas();
     TH1D* h = new TH1D("h", "h;xtitle;ytitle", 50, 0, 10);
     TF1* f = new TF1("f", "gausn", 0, 10);
@@ -124,6 +128,7 @@ void TestExportManager() {
     h->FillRandom("f", 1000);
     h->Draw();
     f->Draw("same");
+    c1->Update();
 
     TCanvas* c2 = new TCanvas();
     double x1[5] = {1, 2, 3, 4, 5};
@@ -173,6 +178,16 @@ void TestExportManager() {
         SIMPLE_TEST(!gSystem->AccessPathName("output/data_c2/gre1_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/data_c2/gre2_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/c2.gle"));
+
+        // Prepare next test --> using GLE to render the plots
+        // - save plots as PDF using ROOT internal method (for comparison)
+        c1->SaveAs("output/c1/c1.pdf");
+        c2->SaveAs("output/c2.pdf");
+        // - save name of gle sources in dedicated file
+        std::ofstream ofs("output/gle_files.out");
+        ofs << "c1/c1.gle\n";
+        ofs << "c2.gle\n";
+        ofs.close();
     }
     catch (const std::exception& e) {
         EXCEPTION_CAUGHT(e);

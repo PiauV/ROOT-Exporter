@@ -41,8 +41,8 @@ void TestRTTConfig() {
     EXPECTED_EXCEPTION(gRTT->SetFileExtension(" "), std::invalid_argument);
 
     // default directory
-    const TString dir_name1 = "./temp";
-    const TString dir_name2 = "temp";
+    const TString dir_name1 = "./output";
+    const TString dir_name2 = "output";
     gSystem->mkdir(dir_name1);
     gRTT->SetDirectory(dir_name1);
     COMPARE_TSTRING(gRTT->GetDirectory(), dir_name1);
@@ -119,7 +119,7 @@ void TestRTTOutput() {
     // TText
     TText* text = new TText(0, 0, "100");
 
-    gRTT->SetDirectory("./output");
+    gRTT->SetDirectory("./output/test_rtt");
     gRTT->SetFileExtension(".txt");
 
     // simple saves
@@ -172,23 +172,23 @@ void TestRTTOutput() {
     }
 
     // gRTT->SetVerbose(true);
-    SIMPLE_TEST(check_file_content("./output/h.txt", 2, N, sum_y, 2));
-    SIMPLE_TEST(check_file_content("./output/h2.txt", N, N, sum_z, 0));
-    SIMPLE_TEST(check_file_content("./output/gr.txt", 2, N, sum_y, 2));
-    SIMPLE_TEST(check_file_content("./output/gre.txt", 3, N, sum_y, 2));
-    SIMPLE_TEST(check_file_content("./output/gre.txt", 3, N, sum_ey, 3));
-    SIMPLE_TEST(check_file_content("./output/mg_gr.txt", 2, N, sum_y, 2));
-    SIMPLE_TEST(check_file_content("./output/mg_gre.txt", 3, N, sum_y, 2));
-    SIMPLE_TEST(check_file_content("./output/gr2d.txt", 3, N * N, sum_z, 3));
-    SIMPLE_TEST(check_file_content("./output/func.txt", 2, 3, 2 + 3 + 4, 2));
-    SIMPLE_TEST(check_file_content("./output/h_with_errors.txt", 3, N, sum_y, 2));
-    SIMPLE_TEST(check_file_content("./output/h_lowedge_and_errors.dat", 3, N, sum_ey, 3));
-    SIMPLE_TEST(check_file_content("./output/gre_horizontal_errors.txt", 4, N, sum_y, 2));
-    SIMPLE_TEST(check_file_content("./output/gre_horizontal_errors.txt", 4, N, sum_ex, 3));
-    SIMPLE_TEST(check_file_content("./output/gre_horizontal_errors.txt", 4, N, sum_ey, 4));
-    SIMPLE_TEST(check_file_content("./output/h2_columns.txt", 3, N * N, sum_z, 3));
-    SIMPLE_TEST(check_file_content("./output/text.txt", 1, 1, 100, 0));
-    SIMPLE_TEST(check_file_content("./output/func_custom.txt", 1, 1, 101, 0));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/h.txt", 2, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/h2.txt", N, N, sum_z, 0));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/gr.txt", 2, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/gre.txt", 3, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/gre.txt", 3, N, sum_ey, 3));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/mg_gr.txt", 2, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/mg_gre.txt", 3, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/gr2d.txt", 3, N * N, sum_z, 3));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/func.txt", 2, 3, 2 + 3 + 4, 2));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/h_with_errors.txt", 3, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/h_lowedge_and_errors.dat", 3, N, sum_ey, 3));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/gre_horizontal_errors.txt", 4, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/gre_horizontal_errors.txt", 4, N, sum_ex, 3));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/gre_horizontal_errors.txt", 4, N, sum_ey, 4));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/h2_columns.txt", 3, N * N, sum_z, 3));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/text.txt", 1, 1, 100, 0));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/func_custom.txt", 1, 1, 101, 0));
 
     delete h;
     delete h2;

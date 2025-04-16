@@ -1,0 +1,16 @@
+find_program(GLE "gle" REQUIRED)
+
+file(STRINGS "gle_files.out" files)
+foreach(fin ${files})
+    # message(STATUS "Processing file ${fin}...") 
+    string(REGEX REPLACE "([a-zA-Z0-9\\-_]+).gle" "gle_\\1.pdf" fout ${fin})
+    execute_process(COMMAND gle -d pdf -o ${fout} ${fin} RESULT_VARIABLE gle_result ERROR_VARIABLE gle_err)
+    string(FIND ${gle_err} "error" found_error)
+    if(${gle_result} OR (${found_error} GREATER_EQUAL 0))
+        file (WRITE "gle.log" ${gle_err})
+        message(FATAL_ERROR "Error running GLE (${fin}), see file 'gle.log'")
+    # else()
+    #     message(STATUS "File ${fout} was created.") 
+    endif()
+endforeach()
+    
