@@ -141,8 +141,13 @@ void ExportManager::SaveData(const TObject* obj, PadProperties::Data& data) cons
             if (h) {
                 ncol = 2;
                 TString opth = h->GetDrawOption();
+                // opth.Append(h->GetOption());
                 opth.ToUpper();
-                if (!opth.Contains("HIST")) {
+                bool with_err = false;
+                if (opth.Contains("E")) with_err = true;
+                if (!with_err && h->GetSumw2()->GetSize()) with_err = true;
+                if (with_err && opth.Contains("HIST")) with_err = false;
+                if (with_err) {
                     option = "E";
                     ncol++;
                 }

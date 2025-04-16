@@ -142,19 +142,27 @@ void TestExportManager() {
     double ex3[2] = {0.5, 0.5};
     TGraph* gr = new TGraph(5, x1, y1);
     gr->SetName("gr_c2");
+    gr->SetTitle("#Gamma");
     gr->SetMarkerStyle(2);
     gr->SetLineColor(kRed);
+    gr->SetFillColor(kWhite);
     TGraphErrors* gre1 = new TGraphErrors(3, x2, y2, 0, ey2);
     gre1->SetName("gre1_c2");
+    gre1->SetTitle("graph1");
     gre1->SetMarkerStyle(20);
     gre1->SetMarkerColor(kBlue);
+    gre1->SetFillColor(kWhite);
     TGraphErrors* gre2 = new TGraphErrors(2, x3, y3, ex3, ey3);
     gre2->SetName("gre2_c2");
+    gre2->SetTitle("graph2");
     gre2->SetMarkerStyle(25);
+    gre2->SetFillColor(kWhite);
     gr->Draw("al");
-    gr->GetXaxis()->SetTitle("axis with #Delta symbol");
+    gr->GetXaxis()->SetTitle("#alpha");
+    gr->GetYaxis()->SetTitle("#beta");
     gre1->Draw("p same");
     gre2->Draw("pl same");
+    c2->BuildLegend();
     c2->Update();
 
     // Data export

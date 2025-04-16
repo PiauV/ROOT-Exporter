@@ -175,15 +175,15 @@ bool PlotSerializer::GetAxis(const TH1* h) {
     const TAxis* xx = h->GetXaxis();
     pp_.xaxis.title = xx->GetTitle();
     pp_.xaxis.color = GetColor(xx->GetAxisColor());
-    pp_.xaxis.min = h->GetBinLowEdge(xx->GetFirst());
-    pp_.xaxis.max = h->GetBinLowEdge(xx->GetLast() + 1);
+    pp_.xaxis.min = pad_->GetUxmin();
+    pp_.xaxis.max = pad_->GetUxmax();
     pp_.xaxis.log = (pad_->GetLogx() == 1);
 
     const TAxis* yy = h->GetYaxis();
     pp_.yaxis.title = yy->GetTitle();
     pp_.yaxis.color = GetColor(yy->GetAxisColor());
-    pp_.yaxis.min = h->GetMinimum();
-    pp_.yaxis.max = h->GetMaximum();
+    pp_.yaxis.min = pad_->GetUymin();
+    pp_.yaxis.max = pad_->GetUymax();
     pp_.yaxis.log = (pad_->GetLogy() == 1);
 
     return true;

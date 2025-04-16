@@ -147,8 +147,8 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
 
     // configure legend
     if (pp.legend) {
-        ofs << "\nkey compact pos ";
-        ofs << (pp.legend > 2 ? "b" : "t") << (pp.legend / 2 ? "l" : "r"); // (1 -> tl ; 2 -> tr ; 3 -> bl ; 4 -> br)
+        ofs << "\n\tkey compact pos ";
+        ofs << (pp.legend > 2 ? "b" : "t") << (pp.legend % 2 ? "l" : "r"); // (1 -> tl ; 2 -> tr ; 3 -> bl ; 4 -> br)
         ofs << " hei 0.3 offset 0.2 0.2" << std::endl;
     }
 
@@ -159,7 +159,7 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
 }
 
 void GleExportManager::InitFile(std::ofstream& ofs) const {
-    ofs << "size 8 6\n"
+    ofs << "size 10 7\n"
         << "set hei 0.353\n"
         << "set lwidth 0.015\n"
         << "set texlabels 1\n"
