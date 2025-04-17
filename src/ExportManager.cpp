@@ -20,6 +20,7 @@ ExportManager::ExportManager() {
     com_ = '#';
     dataDir_ = "";
     inFolder_ = false;
+    latex_ = true;
 }
 
 ExportManager::~ExportManager() {
@@ -170,6 +171,28 @@ void ExportManager::SaveData(const TObject* obj, PadProperties::Data& data) cons
     }
 }
 
+TString ExportManager::FormatLabel(const TString& str) const {
+    TString label(str);
+    if (latex_) {
+        // process LaTeX symbols : replace '#sym' with '$\sym$'
+        int s = label.Index('#');
+        while (s >= 0) {
+            label.Replace(s, 1, "\\");
+            label.Insert(s, '$');
+            int s0 = s;
+            s = label.Index(' ', s0);
+            if (s >= 0)
+                label.Insert(s, '$');
+            else
+                label.Append('$');
+            s0 = label.Index(s, '$');
+            s = label.Index('#', s0);
+        }
+    }
+    label.Prepend('\"').Append('\"');
+    return label;
+}
+
 void ExportManager::SetDataDirectory(TString folder_name) {
     // keep the data files in a separator folder
     dataDir_ = folder_name;
@@ -177,6 +200,10 @@ void ExportManager::SetDataDirectory(TString folder_name) {
 
 void ExportManager::SaveInFolder(bool flag) {
     inFolder_ = flag;
+}
+
+void ExportManager::EnableLatex(bool flag) {
+    latex_ = flag;
 }
 
 } // namespace Expad

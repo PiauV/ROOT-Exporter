@@ -44,14 +44,9 @@ namespace Expad {
 GleExportManager::GleExportManager() {
     ext_ = ".gle";
     com_ = '!';
-    latex_ = true;
 }
 
 GleExportManager::~GleExportManager() {
-}
-
-void GleExportManager::EnableLatex(bool flag) {
-    latex_ = flag;
 }
 
 void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp) const {
@@ -69,10 +64,10 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     // >>> plot data
     ofs << "begin graph\n\tscale auto" << std::endl;
     if (pp.title.Length()) {
-        ofs << "\ttitle \"" << ProcessLatex(pp.title) << "\"" << std::endl;
+        ofs << "\ttitle " << FormatLabel(pp.title) << std::endl;
     }
     // draw axis
-    ofs << "\txtitle \"" << ProcessLatex(pp.xaxis.title) << "\"" << std::endl;
+    ofs << "\txtitle " << FormatLabel(pp.xaxis.title) << std::endl;
     ofs << "\txaxis min " << pp.xaxis.min << " max " << pp.xaxis.max;
     if (pp.xaxis.log) ofs << " log";
     ofs << std::endl;
@@ -80,7 +75,7 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
         auto c = pp.xaxis.color;
         ofs << "\txaxis color rgb(" << c.red << "," << c.green << "," << c.blue << ")" << std::endl;
     }
-    ofs << "\tytitle \"" << ProcessLatex(pp.yaxis.title) << "\"" << std::endl;
+    ofs << "\tytitle " << FormatLabel(pp.yaxis.title) << std::endl;
     ofs << "\tyaxis min " << pp.yaxis.min << " max " << pp.yaxis.max;
     if (pp.yaxis.log) ofs << " log";
     ofs << std::endl;
@@ -127,7 +122,7 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
 
         // next line : label
         if (pp.legend)
-            ofs << "\td" << idx_data << " key \"" << ProcessLatex(pp.datasets[i].label) << "\"" << std::endl;
+            ofs << "\td" << idx_data << " key " << FormatLabel(pp.datasets[i].label) << std::endl;
 
         // last line : errors (if any)
         int ncol = pp.datasets[i].file.second;
@@ -164,25 +159,6 @@ void GleExportManager::InitFile(std::ofstream& ofs) const {
         << "set lwidth 0.015\n"
         << "set texlabels 1\n"
         << std::endl;
-}
-
-TString GleExportManager::ProcessLatex(const TString& str) const {
-    if (!latex_) return str;
-    TString ltx(str);
-    int s = ltx.Index('#');
-    while (s >= 0) {
-        ltx.Replace(s, 1, "\\");
-        ltx.Insert(s, '$');
-        int s0 = s;
-        s = ltx.Index(' ', s0);
-        if (s >= 0)
-            ltx.Insert(s, '$');
-        else
-            ltx.Append('$');
-        s0 = ltx.Index(s, '$');
-        s = ltx.Index('#', s0);
-    }
-    return ltx;
 }
 
 } // namespace Expad
