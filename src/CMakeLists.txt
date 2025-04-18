@@ -19,6 +19,7 @@ target_link_libraries(libROOTToText PUBLIC ${ROOT_LIBS})
 ##### Plot export (ExPlot)
 
 set(EXPLOT_HEADERS
+GnuplotExportManager.hh
 GleExportManager.hh
 DataExportManager.hh
 ExportManager.hh
@@ -28,6 +29,7 @@ DataType.hh
 )
 
 set(EXPLOT_SRC
+GnuplotExportManager.cpp
 GleExportManager.cpp
 ExportManager.cpp
 PadProperties.cpp

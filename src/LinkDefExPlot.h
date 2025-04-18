@@ -9,5 +9,6 @@
 #pragma link C++ class Expad::ExportManager;
 #pragma link C++ class Expad::DataExportManager;
 #pragma link C++ class Expad::GleExportManager;
+#pragma link C++ class Expad::GnuplotExportManager;
 
 #endif // __CINT__ / __CLING__

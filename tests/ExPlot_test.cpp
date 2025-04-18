@@ -1,6 +1,7 @@
 #include "ExPlot_test.hh"
 #include "DataExportManager.hh"
 #include "GleExportManager.hh"
+#include "GnuplotExportManager.hh"
 #include "PlotSerializer.hh"
 #include "macros.hh"
 
@@ -187,14 +188,32 @@ void TestExportManager() {
         SIMPLE_TEST(!gSystem->AccessPathName("output/data_c2/gre2_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/c2.gle"));
 
+        gSystem->mkdir("output/gnuplot");
+        auto gnuplot_man = std::make_unique<Expad::GnuplotExportManager>();
+        gnuplot_man->SaveInFolder(false);
+        gnuplot_man->ExportPad(c1, "output/gnuplot/c1");
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/h.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/f.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/c1.gp"));
+        gnuplot_man->ExportPad(c2, "output/gnuplot/c2");
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/gr_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/gre1_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/gre2_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/c2.gp"));
+
         // Prepare next test --> using GLE to render the plots
         // - save plots as PDF using ROOT internal method (for comparison)
         c1->SaveAs("output/c1/c1.pdf");
         c2->SaveAs("output/c2.pdf");
         // - save name of gle sources in dedicated file
-        std::ofstream ofs("output/gle_files.out");
+        std::ofstream ofs;
+        ofs.open("output/gle_files.out");
         ofs << "c1/c1.gle\n";
         ofs << "c2.gle\n";
+        ofs.close();
+        ofs.open("output/gnuplot_files.out");
+        ofs << "gnuplot/c1.gp\n";
+        ofs << "gnuplot/c2.gp\n";
         ofs.close();
     }
     catch (const std::exception& e) {

@@ -19,6 +19,7 @@ struct PadProperties {
         Color();
         Color(double r, double g, double b, double a = 1);
         TString rgb_str(bool with_alpha = false) const;
+        TString hex_str(bool with_alpha = false) const;
     };
 
     struct AxisProperties {
