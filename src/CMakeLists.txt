@@ -22,6 +22,7 @@ set(EXPLOT_HEADERS
 GleExportManager.hh
 DataExportManager.hh
 ExportManager.hh
+# PadProperties.hh # not needed for dictionnary generation
 PlotSerializer.hh
 DataType.hh
 )
@@ -29,6 +30,7 @@ DataType.hh
 set(EXPLOT_SRC
 GleExportManager.cpp
 ExportManager.cpp
+PadProperties.cpp
 PlotSerializer.cpp
 DataType.cpp
 )

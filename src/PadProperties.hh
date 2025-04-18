@@ -16,8 +16,9 @@ struct PadProperties {
         double blue;
         double green;
         double alpha;
-        Color(double r, double g, double b, double a = 1) : red(r), green(g), blue(b), alpha(a) {};
-        Color() : Color(0, 0, 0, 1) {};
+        Color();
+        Color(double r, double g, double b, double a = 1);
+        TString rgb_str(bool with_alpha = false) const;
     };
 
     struct AxisProperties {
@@ -40,6 +41,8 @@ struct PadProperties {
         DrawingStyle marker;
         DrawingStyle line;
         std::pair<TString, int> file; // filename ; number of columns
+        Data();
+        Data(const Data& d);
     };
 
     TString title;
@@ -49,14 +52,8 @@ struct PadProperties {
     unsigned short legend = 0;
 };
 
-inline bool operator==(const PadProperties::Color& lc, const PadProperties::Color& rc) {
-    double e = 1e-4;
-    return (fabs(lc.alpha - rc.alpha) < e && fabs(lc.red - rc.red) < e && fabs(lc.green - rc.green) < e && fabs(lc.blue - rc.blue) < e);
-}
-
-inline bool operator!=(const PadProperties::Color& lc, const PadProperties::Color& rc) {
-    return !(lc == rc);
-}
+bool operator==(const PadProperties::Color& lc, const PadProperties::Color& rc);
+bool operator!=(const PadProperties::Color& lc, const PadProperties::Color& rc);
 
 } // namespace Expad
 

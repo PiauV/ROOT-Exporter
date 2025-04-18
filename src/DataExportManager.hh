@@ -12,7 +12,7 @@ public:
     ~DataExportManager() {};
 
 protected:
-    void WriteToFile(const char* filename, const PadProperties& pp) const override {};
+    void WriteToFile(const char*, const PadProperties&) const override {};
 };
 } // namespace Expad
 

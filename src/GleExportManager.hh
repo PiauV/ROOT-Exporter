@@ -14,9 +14,7 @@ public:
 
 protected:
     void WriteToFile(const char* filename, const PadProperties& pp) const;
-
-private:
-    void InitFile(std::ofstream& ofs) const;
+    void WriteHeader(std::ofstream& ofs) const;
 };
 } // namespace Expad
 

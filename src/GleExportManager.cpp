@@ -56,8 +56,8 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
         return;
     }
 
-    // write default header for configuration (size, font, etc...)
-    InitFile(ofs);
+    // write default header (gle configuration : size, font, etc...)
+    WriteHeader(ofs);
 
     const PadProperties::Color black(0, 0, 0);
 
@@ -71,17 +71,17 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     ofs << "\txaxis min " << pp.xaxis.min << " max " << pp.xaxis.max;
     if (pp.xaxis.log) ofs << " log";
     ofs << std::endl;
-    if (pp.xaxis.color != black) {
-        auto c = pp.xaxis.color;
-        ofs << "\txaxis color rgb(" << c.red << "," << c.green << "," << c.blue << ")" << std::endl;
+    auto xc = pp.xaxis.color;
+    if (xc != black) {
+        ofs << "\txaxis color " << xc.rgb_str() << std::endl;
     }
     ofs << "\tytitle " << FormatLabel(pp.yaxis.title) << std::endl;
     ofs << "\tyaxis min " << pp.yaxis.min << " max " << pp.yaxis.max;
     if (pp.yaxis.log) ofs << " log";
     ofs << std::endl;
-    if (pp.yaxis.color != black) {
-        auto c = pp.yaxis.color;
-        ofs << "\tyaxis color rgb(" << c.red << "," << c.green << "," << c.blue << ")" << std::endl;
+    auto yc = pp.yaxis.color;
+    if (yc != black) {
+        ofs << "\tyaxis color " << yc.rgb_str() << std::endl;
     }
     ofs << std::endl;
 
@@ -96,16 +96,17 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     for (int i = 0; i < n; i++) {
         // first line : marker, line & color
         ofs << "\n\td" << idx_data;
+        auto di = pp.datasets[i];
         auto ci = black;
-        auto mi = pp.datasets[i].marker;
+        auto mi = di.marker;
         if (mi.style) {
             ofs << " marker " << (GLE_marker.count(mi.style) ? GLE_marker.at(mi.style) : "circle");
             ofs << " msize " << 0.02 * mi.size; // 0.2 / 10
             ci = mi.color;
         }
-        auto li = pp.datasets[i].line;
+        auto li = di.line;
         if (li.style) {
-            if (pp.datasets[i].type == Histo1D)
+            if (di.type == Histo1D)
                 ofs << " line hist";
             else {
                 if (li.style != 1 && GLE_line.count(li.style))
@@ -117,15 +118,15 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
             ci = li.color;
         }
         if (ci != black)
-            ofs << " color rgb(" << ci.red << "," << ci.green << "," << ci.blue << ")";
+            ofs << " color " << ci.rgb_str();
         ofs << std::endl;
 
         // next line : label
         if (pp.legend)
-            ofs << "\td" << idx_data << " key " << FormatLabel(pp.datasets[i].label) << std::endl;
+            ofs << "\td" << idx_data << " key " << FormatLabel(di.label) << std::endl;
 
         // last line : errors (if any)
-        int ncol = pp.datasets[i].file.second;
+        int ncol = di.file.second;
         if (ncol == 3) {
             ofs << "\td" << idx_data
                 << " err d" << idx_data + 1 << " errwidth 0.05"
@@ -153,7 +154,7 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     ofs.close();
 }
 
-void GleExportManager::InitFile(std::ofstream& ofs) const {
+void GleExportManager::WriteHeader(std::ofstream& ofs) const {
     ofs << "size 10 7\n"
         << "set hei 0.353\n"
         << "set lwidth 0.015\n"
