@@ -98,10 +98,13 @@ void PlotSerializer::ExtractPadProperties() {
         throw std::runtime_error("ExPaD failed to export this plot (no compatible data was found).");
 }
 
-void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
+void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TString& extra_opts) {
     if (data_type == MultiGraph1D) {
-        for (const TObject* gr : *(((TMultiGraph*)obj)->GetListOfGraphs())) {
-            StoreData(gr, Graph1D);
+        TListIter next(((TMultiGraph*)obj)->GetListOfGraphs());
+        while (next()) {
+            TString opt(next.GetOption());
+            opt.Append(obj->GetDrawOption());
+            StoreData(*next, Graph1D, opt);
         }
     }
     else {
@@ -109,6 +112,8 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type) {
         prop.type = data_type;
         prop.label = obj->GetTitle();
         TString opt(obj->GetDrawOption());
+        opt.Append(obj->GetOption());
+        if (extra_opts.Length()) opt.Append(extra_opts);
         opt.ToUpper();
         const TAttLine* line = dynamic_cast<const TAttLine*>(obj);
         if (!line)

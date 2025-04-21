@@ -31,7 +31,7 @@ public:
 
 private:
     void ExtractPadProperties();
-    void StoreData(const TObject* obj, DataType data_type);
+    void StoreData(const TObject* obj, DataType data_type, const TString& extra_opts = "");
     void StoreDataWithAxis(const TObject* obj, DataType data_type, Bool_t& get_axis);
     bool GetAxis(const TH1* h);
     bool GetLegend(const TLegend* leg);

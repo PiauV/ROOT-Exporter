@@ -152,17 +152,20 @@ void TestExportManager() {
     gre1->SetTitle("graph1");
     gre1->SetMarkerStyle(20);
     gre1->SetMarkerColor(kBlue);
+    gre1->SetLineColor(kBlue);
     gre1->SetFillColor(kWhite);
     TGraphErrors* gre2 = new TGraphErrors(2, x3, y3, ex3, ey3);
     gre2->SetName("gre2_c2");
     gre2->SetTitle("graph2");
     gre2->SetMarkerStyle(25);
     gre2->SetFillColor(kWhite);
-    gr->Draw("al");
-    gr->GetXaxis()->SetTitle("#alpha");
-    gr->GetYaxis()->SetTitle("#beta");
-    gre1->Draw("p same");
-    gre2->Draw("pl same");
+    TMultiGraph* mg = new TMultiGraph();
+    mg->Add(gr, "l");
+    mg->Add(gre1, "p");
+    mg->Add(gre2, "pl");
+    mg->Draw("a");
+    mg->GetXaxis()->SetTitle("#alpha");
+    mg->GetYaxis()->SetTitle("#beta");
     c2->BuildLegend();
     c2->Update();
 
@@ -225,9 +228,7 @@ void TestExportManager() {
 
     delete f;
     delete h;
-    delete gr;
-    delete gre1;
-    delete gre2;
+    delete mg;
 
     END_TEST();
 }
