@@ -17,7 +17,7 @@ protected:
     TString FormatLabel(const TString& str) const;
 
 private:
-    void WriteHeader(std::ofstream& ofs, const char* basename) const;
+    void WriteHeader(std::ofstream& ofs, TString& file) const;
 };
 } // namespace Expad
 

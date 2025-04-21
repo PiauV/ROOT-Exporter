@@ -177,19 +177,20 @@ void TestExportManager() {
         SIMPLE_TEST(!gSystem->AccessPathName("output/test_export/h.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/test_export/f.txt"));
 
+        gSystem->mkdir("output/gle");
         auto gle_man = std::make_unique<Expad::GleExportManager>();
         gle_man->SaveInFolder(true);
-        gle_man->ExportPad(c1, "output/c1");
-        SIMPLE_TEST(!gSystem->AccessPathName("output/c1/h.txt"));
-        SIMPLE_TEST(!gSystem->AccessPathName("output/c1/f.txt"));
-        SIMPLE_TEST(!gSystem->AccessPathName("output/c1/c1.gle"));
+        gle_man->ExportPad(c1, "output/gle/c1");
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/h.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/f.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/c1.gle"));
         gle_man->SaveInFolder(false);
         gle_man->SetDataDirectory("data_c2");
-        gle_man->ExportPad(c2, "output/c2.gle");
-        SIMPLE_TEST(!gSystem->AccessPathName("output/data_c2/gr_c2.txt"));
-        SIMPLE_TEST(!gSystem->AccessPathName("output/data_c2/gre1_c2.txt"));
-        SIMPLE_TEST(!gSystem->AccessPathName("output/data_c2/gre2_c2.txt"));
-        SIMPLE_TEST(!gSystem->AccessPathName("output/c2.gle"));
+        gle_man->ExportPad(c2, "output/gle/c2.gle");
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/data_c2/gr_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/data_c2/gre1_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/data_c2/gre2_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c2.gle"));
 
         gSystem->mkdir("output/gnuplot");
         auto gnuplot_man = std::make_unique<Expad::GnuplotExportManager>();
@@ -206,15 +207,15 @@ void TestExportManager() {
 
         // Prepare next test --> using GLE to render the plots
         // - save plots as PDF using ROOT internal method (for comparison)
-        c1->SaveAs("output/c1/c1.pdf");
+        c1->SaveAs("output/c1.pdf");
         c2->SaveAs("output/c2.pdf");
         // - save name of gle sources in dedicated file
         std::ofstream ofs;
-        ofs.open("output/gle_files.out");
-        ofs << "c1/c1.gle\n";
-        ofs << "c2.gle\n";
+        ofs.open("output/gle.out");
+        ofs << "gle/c1/c1.gle\n";
+        ofs << "gle/c2.gle\n";
         ofs.close();
-        ofs.open("output/gnuplot_files.out");
+        ofs.open("output/gnuplot.out");
         ofs << "gnuplot/c1.gp\n";
         ofs << "gnuplot/c2.gp\n";
         ofs.close();
