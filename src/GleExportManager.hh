@@ -13,7 +13,7 @@ public:
     ~GleExportManager();
 
 protected:
-    void WriteToFile(const char* filename, const PadProperties& pp) const;
+    virtual void WriteToFile(const char* filename, const PadProperties& pp) const;
     void WriteHeader(std::ofstream& ofs) const;
 };
 } // namespace Expad

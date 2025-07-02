@@ -10,6 +10,7 @@ PointerAlignment: Left
 SeparateDefinitionBlocks: Always
 IndentAccessModifiers: false
 AccessModifierOffset: -4
+InsertNewlineAtEOF: true
 
 BreakBeforeBraces: Custom
 BraceWrapping:

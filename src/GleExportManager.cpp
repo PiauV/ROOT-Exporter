@@ -59,9 +59,8 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     // write default header (gle configuration : size, font, etc...)
     WriteHeader(ofs);
 
-    const PadProperties::Color black(0, 0, 0);
-
     // >>> plot data
+    const PadProperties::Color black(0, 0, 0);
     ofs << "begin graph\n\tscale auto" << std::endl;
     if (pp.title.Length()) {
         ofs << "\ttitle " << FormatLabel(pp.title) << std::endl;
@@ -85,18 +84,16 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     }
     ofs << std::endl;
 
-    // read data files
-    for (const auto& d : pp.datasets) {
-        ofs << "\tdata \"" << d.file.first << "\"" << std::endl;
-    }
-
-    // draw data points
+    // draw data points from file
     int n = pp.datasets.size();
     int idx_data = 1;
     for (int i = 0; i < n; i++) {
-        // first line : marker, line & color
+        const auto di = pp.datasets[i];
+        // read data file
+        ofs << "\tdata \"" << di.file.first << "\"" << std::endl;
+
+        // marker, line & color
         ofs << "\n\td" << idx_data;
-        auto di = pp.datasets[i];
         auto ci = black;
         auto mi = di.marker;
         if (mi.style) {
@@ -121,11 +118,11 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
             ofs << " color " << ci.rgb_str();
         ofs << std::endl;
 
-        // next line : label
+        // key (legend)
         if (pp.legend)
             ofs << "\td" << idx_data << " key " << FormatLabel(di.label) << std::endl;
 
-        // last line : errors (if any)
+        // errors (if any)
         int ncol = di.file.second;
         if (ncol == 3) {
             ofs << "\td" << idx_data

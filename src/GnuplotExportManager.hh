@@ -13,8 +13,8 @@ public:
     ~GnuplotExportManager();
 
 protected:
-    void WriteToFile(const char* filename, const PadProperties& pp) const;
-    TString FormatLabel(const TString& str) const;
+    virtual void WriteToFile(const char* filename, const PadProperties& pp) const;
+    virtual TString FormatLabel(const TString& str) const;
 
 private:
     void WriteHeader(std::ofstream& ofs, TString& file) const;

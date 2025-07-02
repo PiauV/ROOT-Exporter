@@ -144,7 +144,7 @@ void TestExportManager() {
     TGraph* gr = new TGraph(5, x1, y1);
     gr->SetName("gr_c2");
     gr->SetTitle("#Gamma");
-    gr->SetMarkerStyle(2);
+    gr->SetLineStyle(2);
     gr->SetLineColor(kRed);
     gr->SetFillColor(kWhite);
     TGraphErrors* gre1 = new TGraphErrors(3, x2, y2, 0, ey2);
@@ -205,11 +205,11 @@ void TestExportManager() {
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/gre2_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/c2.gp"));
 
-        // Prepare next test --> using GLE to render the plots
+        // Prepare next test --> using external tools to render the plots
         // - save plots as PDF using ROOT internal method (for comparison)
         c1->SaveAs("output/c1.pdf");
         c2->SaveAs("output/c2.pdf");
-        // - save name of gle sources in dedicated file
+        // - save name of sources in dedicated file
         std::ofstream ofs;
         ofs.open("output/gle.out");
         ofs << "gle/c1/c1.gle\n";

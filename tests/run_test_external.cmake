@@ -6,7 +6,7 @@ macro(gle_test)
         execute_process(COMMAND ${GLE} -d pdf -o ${fout} ${fin} RESULT_VARIABLE res ERROR_VARIABLE gle_err)
         # for some reason all gle output goes to stderr
         string(FIND ${gle_err} "error" found_error)
-        if(${res} OR (${found_error} GREATER_EQUAL 0))
+        if((NOT res EQUAL 0) OR (${found_error} GREATER_EQUAL 0))
             file (WRITE "expad-test-gle.log" ${gle_err})
             message(FATAL_ERROR "Error running gle (${fin}) - see 'expad-test-gle.log'")
         else()
@@ -22,7 +22,7 @@ macro(gnuplot_test)
         # we need to call gnuplot in the directory where the scripts are
         string(REPLACE "gnuplot/" "" filename ${fin}) # remove gnuplot/ dir from file name
         execute_process(COMMAND ${GNUPLOT} ${filename} RESULT_VARIABLE res ERROR_FILE "expad-test-gnuplot.log" WORKING_DIRECTORY "gnuplot" OUTPUT_QUIET)
-        if(${res})
+        if(NOT res EQUAL 0)
             message(FATAL_ERROR "Error running gnuplot (${fin}) - see 'expad-test-gnuplot.log'")
         else()
             message(STATUS "File ${fin} was successfully processed.")
