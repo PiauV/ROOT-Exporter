@@ -3,6 +3,7 @@
 #include "GleExportManager.hh"
 #include "GnuplotExportManager.hh"
 #include "PlotSerializer.hh"
+#include "PyplotExportManager.hh"
 #include "macros.hh"
 
 #include "TCanvas.h"
@@ -205,6 +206,19 @@ void TestExportManager() {
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/gre2_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/c2.gp"));
 
+        gSystem->mkdir("output/python");
+        auto pyplot_man = std::make_unique<Expad::PyplotExportManager>();
+        pyplot_man->SaveInFolder(false);
+        pyplot_man->ExportPad(c1, "output/python/c1");
+        SIMPLE_TEST(!gSystem->AccessPathName("output/python/h.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/python/f.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/python/c1.py"));
+        pyplot_man->ExportPad(c2, "output/python/c2");
+        SIMPLE_TEST(!gSystem->AccessPathName("output/python/gr_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/python/gre1_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/python/gre2_c2.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/python/c2.py"));
+
         // Prepare next test --> using external tools to render the plots
         // - save plots as PDF using ROOT internal method (for comparison)
         c1->SaveAs("output/c1.pdf");
@@ -218,6 +232,10 @@ void TestExportManager() {
         ofs.open("output/gnuplot.out");
         ofs << "gnuplot/c1.gp\n";
         ofs << "gnuplot/c2.gp\n";
+        ofs.close();
+        ofs.open("output/python.out");
+        ofs << "python/c1.py\n";
+        ofs << "python/c2.py\n";
         ofs.close();
     }
     catch (const std::exception& e) {

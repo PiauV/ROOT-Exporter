@@ -19,22 +19,24 @@ target_link_libraries(libROOTToText PUBLIC ${ROOT_LIBS})
 ##### Plot export (ExPlot)
 
 set(EXPLOT_HEADERS
-GnuplotExportManager.hh
-GleExportManager.hh
 DataExportManager.hh
+DataType.hh
 ExportManager.hh
+GleExportManager.hh
+GnuplotExportManager.hh
 # PadProperties.hh # not needed for dictionnary generation
 PlotSerializer.hh
-DataType.hh
+PyplotExportManager.hh
 )
 
 set(EXPLOT_SRC
-GnuplotExportManager.cpp
-GleExportManager.cpp
+DataType.cpp
 ExportManager.cpp
+GleExportManager.cpp
+GnuplotExportManager.cpp
 PadProperties.cpp
 PlotSerializer.cpp
-DataType.cpp
+PyplotExportManager.cpp
 )
 
 set(EXPLOT_DICT ExPlot_dict)
