@@ -29,6 +29,7 @@ ROOTToText::ROOTToText() {
     baseDirectory_ = "./";
     cc_ = '#';
     verb_ = false;
+    npfunc_ = 100;
 }
 
 ROOTToText::~ROOTToText() {
@@ -127,6 +128,19 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, 
     if (verb_) std::cout << "Saved " << obj->GetName() << " in " << path << std::endl;
     filename = path;
     return true;
+}
+
+void ROOTToText::PrintOptions() const {
+    std::cout << "Available options :\n"
+              << "\tD      [all] - Use default RTT writer\n"
+              << "\tL      [TH1] - Use bin low edge instead of bin center\n"
+              << "\tE      [TH1] - Save bin errors\n"
+              << "\tC      [TH2] - Save 2D data in columns : X Y Z\n"
+              << "\tG      [TH2] - Save 2D data in GLE format\n"
+              << "\tR  [TH1/TH2] - Save only data in the bin range\n"
+              << "\tH   [TGraph] - Save horizontal errors\n"
+              << "\tN<n>   [TF1] - Use n points to save function\n"
+              << std::endl;
 }
 
 bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, TString& filename, Option_t* opt) const {
@@ -274,6 +288,7 @@ TString ROOTToText::GetFilePath(const TObject* obj, const char* filename) const 
 void ROOTToText::WriteTH1(const TH1* h, const TString& option, std::ofstream& ofs) const {
     bool low_edge = option.Contains('L');
     bool with_errors = option.Contains('E');
+    bool use_range = option.Contains('R');
 
     if (headerTitle_)
         ofs << cc_ << " " << h->GetTitle() << std::endl;
@@ -293,7 +308,12 @@ void ROOTToText::WriteTH1(const TH1* h, const TString& option, std::ofstream& of
             ofs << cc_ << " 3:EY" << std::endl;
     }
 
-    for (int i = 1; i <= h->GetNbinsX(); i++) {
+    int imin = 1, imax = h->GetNbinsX();
+    if (use_range) {
+        imin = h->GetXaxis()->GetFirst();
+        imax = h->GetXaxis()->GetLast();
+    }
+    for (int i = imin; i <= imax; i++) {
         if (low_edge)
             ofs << h->GetBinLowEdge(i);
         else
@@ -306,6 +326,7 @@ void ROOTToText::WriteTH1(const TH1* h, const TString& option, std::ofstream& of
 }
 
 void ROOTToText::WriteTH2(const TH2* h, const TString& option, std::ofstream& ofs) const {
+    bool use_range = option.Contains('R');
     bool in_columns = option.Contains("C");
     // x1, y1, z11
     // x2, y1, z21
@@ -354,9 +375,20 @@ void ROOTToText::WriteTH2(const TH2* h, const TString& option, std::ofstream& of
         ofs << std::endl;
     }
 
+    int imin = 1, imax = h->GetNbinsX();
+    if (use_range) {
+        imin = h->GetXaxis()->GetFirst();
+        imax = h->GetXaxis()->GetLast();
+    }
+    int jmin = 1, jmax = h->GetNbinsY();
+    if (use_range) {
+        jmin = h->GetYaxis()->GetFirst();
+        jmax = h->GetYaxis()->GetLast();
+    }
+
     if (in_columns) {
-        for (int i = 1; i <= h->GetNbinsX(); i++) {
-            for (int j = 1; j <= h->GetNbinsY(); j++) {
+        for (int i = imin; i <= imax; i++) {
+            for (int j = jmin; j <= jmax; j++) {
                 ofs << h->GetXaxis()->GetBinCenter(i) << " "
                     << h->GetYaxis()->GetBinCenter(j) << " "
                     << h->GetBinContent(i, j)
@@ -366,8 +398,8 @@ void ROOTToText::WriteTH2(const TH2* h, const TString& option, std::ofstream& of
         }
     }
     else {
-        for (int j = 1; j <= h->GetNbinsY(); j++) {
-            for (int i = 1; i <= h->GetNbinsX(); i++) {
+        for (int j = jmin; j <= jmax; j++) {
+            for (int i = imin; i <= imax; i++) {
                 if (i > 1)
                     ofs << " ";
                 ofs << h->GetBinContent(i, j);
@@ -474,15 +506,16 @@ void ROOTToText::WriteTF1(const TF1* f, const TString& option, std::ofstream& of
     // number of points for evaluation
     int npoints = -1;
     if (option.Contains("N")) {
-        TPRegexp pattern("N(\\d+)");
-        TObjArray* strL = pattern.MatchS(option);
-        if (strL->GetSize() > 1) {
-            // strL contains the whole string matching the regex (0) and the captured group (1)
-            // we are only interested in the captured group (i.e. the figures)
-            npoints = ((TObjString*)strL->At(1))->GetString().Atoi();
+        auto s1 = option.First('N');
+        auto s2 = s1;
+        while (isdigit(option[++s2])) // string ends with '\0' --> no need to perform out-of-bounds check
+            continue;
+        auto sub = option(s1 + 1, s2 - s1 - 2);
+        if (!sub.IsNull()) {
+            npoints = sub.String().Atoi();
         }
     }
-    if (npoints <= 0) npoints = 100;
+    if (npoints <= 0) npoints = npfunc_;
 
     // function range
     Double_t xmin, xmax;

@@ -39,6 +39,7 @@ public:
     inline TString GetDirectory() const;
     inline char GetCommentChar() const;
     inline void SetVerbose(bool v);
+    inline void SetDefaultNpFunction(int n);
     // set precision, format ?
     bool AddCustomWriter(const char* class_name, writer& func);
     bool RemoveCustomWriter(const char* class_name);
@@ -47,6 +48,7 @@ public:
     bool SaveObject(const TObject* obj, const char* filename = "", Option_t* opt = "") const;
     bool SaveObject(const TObject* obj, DataType dt, const char* filename = "", Option_t* opt = "") const;
     bool SaveObject(const TObject* obj, DataType dt, TString& filename, Option_t* opt = "") const;
+    void PrintOptions() const;
 
 private:
     ROOTToText();
@@ -66,8 +68,9 @@ private:
     TString defaultExtension_;
     TString baseDirectory_;
     static ROOTToText* instance_;
-    char cc_;   // comment character
-    bool verb_; // verbose
+    char cc_;    // comment character
+    bool verb_;  // verbose
+    int npfunc_; // default number of points for functions (TF1)
     std::map<TClass*, writer> userWriters_;
 };
 
@@ -94,6 +97,10 @@ char ROOTToText::GetCommentChar() const {
 
 void ROOTToText::SetVerbose(bool v) {
     verb_ = v;
+}
+
+inline void ROOTToText::SetDefaultNpFunction(int n) {
+    npfunc_ = n;
 }
 
 } // namespace Expad
