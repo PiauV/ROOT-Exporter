@@ -66,7 +66,7 @@ void PlotSerializer::ExtractPadProperties() {
             if (legend) {
                 // Update this object's label (legend has already been read)
                 for (const TObject* obj_l : *legend->GetListOfPrimitives()) {
-                    const TLegendEntry* entry = static_cast<const TLegendEntry*>(obj_l);
+                    auto entry = static_cast<const TLegendEntry*>(obj_l);
                     const TObject* entry_obj = entry->GetObject();
                     if (entry_obj != obj_l) continue;
                     pp_.datasets.back().label = entry->GetLabel();
@@ -80,17 +80,25 @@ void PlotSerializer::ExtractPadProperties() {
         }
         else if (dim == 0) {
             // other graphics entities (text, legend, ...)
-            if (data == TextBox) {
-                if (strcmp(obj_p->GetName(), "title") == 0) {
-                    // title of the plot
-                    pp_.title = ((TPaveText*)obj_p)->GetLine(0)->GetTitle();
-                }
-            }
-            else if (data == Legend) {
-                if (legend)
-                    throw std::runtime_error("A legend has already been registered.");
-                legend = dynamic_cast<const TLegend*>(obj_p);
-                GetLegend(legend);
+            switch (data) {
+                case TextBox:
+                    if (strcmp(obj_p->GetName(), "title") == 0) {
+                        // title of the plot
+                        pp_.title = ((TPaveText*)obj_p)->GetLine(0)->GetTitle();
+                    }
+                    break;
+                case Legend:
+                    if (legend)
+                        throw std::runtime_error("A legend has already been registered.");
+                    legend = dynamic_cast<const TLegend*>(obj_p);
+                    GetLegend(legend);
+                    break;
+                case BareText:
+                case Line:
+                    StoreDecorator(obj_p, data);
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -115,7 +123,7 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TSt
         opt.Append(obj->GetOption());
         if (extra_opts.Length()) opt.Append(extra_opts);
         opt.ToUpper();
-        const TAttLine* line = dynamic_cast<const TAttLine*>(obj);
+        auto line = dynamic_cast<const TAttLine*>(obj);
         if (!line)
             std::cout << "Warning : could not get line attributes from " << obj->GetName() << std::endl;
         else {
@@ -129,7 +137,7 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TSt
                 if (opt.Contains("P")) prop.line.style = 0;
             }
         }
-        const TAttMarker* marker = dynamic_cast<const TAttMarker*>(obj);
+        auto marker = dynamic_cast<const TAttMarker*>(obj);
         if (!marker)
             std::cout << "Warning : could not get marker attributes from " << obj->GetName() << std::endl;
         else {
@@ -172,6 +180,38 @@ void PlotSerializer::StoreDataWithAxis(const TObject* obj, DataType data_type, B
         else
             std::cout << "Warning : could not get axis from " << obj->GetName() << std::endl;
     }
+}
+
+void PlotSerializer::StoreDecorator(const TObject* obj, DataType data_type) {
+    PadProperties::Decorator deco;
+    deco.type = data_type;
+    auto line = dynamic_cast<const TAttLine*>(obj);
+    if (line) {
+        deco.properties.color = GetColor(line->GetLineColor());
+        deco.properties.size = line->GetLineWidth();
+        deco.properties.style = line->GetLineStyle();
+    }
+    auto txt = dynamic_cast<const TAttText*>(obj);
+    if (txt) {
+        deco.properties.color = GetColor(txt->GetTextColor());
+    }
+    switch (data_type) {
+        case BareText: {
+            deco.label = obj->GetTitle();
+            auto tt = dynamic_cast<const TText*>(obj);
+            deco.pos.set(tt->GetX(), tt->GetY());
+            break;
+        }
+        case Line: {
+            deco.label = obj->GetOption(); // arrow direction (if any)
+            auto tl = dynamic_cast<const TLine*>(obj);
+            deco.pos.set(tl->GetX1(), tl->GetY1(), tl->GetX2(), tl->GetY2());
+            break;
+        }
+        default:
+            break;
+    }
+    pp_.decorators.push_back(deco);
 }
 
 bool PlotSerializer::GetAxis(const TH1* h) {

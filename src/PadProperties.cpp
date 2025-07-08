@@ -49,4 +49,16 @@ PadProperties::Data::Data(const Data& d) {
     type = d.type;
 }
 
+PadProperties::Decorator::Decorator() : properties(), label(), pos() {
+    type = Undefined;
+}
+
+void PadProperties::Coord::set(double x, double y, double xmax, double ymax) {
+    x1 = x;
+    y1 = y;
+    x2 = xmax;
+    y2 = ymax;
+    isok = true;
+}
+
 } // namespace Expad

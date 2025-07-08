@@ -39,6 +39,15 @@ DataType GetDataType(const TObject* obj) {
     else if (obj->InheritsFrom("TLegend")) {
         return Legend;
     }
+    else if (obj->InheritsFrom("TLine")) {
+        return Line;
+    }
+    // else if (obj->InheritsFrom("TBox")) {
+    //     return Box;
+    // }
+    // else if (obj->InheritsFrom("TEllipse")) {
+    //     return Ellipse;
+    // }
     return Undefined;
 }
 

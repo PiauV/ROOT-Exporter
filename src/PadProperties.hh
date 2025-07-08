@@ -46,10 +46,28 @@ struct PadProperties {
         Data(const Data& d);
     };
 
+    struct Coord {
+        bool isok = 0; // to avoid drawing ill-initialized object at (0,0)
+        double x1 = 0;
+        double x2 = 0;
+        double y1 = 0;
+        double y2 = 0;
+        void set(double x, double y, double xmax = 0, double ymax = 0);
+    };
+
+    struct Decorator {
+        DataType type;
+        DrawingStyle properties;
+        TString label;
+        Coord pos;
+        Decorator();
+    };
+
     TString title;
     AxisProperties xaxis;
     AxisProperties yaxis;
     std::vector<Data> datasets;
+    std::vector<Decorator> decorators;
     unsigned short legend = 0;
 };
 
