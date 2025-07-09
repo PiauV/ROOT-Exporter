@@ -1,5 +1,4 @@
 #include "ExPlot_test.hh"
-#include "DataExportManager.hh"
 #include "GleExportManager.hh"
 #include "GnuplotExportManager.hh"
 #include "PlotSerializer.hh"

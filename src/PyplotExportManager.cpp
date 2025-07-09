@@ -54,6 +54,18 @@ PyplotExportManager::PyplotExportManager() {
 PyplotExportManager::~PyplotExportManager() {
 }
 
+TString PyplotExportManager::FormatLabel(const TString& str) const {
+    TString ltx = ExportManager::FormatLabel(str);
+    if (latex_) {
+        ltx.Prepend("r");
+    }
+    return ltx;
+}
+
+char* PyplotExportManager::getColor(PadProperties::Color c) const {
+    return Form("(%.3g,%.3g,%.3g)", c.red, c.green, c.blue);
+}
+
 void PyplotExportManager::WriteToFile(const char* filename, const PadProperties& pp) const {
     std::ofstream ofs(filename);
     if (!ofs.is_open()) {
@@ -62,11 +74,40 @@ void PyplotExportManager::WriteToFile(const char* filename, const PadProperties&
     }
 
     // write default header for configuration (import libraries) and set output name
-    TString outfile(gSystem->BaseName(filename)); // outfile : *.py
-    InitFile(ofs, outfile);                       // outfile : *.pdf
+    InitFile(ofs);
+
+    ofs << "fig, ax = plt.subplots()" << std::endl;
 
     // >>> plot data
-    ofs << "fig, ax = plt.subplots()" << std::endl;
+    SetTitleAndAxis(ofs, pp);
+
+    // draw data from files
+    SetData(ofs, pp);
+
+    // configure legend
+    SetLegend(ofs, pp);
+
+    // plot data <<<
+
+    TString outfile(gSystem->BaseName(filename));    // outfile : *.py
+    outfile.Replace(outfile.Index(ext_), 4, ".pdf"); // outfile : *.pdf
+
+    ofs << "plt.savefig(\'" << outfile << "\')\n"
+        << "# plt.show()\n"
+        << "# plt.close()"
+        << std::endl;
+
+    ofs.close();
+}
+
+void PyplotExportManager::InitFile(std::ofstream& ofs) const {
+    ofs << "import numpy as np\n"
+        << "import matplotlib.pyplot as plt\n"
+        << std::endl;
+}
+
+void PyplotExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadProperties& pp) const {
+    // set title
     if (pp.title.Length()) {
         ofs << "ax.set_title(" << FormatLabel(pp.title) << ")" << std::endl;
     }
@@ -103,8 +144,9 @@ void PyplotExportManager::WriteToFile(const char* filename, const PadProperties&
             << std::endl;
     }
     ofs << std::endl;
+}
 
-    // draw data from files
+void PyplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) const {
     int n = pp.datasets.size();
     for (int i = 0; i < n; i++) {
         const auto di = pp.datasets[i];
@@ -172,8 +214,9 @@ void PyplotExportManager::WriteToFile(const char* filename, const PadProperties&
         ofs << ")\n"
             << std::endl;
     }
+}
 
-    // configure legend
+void PyplotExportManager::SetLegend(std::ofstream& ofs, const PadProperties& pp) const {
     if (pp.legend) {
         ofs << "ax.legend(loc=\'"
             << (pp.legend > 2 ? "lower" : "upper")
@@ -181,35 +224,6 @@ void PyplotExportManager::WriteToFile(const char* filename, const PadProperties&
             << "\')\n"
             << std::endl;
     }
-
-    ofs << "plt.savefig(output_name)\n"
-        << "# plt.show()\n"
-        << "# plt.close()"
-        << std::endl;
-
-    // plot data <<<
-
-    ofs.close();
-}
-
-TString PyplotExportManager::FormatLabel(const TString& str) const {
-    TString ltx = ExportManager::FormatLabel(str);
-    if (latex_) {
-        ltx.Prepend("r");
-    }
-    return ltx;
-}
-
-void PyplotExportManager::InitFile(std::ofstream& ofs, TString& file) const {
-    file.Replace(file.Index(ext_), 4, ".pdf");
-    ofs << "import numpy as np\n"
-        << "import matplotlib.pyplot as plt\n\n"
-        << "output_name = \'" << file << "\'\n"
-        << std::endl;
-}
-
-char* PyplotExportManager::getColor(PadProperties::Color c) const {
-    return Form("(%.3g,%.3g,%.3g)", c.red, c.green, c.blue);
 }
 
 } // namespace Expad

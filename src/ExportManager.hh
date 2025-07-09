@@ -7,28 +7,53 @@ class TVirtualPad;
 
 namespace Expad {
 
-/// Virtual class
-class ExportManager {
+class BaseExportManager {
 public:
-    ExportManager();
-    ~ExportManager();
+    BaseExportManager();
+    ~BaseExportManager();
 
     void ExportPad(TVirtualPad* pad, const char* filename) const;
     void SetDataDirectory(TString folder_name);
     void SaveInFolder(bool flag);
-    void EnableLatex(bool flag);
 
 protected:
     TString GetFilePath(TVirtualPad* pad, const char* filename) const;
     virtual void SaveData(const TObject* obj, PadProperties::Data& data) const;
     virtual void WriteToFile(const char* filename, const PadProperties& pp) const = 0;
-    virtual TString FormatLabel(const TString& str) const;
 
 protected:
     TString ext_;
     char com_; // comment char
     TString dataDir_;
     bool inFolder_;
+};
+
+class DataExportManager : public BaseExportManager {
+public:
+    DataExportManager() {};
+    ~DataExportManager() {};
+
+protected:
+    void WriteToFile(const char*, const PadProperties&) const override {};
+};
+
+class ExportManager : public BaseExportManager {
+public:
+    ExportManager();
+    ~ExportManager();
+
+    inline void EnableLatex(bool flag = true) { latex_ = flag; };
+
+protected:
+    virtual TString FormatLabel(const TString& str) const;
+
+    virtual void WriteToFile(const char*, const PadProperties&) const = 0;
+
+    virtual void SetTitleAndAxis(std::ofstream& ofs, const PadProperties& pp) const = 0;
+    virtual void SetData(std::ofstream& ofs, const PadProperties& pp) const = 0;
+    virtual void SetLegend(std::ofstream& ofs, const PadProperties& pp) const = 0;
+
+protected:
     bool latex_;
 };
 

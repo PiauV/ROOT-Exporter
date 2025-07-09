@@ -57,11 +57,41 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     }
 
     // write default header (gle configuration : size, font, etc...)
-    WriteHeader(ofs);
+    InitFile(ofs);
 
     // >>> plot data
-    const PadProperties::Color black(0, 0, 0);
-    ofs << "begin graph\n\tscale auto" << std::endl;
+
+    // start graph
+    ofs << "begin graph\n"
+        << "\tscale auto\n"
+        << std::endl;
+
+    SetTitleAndAxis(ofs, pp);
+
+    // draw data points from file
+    SetData(ofs, pp);
+
+    // configure legend
+    SetLegend(ofs, pp);
+
+    // close graph
+    ofs << "\nend graph" << std::endl;
+
+    // plot data <<<
+
+    ofs.close();
+}
+
+void GleExportManager::InitFile(std::ofstream& ofs) const {
+    ofs << "size 10 7\n"
+        << "set hei 0.353\n"
+        << "set lwidth 0.015\n"
+        << "set texlabels 1\n"
+        << std::endl;
+}
+
+void GleExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadProperties& pp) const {
+    // set title
     if (pp.title.Length()) {
         ofs << "\ttitle " << FormatLabel(pp.title) << std::endl;
     }
@@ -71,7 +101,7 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     if (pp.xaxis.log) ofs << " log";
     ofs << std::endl;
     auto xc = pp.xaxis.color;
-    if (xc != black) {
+    if (xc != Black) {
         ofs << "\txaxis color " << xc.rgb_str() << std::endl;
     }
     ofs << "\tytitle " << FormatLabel(pp.yaxis.title) << std::endl;
@@ -79,12 +109,13 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     if (pp.yaxis.log) ofs << " log";
     ofs << std::endl;
     auto yc = pp.yaxis.color;
-    if (yc != black) {
+    if (yc != Black) {
         ofs << "\tyaxis color " << yc.rgb_str() << std::endl;
     }
     ofs << std::endl;
+}
 
-    // draw data points from file
+void GleExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) const {
     int n = pp.datasets.size();
     int idx_data = 1;
     for (int i = 0; i < n; i++) {
@@ -94,7 +125,7 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
 
         // marker, line & color
         ofs << "\n\td" << idx_data;
-        auto ci = black;
+        auto ci = Black;
         auto mi = di.marker;
         if (mi.style) {
             ofs << " marker " << (GLE_marker.count(mi.style) ? GLE_marker.at(mi.style) : "circle");
@@ -114,7 +145,7 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
             ofs << " lwidth " << 0.015 * li.size;
             ci = li.color;
         }
-        if (ci != black)
+        if (ci != Black)
             ofs << " color " << ci.rgb_str();
         ofs << std::endl;
 
@@ -137,26 +168,14 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
         }
         idx_data += (ncol - 1); // first column is x
     }
+}
 
-    // configure legend
+void GleExportManager::SetLegend(std::ofstream& ofs, const PadProperties& pp) const {
     if (pp.legend) {
         ofs << "\n\tkey compact pos ";
         ofs << (pp.legend > 2 ? "b" : "t") << (pp.legend % 2 ? "l" : "r"); // (1 -> tl ; 2 -> tr ; 3 -> bl ; 4 -> br)
         ofs << " hei 0.3 offset 0.2 0.2" << std::endl;
     }
-
-    ofs << "\nend graph" << std::endl;
-    // plot data <<<
-
-    ofs.close();
-}
-
-void GleExportManager::WriteHeader(std::ofstream& ofs) const {
-    ofs << "size 10 7\n"
-        << "set hei 0.353\n"
-        << "set lwidth 0.015\n"
-        << "set texlabels 1\n"
-        << std::endl;
 }
 
 } // namespace Expad

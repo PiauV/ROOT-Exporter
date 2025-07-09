@@ -54,6 +54,22 @@ GnuplotExportManager::GnuplotExportManager() {
 GnuplotExportManager::~GnuplotExportManager() {
 }
 
+TString GnuplotExportManager::FormatLabel(const TString& str) const {
+    TString ltx = ExportManager::FormatLabel(str);
+    if (latex_) {
+        int s = ltx.Index("$\\");
+        while (s >= 0) {
+            ltx.Replace(s, 2, "$\\\\");
+            if (s + 2 >= ltx.Length())
+                s = -1; // should never happen, but it's better to be safe
+            else {
+                s = ltx.Index("$\\", s + 2);
+            }
+        }
+    }
+    return ltx;
+}
+
 void GnuplotExportManager::WriteToFile(const char* filename, const PadProperties& pp) const {
     std::ofstream ofs(filename);
     if (!ofs.is_open()) {
@@ -61,25 +77,51 @@ void GnuplotExportManager::WriteToFile(const char* filename, const PadProperties
         return;
     }
 
-    // write default header (gnuplot configuration)
-    TString outfile(gSystem->BaseName(filename)); // outfile : *.gp
-    WriteHeader(ofs, outfile);                    // outfile : *.tex
+    TString outfile(gSystem->BaseName(filename));    // outfile : *.gp
+    outfile.Replace(outfile.Index(ext_), 4, ".tex"); // outfile : *.tex
 
-    const PadProperties::Color black(0, 0, 0);
+    // write default header (gnuplot configuration)
+    InitFile(ofs, outfile);
 
     // >>> plot data
+    SetTitleAndAxis(ofs, pp);
+
+    // configure legend
+    SetLegend(ofs, pp);
+
+    // draw data from files
+    SetData(ofs, pp);
+
+    // plot data <<<
+
+    ofs << "\nunset output"
+        << "\n!pdflatex " << outfile
+        << std::endl;
+
+    ofs.close();
+}
+
+void GnuplotExportManager::InitFile(std::ofstream& ofs, const TString& file) const {
+    ofs << "set terminal cairolatex pdf standalone size 10cm,7cm\n"
+        << "set output \"" << file << "\""
+        << std::endl;
+}
+
+void GnuplotExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadProperties& pp) const {
+    // set title
     if (pp.title.Length()) {
         ofs << "\nset title " << FormatLabel(pp.title) << std::endl;
     }
+
     // draw axis
     auto cx = pp.xaxis.color; // colored axis : do not change border color (tricky use of "set border" + "set arrow" will be done by user)
     ofs << "\nset xlabel " << FormatLabel(pp.xaxis.title);
-    if (cx != black)
+    if (cx != Black)
         ofs << " textcolor rgb " << cx.hex_str();
     ofs << std::endl;
-    if (cx != black || pp.xaxis.log) {
+    if (cx != Black || pp.xaxis.log) {
         ofs << "set xtics";
-        if (cx != black)
+        if (cx != Black)
             ofs << " textcolor rgb " << cx.hex_str();
         if (pp.xaxis.log)
             ofs << " logscale";
@@ -89,36 +131,27 @@ void GnuplotExportManager::WriteToFile(const char* filename, const PadProperties
 
     auto cy = pp.yaxis.color;
     ofs << "set ylabel " << FormatLabel(pp.yaxis.title);
-    if (cy != black)
+    if (cy != Black)
         ofs << " textcolor rgb " << cy.hex_str();
     ofs << std::endl;
-    if (cy != black || pp.yaxis.log) {
+    if (cy != Black || pp.yaxis.log) {
         ofs << "set ytics";
-        if (cy != black)
+        if (cy != Black)
             ofs << " textcolor rgb " << cy.hex_str();
         if (pp.yaxis.log)
             ofs << " logscale";
         ofs << std::endl;
     }
     ofs << "set yrange [" << pp.yaxis.min << ":" << pp.yaxis.max << "]" << std::endl;
+}
 
-    // configure legend
-    if (pp.legend) {
-        ofs << "\nset key notitle box opaque"
-            << "\nset key " << (pp.legend > 2 ? "bottom" : "top") << (pp.legend % 2 ? " left" : " right") // (1 -> tl ; 2 -> tr ; 3 -> bl ; 4 -> br)
-            << std::endl;
-    }
-    else {
-        ofs << "\nunset key" << std::endl;
-    }
-
-    // draw data from files
+void GnuplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) const {
     int n = pp.datasets.size();
     ofs << "\nplot ";
     for (int i = 0; i < n; ++i) {
         auto di = pp.datasets[i];
         ofs << " \"" << di.file.first << "\"";
-        auto ci = black;     // color
+        auto ci = Black;     // color
         auto mi = di.marker; // marker
         auto li = di.line;   // line
         // pointtype style
@@ -175,37 +208,17 @@ void GnuplotExportManager::WriteToFile(const char* filename, const PadProperties
         else
             ofs << std::endl;
     }
-    // plot data <<<
-
-    ofs << "\nunset output"
-        << "\n!pdflatex " << outfile
-        << std::endl;
-
-    ofs.close();
 }
 
-TString GnuplotExportManager::FormatLabel(const TString& str) const {
-    TString ltx = ExportManager::FormatLabel(str);
-    if (latex_) {
-        int s = ltx.Index("$\\");
-        while (s >= 0) {
-            ltx.Replace(s, 2, "$\\\\");
-            if (s + 2 >= ltx.Length())
-                s = -1; // should never happen, but it's better to be safe
-            else {
-                s = ltx.Index("$\\", s + 2);
-            }
-        }
+void GnuplotExportManager::SetLegend(std::ofstream& ofs, const PadProperties& pp) const {
+    if (pp.legend) {
+        ofs << "\nset key notitle box opaque"
+            << "\nset key " << (pp.legend > 2 ? "bottom" : "top") << (pp.legend % 2 ? " left" : " right") // (1 -> tl ; 2 -> tr ; 3 -> bl ; 4 -> br)
+            << std::endl;
     }
-    return ltx;
-}
-
-void GnuplotExportManager::WriteHeader(std::ofstream& ofs, TString& file) const {
-    // filename.gp --> filename.tex
-    file.Replace(file.Index(ext_), 4, ".tex");
-    ofs << "set terminal cairolatex pdf standalone size 10cm,7cm\n"
-        << "set output \"" << file << "\""
-        << std::endl;
+    else {
+        ofs << "\nunset key" << std::endl;
+    }
 }
 
 } // namespace Expad

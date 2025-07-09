@@ -74,6 +74,8 @@ struct PadProperties {
 bool operator==(const PadProperties::Color& lc, const PadProperties::Color& rc);
 bool operator!=(const PadProperties::Color& lc, const PadProperties::Color& rc);
 
+static const PadProperties::Color Black(0, 0, 0);
+
 } // namespace Expad
 
 #endif

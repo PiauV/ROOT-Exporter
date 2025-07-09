@@ -14,7 +14,12 @@ public:
 
 protected:
     virtual void WriteToFile(const char* filename, const PadProperties& pp) const;
-    void WriteHeader(std::ofstream& ofs) const;
+    virtual void SetTitleAndAxis(std::ofstream& ofs, const PadProperties& pp) const;
+    virtual void SetData(std::ofstream& ofs, const PadProperties& pp) const;
+    virtual void SetLegend(std::ofstream& ofs, const PadProperties& pp) const;
+
+private:
+    void InitFile(std::ofstream& ofs) const;
 };
 } // namespace Expad
 

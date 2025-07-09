@@ -43,7 +43,7 @@ private:
     PadProperties pp_;
     std::vector<const TObject*> dataObjects_;
 
-    friend class ExportManager;
+    friend class BaseExportManager;
 };
 
 } // namespace Expad

@@ -15,18 +15,17 @@
 
 namespace Expad {
 
-ExportManager::ExportManager() {
+BaseExportManager::BaseExportManager() {
     ext_ = "";
     com_ = '#';
     dataDir_ = "";
     inFolder_ = false;
-    latex_ = true;
 }
 
-ExportManager::~ExportManager() {
+BaseExportManager::~BaseExportManager() {
 }
 
-void ExportManager::ExportPad(TVirtualPad* pad, const char* filename) const {
+void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const {
     auto ps = std::make_unique<PlotSerializer>(pad);
 
     auto path = GetFilePath(pad, filename);
@@ -64,7 +63,7 @@ void ExportManager::ExportPad(TVirtualPad* pad, const char* filename) const {
     WriteToFile(path, ps->pp_);
 }
 
-TString ExportManager::GetFilePath(TVirtualPad* pad, const char* filename) const {
+TString BaseExportManager::GetFilePath(TVirtualPad* pad, const char* filename) const {
     TString str(filename);
 
     // if no filename is given, use the object name
@@ -109,7 +108,7 @@ TString ExportManager::GetFilePath(TVirtualPad* pad, const char* filename) const
     return str;
 }
 
-void ExportManager::SaveData(const TObject* obj, PadProperties::Data& data) const {
+void BaseExportManager::SaveData(const TObject* obj, PadProperties::Data& data) const {
     TString option = "";
     int ncol = 0;
     switch (data.type) {
@@ -171,6 +170,22 @@ void ExportManager::SaveData(const TObject* obj, PadProperties::Data& data) cons
     }
 }
 
+void BaseExportManager::SetDataDirectory(TString folder_name) {
+    // keep the data files in a separator folder
+    dataDir_ = folder_name;
+}
+
+void BaseExportManager::SaveInFolder(bool flag) {
+    inFolder_ = flag;
+}
+
+ExportManager::ExportManager() : BaseExportManager() {
+    EnableLatex();
+}
+
+ExportManager::~ExportManager() {
+}
+
 TString ExportManager::FormatLabel(const TString& str) const {
     TString label(str);
     if (latex_) {
@@ -191,19 +206,6 @@ TString ExportManager::FormatLabel(const TString& str) const {
     }
     label.Prepend('\"').Append('\"');
     return label;
-}
-
-void ExportManager::SetDataDirectory(TString folder_name) {
-    // keep the data files in a separator folder
-    dataDir_ = folder_name;
-}
-
-void ExportManager::SaveInFolder(bool flag) {
-    inFolder_ = flag;
-}
-
-void ExportManager::EnableLatex(bool flag) {
-    latex_ = flag;
 }
 
 } // namespace Expad
