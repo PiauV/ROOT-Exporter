@@ -5,16 +5,19 @@
 #include "PyplotExportManager.hh"
 #include "macros.hh"
 
+#include "TArrow.h"
 #include "TCanvas.h"
 #include "TError.h"
 #include "TF1.h"
 #include "TGraph.h"
 #include "TGraphErrors.h"
 #include "TH1D.h"
+#include "TLatex.h"
 #include "TLegend.h"
 #include "TMultiGraph.h"
 #include "TPad.h"
 #include "TROOT.h"
+#include "TText.h"
 
 #include <iostream>
 #include <memory>
@@ -129,6 +132,14 @@ void TestExportManager() {
     h->FillRandom("f", 1000);
     h->Draw();
     f->Draw("same");
+    auto arrow = new TArrow(3.8, 40, 6.2, 40, 0.03, "<|>");
+    arrow->SetLineColor(kRed);
+    arrow->SetFillColor(kRed);
+    arrow->Draw();
+    auto text = new TText(5, 39, "FWHM");
+    text->SetTextAlign(23); // center top
+    text->SetTextColor(kRed);
+    text->Draw();
     c1->Update();
 
     TCanvas* c2 = new TCanvas();
@@ -166,6 +177,8 @@ void TestExportManager() {
     mg->Draw("a");
     mg->GetXaxis()->SetTitle("#alpha");
     mg->GetYaxis()->SetTitle("#beta");
+    auto ltx = new TLatex(1.2, 4.8, "#alpha+#beta+#gamma");
+    ltx->Draw();
     c2->BuildLegend();
     c2->Update();
 

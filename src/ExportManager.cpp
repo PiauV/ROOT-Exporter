@@ -191,18 +191,22 @@ TString ExportManager::FormatLabel(const TString& str) const {
     if (latex_) {
         // process LaTeX symbols : replace '#sym' with '$\sym$'
         int s = label.Index('#');
+        bool eol = false; // set to true if we need to end the line with '$'
         while (s >= 0) {
             label.Replace(s, 1, "\\");
-            label.Insert(s, '$');
-            int s0 = s;
-            s = label.Index(' ', s0);
-            if (s >= 0)
+            if (!eol) {
                 label.Insert(s, '$');
-            else
-                label.Append('$');
-            s0 = label.Index(s, '$');
-            s = label.Index('#', s0);
+                s = label.Index(' ', s);
+                if (s >= 0)
+                    label.Insert(s, '$');
+                else
+                    eol = true;
+                s = label.Index(s, '$');
+            }
+            s = label.Index('#', s);
         }
+        if (eol)
+            label.Append('$');
     }
     label.Prepend('\"').Append('\"');
     return label;

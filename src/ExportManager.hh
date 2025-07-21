@@ -52,6 +52,7 @@ protected:
     virtual void SetTitleAndAxis(std::ofstream& ofs, const PadProperties& pp) const = 0;
     virtual void SetData(std::ofstream& ofs, const PadProperties& pp) const = 0;
     virtual void SetLegend(std::ofstream& ofs, const PadProperties& pp) const = 0;
+    virtual void SetDecorators(std::ofstream& ofs, const PadProperties& pp) const = 0;
 
 protected:
     bool latex_;

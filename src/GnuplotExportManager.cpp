@@ -42,6 +42,25 @@ const std::unordered_map<int, int> dashtype = {
     {9, 2},
     {10, 4},
 }; // ROOT line style -> gnuplot (native) dashtype
+
+const std::unordered_map<int, std::string> gnuplot_arrow = {
+    {0, "nohead"},
+    {1, "head nofilled"},
+    {2, "backhead nofilled"},
+    {3, "heads nofilled"},
+    {10, "nohead"}, // should never happen
+    {11, "head filled"},
+    {12, "backhead filled"},
+    {13, "heads filled"},
+};
+
+const std::unordered_map<int, std::string> gnuplot_just = {
+    {0, ""},
+    {1, "left"},
+    {2, "center"},
+    {3, "right"},
+};
+
 } // namespace
 
 namespace Expad {
@@ -57,13 +76,13 @@ GnuplotExportManager::~GnuplotExportManager() {
 TString GnuplotExportManager::FormatLabel(const TString& str) const {
     TString ltx = ExportManager::FormatLabel(str);
     if (latex_) {
-        int s = ltx.Index("$\\");
+        int s = ltx.Index("\\");
         while (s >= 0) {
-            ltx.Replace(s, 2, "$\\\\");
+            ltx.Replace(s, 1, "\\\\");
             if (s + 2 >= ltx.Length())
                 s = -1; // should never happen, but it's better to be safe
             else {
-                s = ltx.Index("$\\", s + 2);
+                s = ltx.Index("\\", s + 2);
             }
         }
     }
@@ -86,6 +105,9 @@ void GnuplotExportManager::WriteToFile(const char* filename, const PadProperties
     // >>> plot data
     SetTitleAndAxis(ofs, pp);
 
+    // plot other graphical elements (must come before the plot!)
+    SetDecorators(ofs, pp);
+
     // configure legend
     SetLegend(ofs, pp);
 
@@ -102,7 +124,7 @@ void GnuplotExportManager::WriteToFile(const char* filename, const PadProperties
 }
 
 void GnuplotExportManager::InitFile(std::ofstream& ofs, const TString& file) const {
-    ofs << "set terminal cairolatex pdf standalone size 10cm,7cm\n"
+    ofs << "set terminal cairolatex pdf colortext standalone size 10cm,7cm\n"
         << "set output \"" << file << "\""
         << std::endl;
 }
@@ -218,6 +240,67 @@ void GnuplotExportManager::SetLegend(std::ofstream& ofs, const PadProperties& pp
     }
     else {
         ofs << "\nunset key" << std::endl;
+    }
+}
+
+void GnuplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties& pp) const {
+    if (pp.decorators.size()) {
+        int tag = 0;
+        for (const auto& d : pp.decorators) {
+            ++tag;
+            ofs << std::endl;
+            switch (d.type) {
+                case Line: {
+                    if (!d.pos.isok) {
+                        std::cerr << "Warning : uninitialized line position" << std::endl;
+                        continue;
+                    }
+                    ofs << "set arrow " << tag
+                        << " from " << d.pos.x1 << "," << d.pos.y1
+                        << " to " << d.pos.x2 << "," << d.pos.y2;
+                    // set line/arrow properties
+                    // line width
+                    auto line = d.properties;
+                    if (line.size > 1)
+                        ofs << " lw " << line.size;
+                    // line style
+                    if (dashtype.count(line.style)) {
+                        int dt = pointtype.at(line.style);
+                        if (dt) ofs << " dt " << dt;
+                    }
+                    // color
+                    if (d.properties.color != Black)
+                        ofs << " lc rgb " << d.properties.color.hex_str();
+                    // arrow tip
+                    int arrow = 0;
+                    if (d.label.Contains('>')) arrow += 1;
+                    if (d.label.Contains('<')) arrow += 2;
+                    if (d.label.Contains("|>") || d.label.Contains("<|")) arrow += 10;
+                    ofs << " " << gnuplot_arrow.at(arrow) << " front" << std::endl;
+                    break;
+                }
+                case BareText: {
+                    ofs << "set label " << tag
+                        << " " << FormatLabel(d.label)
+                        << " at " << d.pos.x1 << "," << d.pos.y1
+                        << " " << gnuplot_just.at(d.properties.style / 10); // horizontal alignment
+                    // now, a small trick for vertical alignement
+                    // we apply a vertical offset to reproduce the top/bottom alignment wrt the text position
+                    if (d.properties.style % 2) {
+                        // bottom alignment is [1-3]1 --> move upwards (position is bottom of character)
+                        // top alignment is [1-3]3    --> move downwards (position is top of character)
+                        ofs << " offset 0, character " << ((d.properties.style % 10 == 1) ? "0.6" : "-0.6");
+                    }
+                    if (d.properties.color != Black)
+                        ofs << " tc rgb " << d.properties.color.hex_str();
+                    ofs << " front" << std::endl;
+                    break;
+                }
+                default:
+                    std::cerr << "Warning : decorator not implemented in GLE" << std::endl;
+                    break;
+            }
+        }
     }
 }
 

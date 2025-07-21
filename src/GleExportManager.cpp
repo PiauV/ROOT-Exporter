@@ -37,6 +37,27 @@ const std::unordered_map<int, int> GLE_line = {
     {3, 9},
     {10, 6},
 };
+
+const std::unordered_map<int, std::string> GLE_arrow = {
+    {0, ""},
+    {1, "arrow end"},
+    {2, "arrow start"},
+    {3, "arrow both"},
+};
+
+const std::unordered_map<int, std::string> GLE_just = {
+    {0, ""},
+    {11, "bl"},
+    {12, "cl"},
+    {13, "tl"},
+    {21, "bc"},
+    {22, "cc"},
+    {23, "tc"},
+    {31, "br"},
+    {32, "cr"},
+    {33, "tr"},
+};
+
 } // namespace
 
 namespace Expad {
@@ -78,6 +99,9 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     ofs << "\nend graph" << std::endl;
 
     // plot data <<<
+
+    // plot other graphical elements
+    SetDecorators(ofs, pp);
 
     ofs.close();
 }
@@ -175,6 +199,63 @@ void GleExportManager::SetLegend(std::ofstream& ofs, const PadProperties& pp) co
         ofs << "\n\tkey compact pos ";
         ofs << (pp.legend > 2 ? "b" : "t") << (pp.legend % 2 ? "l" : "r"); // (1 -> tl ; 2 -> tr ; 3 -> bl ; 4 -> br)
         ofs << " hei 0.3 offset 0.2 0.2" << std::endl;
+    }
+}
+
+void GleExportManager::SetDecorators(std::ofstream& ofs, const PadProperties& pp) const {
+    if (pp.decorators.size()) {
+        auto current_color = Black;
+        unsigned short current_alignment = 0;
+        bool filled_arrow = false;
+        for (const auto& d : pp.decorators) {
+            ofs << std::endl;
+            if (d.properties.color != current_color) {
+                ofs << "set color " << d.properties.color.rgb_str() << std::endl;
+                current_color = d.properties.color;
+            }
+            switch (d.type) {
+                case Line: {
+                    if (!d.pos.isok) {
+                        std::cerr << "Warning : uninitialized line position" << std::endl;
+                        continue;
+                    }
+                    // line style
+                    auto line = d.properties;
+                    if (line.size > 1)
+                        ofs << "set lwidth " << 0.015 * line.size << std::endl;
+                    if (line.style) ofs << "set lstyle " << GLE_line.at(line.style) << std::endl;
+                    // arrow tip
+                    int arrow = 0;
+                    if (d.label.Contains('>')) arrow += 1;
+                    if (d.label.Contains('<')) arrow += 2;
+                    if ((d.label.Contains("|>") || d.label.Contains("<|"))) {
+                        if (!filled_arrow)
+                            ofs << "set arrowstyle filled" << std::endl;
+                        filled_arrow = true;
+                    }
+                    else if (filled_arrow) {
+                        ofs << "set arrowstyle simple" << std::endl;
+                        filled_arrow = false;
+                    }
+                    // draw the line
+                    ofs << "amove xg(" << d.pos.x1 << ") yg(" << d.pos.y1 << ")" << std::endl;
+                    ofs << "aline xg(" << d.pos.x2 << ") yg(" << d.pos.y2 << ") " << GLE_arrow.at(arrow) << std::endl;
+                    break;
+                }
+                case BareText: {
+                    if (d.properties.style != current_alignment) {
+                        current_alignment = d.properties.style;
+                        ofs << "set just " << GLE_just.at(current_alignment) << std::endl;
+                    }
+                    ofs << "amove xg(" << d.pos.x1 << ") yg(" << d.pos.y1 << ")" << std::endl;
+                    ofs << "tex " << FormatLabel(d.label) << std::endl;
+                    break;
+                }
+                default:
+                    std::cerr << "Warning : decorator not implemented in GLE" << std::endl;
+                    break;
+            }
+        }
     }
 }
 

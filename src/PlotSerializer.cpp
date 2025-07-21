@@ -199,6 +199,7 @@ void PlotSerializer::StoreDecorator(const TObject* obj, DataType data_type) {
         case BareText: {
             deco.label = obj->GetTitle();
             auto tt = dynamic_cast<const TText*>(obj);
+            deco.properties.style = tt->GetTextAlign(); // align/just
             deco.pos.set(tt->GetX(), tt->GetY());
             break;
         }

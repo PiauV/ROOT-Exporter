@@ -42,6 +42,31 @@ const std::unordered_map<int, std::string> py_line = {
     {3, "\'-.\'"},
     {4, "\'-:\'"},
 };
+
+const std::unordered_map<int, std::string> py_arrow = {
+    {0, "\'-\'"},
+    {1, "\'->\'"},
+    {2, "\'<-\'"},
+    {3, "\'<->\'"},
+    {10, "\'-\'"}, // should not exist... this is just to avoid critical errors
+    {11, "\'-|>\'"},
+    {12, "\'<|-\'"},
+    {13, "\'<|-|>\'"},
+};
+
+const std::unordered_map<int, std::string> py_align = {
+    {0, ""},
+    {11, "ha=\'left\', va=\'bottom\'"},
+    {12, "ha=\'left\', va=\'center\'"},
+    {13, "ha=\'left\', va=\'top\'"},
+    {21, "ha=\'center\', va=\'bottom\'"},
+    {22, "ha=\'center\', va=\'center\'"},
+    {23, "ha=\'center\', va=\'top\'"},
+    {31, "ha=\'right\', va=\'bottom\'"},
+    {32, "ha=\'right\', va=\'center\'"},
+    {33, "ha=\'right\', va=\'top\'"},
+};
+
 } // namespace
 
 namespace Expad {
@@ -88,6 +113,9 @@ void PyplotExportManager::WriteToFile(const char* filename, const PadProperties&
     SetLegend(ofs, pp);
 
     // plot data <<<
+
+    // plot other graphical elements
+    SetDecorators(ofs, pp);
 
     TString outfile(gSystem->BaseName(filename));    // outfile : *.py
     outfile.Replace(outfile.Index(ext_), 4, ".pdf"); // outfile : *.pdf
@@ -223,6 +251,58 @@ void PyplotExportManager::SetLegend(std::ofstream& ofs, const PadProperties& pp)
             << (pp.legend % 2 ? " left" : " right")
             << "\')\n"
             << std::endl;
+    }
+}
+
+void PyplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties& pp) const {
+    if (pp.decorators.size()) {
+        for (const auto& d : pp.decorators) {
+            ofs << std::endl;
+            switch (d.type) {
+                case Line: {
+                    if (!d.pos.isok) {
+                        std::cerr << "Warning : uninitialized line position" << std::endl;
+                        continue;
+                    }
+                    // draw the line
+                    ofs << "ax.annotate(\"\", "
+                        << "(" << d.pos.x1 << ", " << d.pos.y1 << "), "
+                        << "(" << d.pos.x2 << ", " << d.pos.y2 << "), "
+                        << "arrowprops=dict(";
+                    // set line/arrow properties
+                    // line width
+                    auto line = d.properties;
+                    if (line.size > 1)
+                        ofs << "lw=" << line.size << ", ";
+                    // line style
+                    if (line.style)
+                        ofs << "ls=" << py_line.at(line.style) << ", ";
+                    // color
+                    if (d.properties.color != Black)
+                        ofs << "color=" << getColor(d.properties.color) << ", ";
+                    // arrow tip
+                    int arrow = 0;
+                    if (d.label.Contains('>')) arrow += 1;
+                    if (d.label.Contains('<')) arrow += 2;
+                    if (d.label.Contains("|>") || d.label.Contains("<|")) arrow += 10;
+                    ofs << "arrowstyle=" << py_arrow.at(arrow) << "), ";
+                    ofs << ")" << std::endl;
+                    break;
+                }
+                case BareText: {
+                    ofs << "ax.text(" << d.pos.x1 << ", " << d.pos.y1 << ", "
+                        << FormatLabel(d.label) << ", "
+                        << py_align.at(d.properties.style) << ", ";
+                    if (d.properties.color != Black)
+                        ofs << "c=" << getColor(d.properties.color) << ", ";
+                    ofs << ")" << std::endl;
+                    break;
+                }
+                default:
+                    std::cerr << "Warning : decorator not implemented in GLE" << std::endl;
+                    break;
+            }
+        }
     }
 }
 

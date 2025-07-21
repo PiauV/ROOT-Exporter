@@ -17,6 +17,7 @@ protected:
     virtual void SetTitleAndAxis(std::ofstream& ofs, const PadProperties& pp) const;
     virtual void SetData(std::ofstream& ofs, const PadProperties& pp) const;
     virtual void SetLegend(std::ofstream& ofs, const PadProperties& pp) const;
+    virtual void SetDecorators(std::ofstream& ofs, const PadProperties& pp) const;
 
     virtual TString FormatLabel(const TString& str) const;
 
