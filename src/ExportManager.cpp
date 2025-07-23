@@ -54,7 +54,7 @@ void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const 
     gRTT->SetDirectory(folder);
     gRTT->SetCommentChar(com_);
     // std::cout << "RTT directory: " << gRTT->GetDirectory() << " (" << pad->GetName() << ")" << std::endl;
-    for (int i = 0; i < ps->dataObjects_.size(); i++) {
+    for (int i = 0; i < (int)ps->dataObjects_.size(); i++) {
         SaveData(ps->dataObjects_[i], ps->pp_.datasets[i]);
     }
     gRTT->SetDirectory(rtt_folder);

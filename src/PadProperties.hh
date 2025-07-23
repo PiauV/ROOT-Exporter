@@ -13,8 +13,8 @@ namespace Expad {
 struct PadProperties {
     struct Color {
         double red;
-        double blue;
         double green;
+        double blue;
         double alpha;
         Color();
         Color(double r, double g, double b, double a = 1);

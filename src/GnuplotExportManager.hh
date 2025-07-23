@@ -10,7 +10,7 @@ namespace Expad {
 class GnuplotExportManager : public ExportManager {
 public:
     GnuplotExportManager();
-    ~GnuplotExportManager();
+    virtual ~GnuplotExportManager();
 
 protected:
     virtual void WriteToFile(const char* filename, const PadProperties& pp) const;

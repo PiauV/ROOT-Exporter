@@ -177,9 +177,9 @@ void TestExportManager() {
     mg->Draw("a");
     mg->GetXaxis()->SetTitle("#alpha");
     mg->GetYaxis()->SetTitle("#beta");
+    c2->BuildLegend(0.65, 0.15, 0.88, 0.35);
     auto ltx = new TLatex(1.2, 4.8, "#alpha+#beta+#gamma");
     ltx->Draw();
-    c2->BuildLegend();
     c2->Update();
 
     // Data export

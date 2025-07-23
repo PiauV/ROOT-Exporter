@@ -10,7 +10,7 @@ int npassed = 0;
 int ntest = 0;
 bool pass_all_tests = true;
 
-int main(int argc, char** argv) {
+int main(int /*argc*/, char** /*argv*/) {
     // terminate handler
     std::set_terminate([]() {
         printf("FATAL ERROR: test was terminated");

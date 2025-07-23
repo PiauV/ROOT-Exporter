@@ -139,9 +139,9 @@ void TestRTTOutput() {
 
     // Use a custom writer
     writer fw = [](const TObject* obj, const TString& /*opt*/, std::ofstream& ofs) {
-        auto f = dynamic_cast<const TF1*>(obj);
-        if (f) {
-            ofs << f->Eval(100) << std::endl;
+        auto ff = dynamic_cast<const TF1*>(obj);
+        if (ff) {
+            ofs << ff->Eval(100) << std::endl;
         }
         else {
             ofs << obj->GetTitle() << std::endl;

@@ -9,7 +9,7 @@ if(MSVC)
     #   - C4512 (assignment operator) --> caused by TStringToken
     add_compile_options(/W4 /wd4100 /wd4127 /wd4512)
 else()
-    add_compile_options(-Wall -Wshadow)
+    add_compile_options(-Wall -Wextra -Wshadow)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)

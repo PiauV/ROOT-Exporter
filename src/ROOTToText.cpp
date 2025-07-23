@@ -57,7 +57,7 @@ bool ROOTToText::SaveObject(const TObject* obj, const char* filename, Option_t* 
 
 bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filename, Option_t* opt) const {
     TString str(filename);
-    return SaveObject(obj, GetDataType(obj), str, opt);
+    return SaveObject(obj, dt, str, opt);
 }
 
 bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, Option_t* opt) const {
@@ -510,10 +510,9 @@ void ROOTToText::WriteTF1(const TF1* f, const TString& option, std::ofstream& of
         auto s2 = s1;
         while (isdigit(option[++s2])) // string ends with '\0' --> no need to perform out-of-bounds check
             continue;
-        auto sub = option(s1 + 1, s2 - s1 - 2);
-        if (!sub.IsNull()) {
-            npoints = sub.String().Atoi();
-        }
+        TString sub = TString(option(s1 + 1, s2 - s1 - 1));
+        if (!sub.IsNull())
+            npoints = sub.Atoi();
     }
     if (npoints <= 0) npoints = npfunc_;
 

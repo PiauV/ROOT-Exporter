@@ -6,6 +6,7 @@
 #include "TH1.h"
 #include "TLegend.h"
 #include "TLegendEntry.h"
+#include "TLine.h"
 #include "TList.h"
 #include "TMultiGraph.h"
 #include "TPad.h"
@@ -248,7 +249,7 @@ bool PlotSerializer::GetLegend(const TLegend* leg) {
         const TObject* entry_obj = entry->GetObject();
         TString label = entry->GetLabel();
         if (label.CompareTo(entry_obj->GetTitle()) == 0) continue; // the label is the object title, no need to change anything
-        for (int i = 0; i < dataObjects_.size(); i++) {
+        for (int i = 0; i < (int)dataObjects_.size(); i++) {
             if (dataObjects_[i] == entry_obj) {
                 pp_.datasets.at(i).label = label;
                 break; // obj found : end the loop

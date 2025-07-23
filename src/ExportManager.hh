@@ -10,7 +10,7 @@ namespace Expad {
 class BaseExportManager {
 public:
     BaseExportManager();
-    ~BaseExportManager();
+    virtual ~BaseExportManager();
 
     void ExportPad(TVirtualPad* pad, const char* filename) const;
     void SetDataDirectory(TString folder_name);
@@ -31,7 +31,7 @@ protected:
 class DataExportManager : public BaseExportManager {
 public:
     DataExportManager() {};
-    ~DataExportManager() {};
+    virtual ~DataExportManager() {};
 
 protected:
     void WriteToFile(const char*, const PadProperties&) const override {};
@@ -40,7 +40,7 @@ protected:
 class ExportManager : public BaseExportManager {
 public:
     ExportManager();
-    ~ExportManager();
+    virtual ~ExportManager();
 
     inline void EnableLatex(bool flag = true) { latex_ = flag; };
 

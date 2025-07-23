@@ -117,7 +117,7 @@ void GnuplotExportManager::WriteToFile(const char* filename, const PadProperties
     // plot data <<<
 
     ofs << "\nunset output"
-        << "\n!pdflatex " << outfile
+        << "\n!pdflatex -interaction=nonstopmode " << outfile
         << std::endl;
 
     ofs.close();

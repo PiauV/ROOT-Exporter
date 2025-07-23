@@ -10,7 +10,7 @@ namespace Expad {
 class GleExportManager : public ExportManager {
 public:
     GleExportManager();
-    ~GleExportManager();
+    virtual ~GleExportManager();
 
 protected:
     virtual void WriteToFile(const char* filename, const PadProperties& pp) const;

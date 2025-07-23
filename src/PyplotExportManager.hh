@@ -10,7 +10,7 @@ namespace Expad {
 class PyplotExportManager : public ExportManager {
 public:
     PyplotExportManager();
-    ~PyplotExportManager();
+    virtual ~PyplotExportManager();
 
 protected:
     virtual void WriteToFile(const char* filename, const PadProperties& pp) const;
