@@ -1,6 +1,6 @@
 #include "PadProperties.hh"
 
-namespace Expad {
+namespace REx {
 PadProperties::Color::Color(double r, double g, double b, double a) : red(r), green(g), blue(b), alpha(a) {};
 PadProperties::Color::Color() : Color(0, 0, 0, 1) {};
 
@@ -61,4 +61,4 @@ void PadProperties::Coord::set(double x, double y, double xmax, double ymax) {
     isok = true;
 }
 
-} // namespace Expad
+} // namespace REx

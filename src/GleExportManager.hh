@@ -5,7 +5,7 @@
 
 #include <fstream>
 
-namespace Expad {
+namespace REx {
 
 class GleExportManager : public ExportManager {
 public:
@@ -22,6 +22,6 @@ protected:
 private:
     void InitFile(std::ofstream& ofs) const;
 };
-} // namespace Expad
+} // namespace REx
 
 #endif

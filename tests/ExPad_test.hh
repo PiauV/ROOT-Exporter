@@ -1,5 +1,5 @@
-#ifndef EXPLOT_TEST_HH
-#define EXPLOT_TEST_HH
+#ifndef EXPAD_TEST_HH
+#define EXPAD_TEST_HH
 
 void TestPlotSerializer();
 void TestExportManager();

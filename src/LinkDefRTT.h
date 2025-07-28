@@ -2,10 +2,10 @@
 // CINT is ROOT5
 // CLING is ROOT6
 
-#include "LinkDefBase.h" // creation of base dictionaries for Expad
+#include "LinkDefBase.h" // creation of base dictionaries for REx
 
-// Turn on creation of additional dictionaries Expad/RTT module
-#pragma link C++ class Expad::ROOTToText;
+// Turn on creation of additional dictionaries REx/RTT module
+#pragma link C++ class REx::ROOTToText;
 #pragma link C++ global gRTT;
 
 #endif // __CINT__ / __CLING__

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
 
-project(ExPaD LANGUAGES CXX)
+project(REx LANGUAGES CXX)
 
 if(MSVC)
     # level 4 warnings but without:

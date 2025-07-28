@@ -5,7 +5,7 @@
 
 class TVirtualPad;
 
-namespace Expad {
+namespace REx {
 
 class BaseExportManager {
 public:
@@ -58,6 +58,6 @@ protected:
     bool latex_;
 };
 
-} // namespace Expad
+} // namespace REx
 
 #endif

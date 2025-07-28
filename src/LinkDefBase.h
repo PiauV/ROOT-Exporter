@@ -7,10 +7,10 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
-// Turn on creation of base dictionaries for Expad (DataType + namespace)
-#pragma link C++ namespace Expad;
-#pragma link C++ enum Expad::DataType;
-#pragma link C++ function Expad::GetDataType;
-#pragma link C++ function Expad::GetDataDimension;
+// Turn on creation of base dictionaries for REx (DataType + namespace)
+#pragma link C++ namespace REx;
+#pragma link C++ enum REx::DataType;
+#pragma link C++ function REx::GetDataType;
+#pragma link C++ function REx::GetDataDimension;
 
 #endif // __CINT__ / __CLING__

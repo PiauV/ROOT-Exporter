@@ -63,7 +63,7 @@ const std::unordered_map<int, std::string> gnuplot_just = {
 
 } // namespace
 
-namespace Expad {
+namespace REx {
 
 GnuplotExportManager::GnuplotExportManager() {
     ext_ = ".gp";
@@ -304,4 +304,4 @@ void GnuplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties
     }
 }
 
-} // namespace Expad
+} // namespace REx

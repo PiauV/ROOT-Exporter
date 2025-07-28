@@ -1,4 +1,4 @@
-#include "ExPlot_test.hh"
+#include "ExPad_test.hh"
 #include "GleExportManager.hh"
 #include "GnuplotExportManager.hh"
 #include "PlotSerializer.hh"
@@ -25,12 +25,12 @@
 void TestPlotSerializer() {
     BEGIN_TEST();
 
-    Expad::PlotSerializer* ps = nullptr;
+    REx::PlotSerializer* ps = nullptr;
 
     // CASE 0 - empty canvas
     TCanvas* c0 = new TCanvas();
     c0->Draw();
-    EXPECTED_EXCEPTION(ps = new Expad::PlotSerializer(gPad), std::runtime_error);
+    EXPECTED_EXCEPTION(ps = new REx::PlotSerializer(gPad), std::runtime_error);
     delete ps;
     ps = nullptr;
 
@@ -44,7 +44,7 @@ void TestPlotSerializer() {
     f->Draw("same");
     c1->Update(); // necessary to get the title in the list of primitives
     try {
-        ps = new Expad::PlotSerializer(gPad);
+        ps = new REx::PlotSerializer(gPad);
         SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
         COMPARE_TSTRING(ps->GetDatasetTitle(0), "h");
         COMPARE_TSTRING(ps->GetDatasetTitle(1), "gaus");
@@ -96,7 +96,7 @@ void TestPlotSerializer() {
     legend->Draw();
     c2->Update(); // necessary to get the title in the list of primitives
     try {
-        ps = new Expad::PlotSerializer(gPad);
+        ps = new REx::PlotSerializer(gPad);
         SIMPLE_TEST(ps->GetNumberOfDatasets() == 3);
         COMPARE_TSTRING(ps->GetPlotTitle(), "title");
         COMPARE_TSTRING(ps->GetXaxisTitle(), "x");
@@ -184,14 +184,14 @@ void TestExportManager() {
 
     // Data export
     try {
-        auto dem = std::make_unique<Expad::DataExportManager>();
+        auto dem = std::make_unique<REx::DataExportManager>();
         dem->ExportPad(c1, "output/test_export");
         // RTT was tested previously --> if files exist, their content should be ok
         SIMPLE_TEST(!gSystem->AccessPathName("output/test_export/h.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/test_export/f.txt"));
 
         gSystem->mkdir("output/gle");
-        auto gle_man = std::make_unique<Expad::GleExportManager>();
+        auto gle_man = std::make_unique<REx::GleExportManager>();
         gle_man->SaveInFolder(true);
         gle_man->ExportPad(c1, "output/gle/c1");
         SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/h.txt"));
@@ -206,7 +206,7 @@ void TestExportManager() {
         SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c2.gle"));
 
         gSystem->mkdir("output/gnuplot");
-        auto gnuplot_man = std::make_unique<Expad::GnuplotExportManager>();
+        auto gnuplot_man = std::make_unique<REx::GnuplotExportManager>();
         gnuplot_man->SaveInFolder(false);
         gnuplot_man->ExportPad(c1, "output/gnuplot/c1");
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/h.txt"));
@@ -219,7 +219,7 @@ void TestExportManager() {
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/c2.gp"));
 
         gSystem->mkdir("output/python");
-        auto pyplot_man = std::make_unique<Expad::PyplotExportManager>();
+        auto pyplot_man = std::make_unique<REx::PyplotExportManager>();
         pyplot_man->SaveInFolder(false);
         pyplot_man->ExportPad(c1, "output/python/c1");
         SIMPLE_TEST(!gSystem->AccessPathName("output/python/h.txt"));

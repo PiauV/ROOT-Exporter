@@ -13,7 +13,7 @@
 #include <iostream>
 #include <memory>
 
-namespace Expad {
+namespace REx {
 
 BaseExportManager::BaseExportManager() {
     ext_ = "";
@@ -212,4 +212,4 @@ TString ExportManager::FormatLabel(const TString& str) const {
     return label;
 }
 
-} // namespace Expad
+} // namespace REx

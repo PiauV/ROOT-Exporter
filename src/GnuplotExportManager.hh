@@ -5,7 +5,7 @@
 
 #include <fstream>
 
-namespace Expad {
+namespace REx {
 
 class GnuplotExportManager : public ExportManager {
 public:
@@ -24,6 +24,6 @@ protected:
 private:
     void InitFile(std::ofstream& ofs, const TString& file) const;
 };
-} // namespace Expad
+} // namespace REx
 
 #endif

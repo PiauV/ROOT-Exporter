@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-namespace Expad {
+namespace REx {
 
 struct PadProperties {
     struct Color {
@@ -76,6 +76,6 @@ bool operator!=(const PadProperties::Color& lc, const PadProperties::Color& rc);
 
 static const PadProperties::Color Black(0, 0, 0);
 
-} // namespace Expad
+} // namespace REx
 
 #endif

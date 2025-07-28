@@ -69,7 +69,7 @@ const std::unordered_map<int, std::string> py_align = {
 
 } // namespace
 
-namespace Expad {
+namespace REx {
 
 PyplotExportManager::PyplotExportManager() {
     ext_ = ".py";
@@ -306,4 +306,4 @@ void PyplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties&
     }
 }
 
-} // namespace Expad
+} // namespace REx

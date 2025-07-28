@@ -16,9 +16,9 @@ add_library(libROOTToText SHARED ${RTT_SRC} ${RTT_DICT}.cxx)
 target_link_libraries(libROOTToText PUBLIC ${ROOT_LIBS})
 
 
-##### Plot export (ExPlot)
+##### Export Plots And Datasets (ExPad)
 
-set(EXPLOT_HEADERS
+set(EXPAD_HEADERS
 DataType.hh
 ExportManager.hh
 GleExportManager.hh
@@ -28,7 +28,7 @@ PlotSerializer.hh
 PyplotExportManager.hh
 )
 
-set(EXPLOT_SRC
+set(EXPAD_SRC
 DataType.cpp
 ExportManager.cpp
 GleExportManager.cpp
@@ -38,15 +38,15 @@ PlotSerializer.cpp
 PyplotExportManager.cpp
 )
 
-set(EXPLOT_DICT ExPlot_dict)
+set(EXPAD_DICT ExPad_dict)
 
 #--- Create ROOT dictonary
-ROOT_GENERATE_DICTIONARY(${EXPLOT_DICT} ${EXPLOT_HEADERS} LINKDEF LinkDefExPlot.h)
+ROOT_GENERATE_DICTIONARY(${EXPAD_DICT} ${EXPAD_HEADERS} LINKDEF LinkDefExPad.h)
 
 #--- Create a shared library
-add_library(libExPlot SHARED ${EXPLOT_SRC} ${EXPLOT_DICT}.cxx)
-add_dependencies(libExPlot libROOTToText)
-target_link_libraries(libExPlot PUBLIC libROOTToText ${ROOT_LIBS})
+add_library(libExPad SHARED ${EXPAD_SRC} ${EXPAD_DICT}.cxx)
+add_dependencies(libExPad libROOTToText)
+target_link_libraries(libExPad PUBLIC libROOTToText ${ROOT_LIBS})
 
 
-set_target_properties(libROOTToText libExPlot PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+set_target_properties(libROOTToText libExPad PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)

@@ -5,7 +5,7 @@
 
 #include <fstream>
 
-namespace Expad {
+namespace REx {
 
 class PyplotExportManager : public ExportManager {
 public:
@@ -25,6 +25,6 @@ private:
     void InitFile(std::ofstream& ofs) const;
     char* getColor(PadProperties::Color c) const;
 };
-} // namespace Expad
+} // namespace REx
 
 #endif

@@ -15,7 +15,7 @@
 #include "TString.h"
 #include "TText.h"
 
-namespace Expad {
+namespace REx {
 
 PlotSerializer::PlotSerializer(TVirtualPad* pad) : pad_(pad) {
     ExtractPadProperties();
@@ -104,7 +104,7 @@ void PlotSerializer::ExtractPadProperties() {
         }
     }
     if (!pp_.datasets.size())
-        throw std::runtime_error("ExPaD failed to export this plot (no compatible data was found).");
+        throw std::runtime_error("REx failed to export this plot (no compatible data was found).");
 }
 
 void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TString& extra_opts) {
@@ -271,4 +271,4 @@ PadProperties::Color PlotSerializer::GetColor(Color_t ci) const {
     return c;
 }
 
-} // namespace Expad
+} // namespace REx

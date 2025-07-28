@@ -43,44 +43,44 @@ void TestDataType() {
     TCanvas* c = new TCanvas();
 
     // histograms
-    SIMPLE_TEST(Expad::GetDataType(h1) == Expad::Histo1D);
-    SIMPLE_TEST(Expad::GetDataType(h2) == Expad::Histo2D);
-    SIMPLE_TEST(Expad::GetDataType(h3) == Expad::Histo3D);
-    SIMPLE_TEST(Expad::GetDataType(pf) == Expad::Histo1D);
+    SIMPLE_TEST(REx::GetDataType(h1) == REx::Histo1D);
+    SIMPLE_TEST(REx::GetDataType(h2) == REx::Histo2D);
+    SIMPLE_TEST(REx::GetDataType(h3) == REx::Histo3D);
+    SIMPLE_TEST(REx::GetDataType(pf) == REx::Histo1D);
 
     // graphs
-    SIMPLE_TEST(Expad::GetDataType(gr) == Expad::Graph1D);
-    SIMPLE_TEST(Expad::GetDataType(gre) == Expad::Graph1D);
-    SIMPLE_TEST(Expad::GetDataType(gr2D) == Expad::Graph2D);
-    SIMPLE_TEST(Expad::GetDataType(mg) == Expad::MultiGraph1D);
+    SIMPLE_TEST(REx::GetDataType(gr) == REx::Graph1D);
+    SIMPLE_TEST(REx::GetDataType(gre) == REx::Graph1D);
+    SIMPLE_TEST(REx::GetDataType(gr2D) == REx::Graph2D);
+    SIMPLE_TEST(REx::GetDataType(mg) == REx::MultiGraph1D);
 
     // functions
-    SIMPLE_TEST(Expad::GetDataType(f1) == Expad::Function1D);
-    SIMPLE_TEST(Expad::GetDataType(f12) == Expad::Function1D);
-    SIMPLE_TEST(Expad::GetDataType(f2) == Expad::Function2D);
+    SIMPLE_TEST(REx::GetDataType(f1) == REx::Function1D);
+    SIMPLE_TEST(REx::GetDataType(f12) == REx::Function1D);
+    SIMPLE_TEST(REx::GetDataType(f2) == REx::Function2D);
 
     // text
-    SIMPLE_TEST(Expad::GetDataType(pvtxt) == Expad::TextBox);
-    SIMPLE_TEST(Expad::GetDataType(txt) == Expad::BareText);
-    SIMPLE_TEST(Expad::GetDataType(ltx) == Expad::BareText);
+    SIMPLE_TEST(REx::GetDataType(pvtxt) == REx::TextBox);
+    SIMPLE_TEST(REx::GetDataType(txt) == REx::BareText);
+    SIMPLE_TEST(REx::GetDataType(ltx) == REx::BareText);
 
     // legend
-    SIMPLE_TEST(Expad::GetDataType(leg) == Expad::Legend);
+    SIMPLE_TEST(REx::GetDataType(leg) == REx::Legend);
 
     // others (not supported)
-    SIMPLE_TEST(Expad::GetDataType(frm) == Expad::Undefined);
-    SIMPLE_TEST(Expad::GetDataType(c) == Expad::Undefined);
+    SIMPLE_TEST(REx::GetDataType(frm) == REx::Undefined);
+    SIMPLE_TEST(REx::GetDataType(c) == REx::Undefined);
 
     // check DataType numbering scheme (undef/1D/2D/3D)
-    SIMPLE_TEST(Expad::GetDataDimension(Expad::Undefined) == -1)
-    SIMPLE_TEST(Expad::GetDataDimension(Expad::Function1D) == 1)
-    SIMPLE_TEST(Expad::GetDataDimension(Expad::Graph1D) == 1)
-    SIMPLE_TEST(Expad::GetDataDimension(Expad::MultiGraph1D) == 1)
-    SIMPLE_TEST(Expad::GetDataDimension(Expad::Histo2D) == 2)
-    SIMPLE_TEST(Expad::GetDataDimension(Expad::Function2D) == 2)
-    SIMPLE_TEST(Expad::GetDataDimension(Expad::Graph2D) == 2)
-    SIMPLE_TEST(Expad::GetDataDimension(Expad::Histo2D) == 2)
-    SIMPLE_TEST(Expad::GetDataDimension(Expad::Histo3D) == 3)
+    SIMPLE_TEST(REx::GetDataDimension(REx::Undefined) == -1)
+    SIMPLE_TEST(REx::GetDataDimension(REx::Function1D) == 1)
+    SIMPLE_TEST(REx::GetDataDimension(REx::Graph1D) == 1)
+    SIMPLE_TEST(REx::GetDataDimension(REx::MultiGraph1D) == 1)
+    SIMPLE_TEST(REx::GetDataDimension(REx::Histo2D) == 2)
+    SIMPLE_TEST(REx::GetDataDimension(REx::Function2D) == 2)
+    SIMPLE_TEST(REx::GetDataDimension(REx::Graph2D) == 2)
+    SIMPLE_TEST(REx::GetDataDimension(REx::Histo2D) == 2)
+    SIMPLE_TEST(REx::GetDataDimension(REx::Histo3D) == 3)
 
     END_TEST();
 }

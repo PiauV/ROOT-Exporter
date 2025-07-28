@@ -1,7 +1,7 @@
 #include "TROOT.h"
 
 #include "DataType_test.hh"
-#include "ExPlot_test.hh"
+#include "ExPad_test.hh"
 #include "RTT_test.hh"
 
 // initialization
@@ -10,6 +10,7 @@ int npassed = 0;
 int ntest = 0;
 bool pass_all_tests = true;
 
+// Testing REx (TREx)
 int main(int /*argc*/, char** /*argv*/) {
     // terminate handler
     std::set_terminate([]() {

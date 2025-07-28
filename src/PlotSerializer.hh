@@ -12,7 +12,7 @@ class TVirtualPad;
 class TLegend;
 class TObject;
 
-namespace Expad {
+namespace REx {
 
 class PlotSerializer {
 public:
@@ -46,6 +46,6 @@ private:
     friend class BaseExportManager;
 };
 
-} // namespace Expad
+} // namespace REx
 
 #endif

@@ -2,7 +2,7 @@
 
 #include "TObject.h"
 
-namespace Expad {
+namespace REx {
 
 DataType GetDataType(const TObject* obj) {
     // histogram
@@ -60,4 +60,4 @@ int GetDataDimension(DataType d) {
         return d / 10 + 1;
 }
 
-} // namespace Expad
+} // namespace REx

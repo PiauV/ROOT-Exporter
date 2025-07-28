@@ -3,7 +3,7 @@
 
 class TObject;
 
-namespace Expad {
+namespace REx {
 
 enum DataType {
     Undefined = 0,
@@ -27,6 +27,6 @@ DataType GetDataType(const TObject* obj);
 
 int GetDataDimension(DataType d);
 
-} // namespace Expad
+} // namespace REx
 
 #endif

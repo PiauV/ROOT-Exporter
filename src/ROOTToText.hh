@@ -23,7 +23,7 @@ class TClass;
 
 typedef void (*writer)(const TObject* obj, const TString& option, std::ofstream& ofs);
 
-namespace Expad {
+namespace REx {
 
 class ROOTToText {
 public:
@@ -103,8 +103,8 @@ inline void ROOTToText::SetDefaultNpFunction(int n) {
     npfunc_ = n;
 }
 
-} // namespace Expad
+} // namespace REx
 
-R__EXTERN Expad::ROOTToText* gRTT;
+R__EXTERN REx::ROOTToText* gRTT;
 
 #endif

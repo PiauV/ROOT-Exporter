@@ -60,7 +60,7 @@ const std::unordered_map<int, std::string> GLE_just = {
 
 } // namespace
 
-namespace Expad {
+namespace REx {
 
 GleExportManager::GleExportManager() {
     ext_ = ".gle";
@@ -259,4 +259,4 @@ void GleExportManager::SetDecorators(std::ofstream& ofs, const PadProperties& pp
     }
 }
 
-} // namespace Expad
+} // namespace REx

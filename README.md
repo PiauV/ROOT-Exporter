@@ -1,4 +1,4 @@
-# ROOT - ExPaD
+# ROOT Exporter (REx)
 
-**Ex**port **P**lots **a**nd **D**atasets
-
+- ROOT To Text (RTT)
+- Export Plots and Datasets (ExPad) 

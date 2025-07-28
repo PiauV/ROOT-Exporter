@@ -16,9 +16,9 @@
 #include <fstream>
 #include <iostream>
 
-Expad::ROOTToText* gRTT = Expad::ROOTToText::GetInstance();
+REx::ROOTToText* gRTT = REx::ROOTToText::GetInstance();
 
-namespace Expad {
+namespace REx {
 
 ROOTToText* ROOTToText::instance_ = 0;
 
@@ -535,4 +535,4 @@ void ROOTToText::WriteTF1(const TF1* f, const TString& option, std::ofstream& of
     }
 }
 
-} // namespace Expad
+} // namespace REx
