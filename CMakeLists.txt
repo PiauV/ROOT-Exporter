@@ -12,9 +12,7 @@ else()
     add_compile_options(-Wall -Wextra -Wshadow)
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/src)
-
-#---Locate the ROOT package
+#--- Locate the ROOT package
 # set(ROOT_CONFIG_DEBUG true)
 find_package(ROOT REQUIRED)
 message(STATUS "Found ROOT ${ROOT_VERSION}")
@@ -28,6 +26,10 @@ if(${ROOT_VERSION} VERSION_GREATER_EQUAL "6")
 else()
     set(ROOT_LIBS Core Cint Hist Graf Gpad)
 endif()
+
+include_directories(${CMAKE_SOURCE_DIR}/src/base)
+include_directories(${CMAKE_SOURCE_DIR}/src/rtt)
+include_directories(${CMAKE_SOURCE_DIR}/src/expad)
 
 enable_testing()
 
