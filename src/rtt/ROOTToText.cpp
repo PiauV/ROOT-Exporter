@@ -1,4 +1,5 @@
 #include "ROOTToText.hh"
+#include "Log.hh"
 
 #include "TClass.h"
 #include "TF1.h"
@@ -62,7 +63,7 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filenam
 
 bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, Option_t* opt) const {
     if (!obj) {
-        std::cerr << "Error: null pointer" << std::endl;
+        LOG_ERROR("null pointer");
         return false;
     }
 
@@ -78,7 +79,7 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, 
     TString path = GetFilePath(obj, filename.Data());
     std::ofstream ofs(path);
     if (!ofs.is_open()) {
-        std::cerr << "Error: could not open file " << path << std::endl;
+        LOG_ERROR("Could not open file " << path);
         return false;
     }
 
@@ -125,7 +126,7 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, 
     }
 
     ofs.close();
-    if (verb_) std::cout << "Saved " << obj->GetName() << " in " << path << std::endl;
+    if (verb_) LOG_INFO("Saved " << obj->GetName() << " in " << path);
     filename = path;
     return true;
 }
@@ -145,7 +146,7 @@ void ROOTToText::PrintOptions() const {
 
 bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, TString& filename, Option_t* opt) const {
     if (!mg) {
-        std::cerr << "Error: null pointer" << std::endl;
+        LOG_ERROR("null pointer");
         return false;
     }
 
@@ -188,15 +189,15 @@ bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, TString& filename, Option
 bool ROOTToText::AddCustomWriter(const char* class_name, writer& func) {
     auto cl = TClass::GetClass(class_name);
     if (!cl) {
-        std::cerr << "Error: class " << class_name << " not found in ROOT." << std::endl;
+        LOG_ERROR("Class " << class_name << " not found in ROOT.");
         return false;
     }
     if (!cl->InheritsFrom("TObject")) {
-        std::cerr << "Error: class " << class_name << " does not inherit from TObject." << std::endl;
+        LOG_ERROR("Class " << class_name << " does not inherit from TObject.");
         return false;
     }
     if (userWriters_.count(cl))
-        std::cout << "Warning: overwritting writer function for class " << class_name << std::endl;
+        LOG_WARN("Overwritting writer function for class " << class_name);
     userWriters_[cl] = func;
     return true;
 }
@@ -208,7 +209,7 @@ bool ROOTToText::RemoveCustomWriter(const char* class_name) {
         return true;
     }
     else {
-        std::cout << "Warning: did not find user writer function for class " << class_name << std::endl;
+        LOG_WARN("Did not find user writer function for class " << class_name);
         return false;
     }
 }
@@ -258,7 +259,7 @@ void ROOTToText::SetDirectory(TString dir) {
     // what to do in case of failure ?? -> exception, error message, return value ?
     TString error_msg = "path " + path + " cannot be accessed.";
     throw std::runtime_error(error_msg);
-    // std::cerr << "Error: path " << path << " cannot be accessed." << std::endl;
+    // LOG_ERROR("Path " << path << " cannot be accessed.");
     // std::cerr << "Keeping the previous directory: " << baseDirectory_ << std::endl;
 }
 
@@ -337,7 +338,7 @@ void ROOTToText::WriteTH2(const TH2* h, const TString& option, std::ofstream& of
     // ...
     bool glefile = option.Contains("G");
     if (in_columns && glefile) {
-        std::cerr << "Warning: Changing 2D GLE file format from \'columns\' to \'matrix\'." << std::endl;
+        LOG_WARN("Changing 2D GLE file format from \'columns\' to \'matrix\'.");
         in_columns = false;
     }
 
@@ -411,7 +412,7 @@ void ROOTToText::WriteTH2(const TH2* h, const TString& option, std::ofstream& of
 
 void ROOTToText::WriteGraph(const TGraph* gr, const TString& option, std::ofstream& ofs) const {
     if (gr->IsA() != TGraph::Class() && gr->IsA() != TGraphErrors::Class())
-        std::cerr << "Warning: only limited support for class " << gr->IsA()->GetName() << std::endl;
+        LOG_WARN("Only limited support for class " << gr->IsA()->GetName());
 
     bool with_errors = true;
     bool with_herrors = option.Contains("H");

@@ -1,5 +1,6 @@
 #include "ExportManager.hh"
 
+#include "Log.hh"
 #include "PlotSerializer.hh"
 #include "ROOTToText.hh"
 
@@ -33,7 +34,7 @@ void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const 
 
     if (ext_.Length()) {
         if (!gSystem->AccessPathName(path, EAccessMode::kFileExists)) {
-            std::cerr << "Warning: overwriting file " << path << std::endl;
+            LOG_WARN("Overwriting file " << path);
         }
     }
     else {
@@ -41,7 +42,7 @@ void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const 
     }
 
     if (gSystem->AccessPathName(folder, EAccessMode::kWritePermission)) {
-        std::cerr << "Error: cannot write to directory " << folder << std::endl;
+        LOG_ERROR("Cannot write to directory " << folder);
         return;
         // throw std::runtime_error("Error: cannot write to this directory.")
     }
@@ -166,7 +167,7 @@ void BaseExportManager::SaveData(const TObject* obj, PadProperties::Data& data) 
             data.file.first.Prepend(dataDir_ + "/");
     }
     else {
-        std::cerr << "Error: could not save data " << obj->GetName() << " (" << obj->IsA()->GetName() << ")." << std::endl;
+        LOG_ERROR("Could not save data " << obj->GetName() << " (" << obj->IsA()->GetName() << ").");
     }
 }
 

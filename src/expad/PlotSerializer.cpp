@@ -1,4 +1,5 @@
 #include "PlotSerializer.hh"
+#include "Log.hh"
 
 #include "TColor.h"
 #include "TF1.h"
@@ -76,7 +77,7 @@ void PlotSerializer::ExtractPadProperties() {
             }
         }
         else if (dim == 2 || dim == 3) {
-            std::cerr << "Warning: 2D/3D plots are not supported yet." << std::endl;
+            LOG_WARN("2D/3D plots are not supported yet.");
             // throw std::invalid_argument("2D/3D plots are not supported yet.");
         }
         else if (dim == 0) {
@@ -125,8 +126,9 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TSt
         if (extra_opts.Length()) opt.Append(extra_opts);
         opt.ToUpper();
         auto line = dynamic_cast<const TAttLine*>(obj);
-        if (!line)
-            std::cout << "Warning : could not get line attributes from " << obj->GetName() << std::endl;
+        if (!line) {
+            LOG_WARN("Could not get line attributes from " << obj->GetName());
+        }
         else {
             prop.line.color = GetColor(line->GetLineColor());
             prop.line.size = line->GetLineWidth();
@@ -139,8 +141,9 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TSt
             }
         }
         auto marker = dynamic_cast<const TAttMarker*>(obj);
-        if (!marker)
-            std::cout << "Warning : could not get marker attributes from " << obj->GetName() << std::endl;
+        if (!marker) {
+            LOG_WARN("Could not get marker attributes from " << obj->GetName());
+        }
         else {
             prop.marker.color = GetColor(marker->GetMarkerColor());
             prop.marker.size = 10 * marker->GetMarkerSize();
@@ -179,7 +182,7 @@ void PlotSerializer::StoreDataWithAxis(const TObject* obj, DataType data_type, B
         if (GetAxis(h))
             get_axis = false;
         else
-            std::cout << "Warning : could not get axis from " << obj->GetName() << std::endl;
+            LOG_WARN("Could not get axis from " << obj->GetName());
     }
 }
 

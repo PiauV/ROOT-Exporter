@@ -1,5 +1,6 @@
 #include "GnuplotExportManager.hh"
 
+#include "Log.hh"
 #include "PlotSerializer.hh"
 
 #include "TPad.h"
@@ -92,7 +93,7 @@ TString GnuplotExportManager::FormatLabel(const TString& str) const {
 void GnuplotExportManager::WriteToFile(const char* filename, const PadProperties& pp) const {
     std::ofstream ofs(filename);
     if (!ofs.is_open()) {
-        std::cerr << "Error: could not open file " << filename << std::endl;
+        LOG_ERROR("Could not open file " << filename);
         return;
     }
 
@@ -252,7 +253,7 @@ void GnuplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties
             switch (d.type) {
                 case Line: {
                     if (!d.pos.isok) {
-                        std::cerr << "Warning : uninitialized line position" << std::endl;
+                        LOG_WARN("Uninitialized line position");
                         continue;
                     }
                     ofs << "set arrow " << tag
@@ -297,7 +298,7 @@ void GnuplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties
                     break;
                 }
                 default:
-                    std::cerr << "Warning : decorator not implemented in GLE" << std::endl;
+                    LOG_WARN("Decorator not implemented for gnuplot");
                     break;
             }
         }
