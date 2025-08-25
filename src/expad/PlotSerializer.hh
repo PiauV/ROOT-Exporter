@@ -14,6 +14,7 @@ class TObject;
 
 namespace REx {
 
+/// @brief Extracts the properties of a plot (content and style)
 class PlotSerializer {
 public:
     PlotSerializer(TVirtualPad* pad);

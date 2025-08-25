@@ -26,6 +26,9 @@ BaseExportManager::BaseExportManager() {
 BaseExportManager::~BaseExportManager() {
 }
 
+/// @brief Save plot to text files (plotting script with data files)
+/// @param pad plot to export
+/// @param filename ouput script name
 void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const {
     auto ps = std::make_unique<PlotSerializer>(pad);
 
@@ -64,6 +67,10 @@ void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const 
     WriteToFile(path, ps->pp_);
 }
 
+/// @brief Get the ouput file path for exporting a plot
+/// @param pad plot to export
+/// @param filename output file name
+/// @return output file path
 TString BaseExportManager::GetFilePath(TVirtualPad* pad, const char* filename) const {
     TString str(filename);
 
@@ -109,6 +116,7 @@ TString BaseExportManager::GetFilePath(TVirtualPad* pad, const char* filename) c
     return str;
 }
 
+/// @brief Save a drawn data object to an external file using ROOTToText
 void BaseExportManager::SaveData(const TObject* obj, PadProperties::Data& data) const {
     TString option = "";
     int ncol = 0;
@@ -171,23 +179,26 @@ void BaseExportManager::SaveData(const TObject* obj, PadProperties::Data& data) 
     }
 }
 
+/// @brief If set, the data files will be saved in a separated folder
 void BaseExportManager::SetDataDirectory(TString folder_name) {
     // keep the data files in a separator folder
     dataDir_ = folder_name;
 }
 
+/// @brief Set to true to save the plot and the data files in a dedicated folder
 void BaseExportManager::SaveInFolder(bool flag) {
     inFolder_ = flag;
 }
 
-ExportManager::ExportManager() : BaseExportManager() {
+VirtualExportManager::VirtualExportManager() : BaseExportManager() {
     EnableLatex();
 }
 
-ExportManager::~ExportManager() {
+VirtualExportManager::~VirtualExportManager() {
 }
 
-TString ExportManager::FormatLabel(const TString& str) const {
+/// @brief Export LaTeX symbols and formulas
+TString VirtualExportManager::FormatLabel(const TString& str) const {
     TString label(str);
     if (latex_) {
         // process LaTeX symbols : replace '#sym' with '$\sym$'

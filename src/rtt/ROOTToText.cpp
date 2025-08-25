@@ -51,11 +51,22 @@ void ROOTToText::SetFileExtension(TString ext) {
         defaultExtension_.Prepend('.');
 }
 
+/// @brief Set a TObject in a text file
+/// @param obj object to save
+/// @param filename output file name
+/// @param opt option(s), see ROOTToText::PrintOptions()
+/// @return true in case of success
 bool ROOTToText::SaveObject(const TObject* obj, const char* filename, Option_t* opt) const {
     TString str(filename);
     return SaveObject(obj, GetDataType(obj), str, opt);
 }
 
+/// @brief Set a TObject in a text file
+/// @param obj object to save
+/// @param dt object type
+/// @param filename output file name
+/// @param opt option(s), see ROOTToText::PrintOptions()
+/// @return true in case of success
 bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filename, Option_t* opt) const {
     TString str(filename);
     return SaveObject(obj, dt, str, opt);
@@ -131,6 +142,19 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, 
     return true;
 }
 
+/// @brief Print list of available options
+///
+/// |    | Objects | Description                             |
+/// |----|---------|-----------------------------------------|
+/// | D  | all     | Use default RTT writer                  |
+/// | L  | TH1     | Use bin low edge instead of bin center  |
+/// | E  | TH1     | Save bin errors                         |
+/// | C  | TH2     | Save 2D data in columns : X Y Z         |
+/// | G  | TH2     | Save 2D data in GLE format              |
+/// | R  | TH1/TH2 | Save only data in the bin range         |
+/// | H  | TGraph  | Save horizontal errors                  |
+/// |N<n>| TF1     | Use n points to save function           |
+///
 void ROOTToText::PrintOptions() const {
     std::cout << "Available options :\n"
               << "\tD      [all] - Use default RTT writer\n"

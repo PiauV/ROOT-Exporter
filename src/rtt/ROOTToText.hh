@@ -74,6 +74,9 @@ private:
     std::map<TClass*, writer> userWriters_;
 };
 
+/// @brief Setup the default header content
+/// @param title Print object title in header
+/// @param axis Print axis titles in header
 void ROOTToText::SetHeader(bool title, bool axis) {
     headerTitle_ = title;
     headerAxis_ = axis;
@@ -99,6 +102,8 @@ void ROOTToText::SetVerbose(bool v) {
     verb_ = v;
 }
 
+/// @brief Set the default number of points to use when saving a TF1
+/// @param n number of points
 inline void ROOTToText::SetDefaultNpFunction(int n) {
     npfunc_ = n;
 }

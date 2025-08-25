@@ -81,7 +81,7 @@ PyplotExportManager::~PyplotExportManager() {
 }
 
 TString PyplotExportManager::FormatLabel(const TString& str) const {
-    TString ltx = ExportManager::FormatLabel(str);
+    TString ltx = VirtualExportManager::FormatLabel(str);
     if (latex_) {
         ltx.Prepend("r");
     }

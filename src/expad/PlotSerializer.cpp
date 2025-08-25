@@ -56,6 +56,7 @@ int PlotSerializer::GetLegendPosition() const {
     return pp_.legend;
 }
 
+/// @brief Extract the properties of all objects drawn in the current pad
 void PlotSerializer::ExtractPadProperties() {
     bool axis_needed = true;
     const TLegend* legend = nullptr;
@@ -108,6 +109,7 @@ void PlotSerializer::ExtractPadProperties() {
         throw std::runtime_error("REx failed to export this plot (no compatible data was found).");
 }
 
+/// @brief Extract properties of a data object
 void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TString& extra_opts) {
     if (data_type == MultiGraph1D) {
         TListIter next(((TMultiGraph*)obj)->GetListOfGraphs());
@@ -158,6 +160,7 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TSt
     }
 }
 
+/// @brief Extract properties of a data object, and its associated axis
 void PlotSerializer::StoreDataWithAxis(const TObject* obj, DataType data_type, Bool_t& get_axis) {
     StoreData(obj, data_type);
     if (get_axis) {
@@ -186,6 +189,7 @@ void PlotSerializer::StoreDataWithAxis(const TObject* obj, DataType data_type, B
     }
 }
 
+/// @brief Extract properties of a decorator object
 void PlotSerializer::StoreDecorator(const TObject* obj, DataType data_type) {
     PadProperties::Decorator deco;
     deco.type = data_type;
@@ -219,6 +223,7 @@ void PlotSerializer::StoreDecorator(const TObject* obj, DataType data_type) {
     pp_.decorators.push_back(deco);
 }
 
+/// @brief Extract axis information from an histogram
 bool PlotSerializer::GetAxis(const TH1* h) {
     if (!h) return false;
 
@@ -239,6 +244,7 @@ bool PlotSerializer::GetAxis(const TH1* h) {
     return true;
 }
 
+/// @brief Store the legend position and labels
 bool PlotSerializer::GetLegend(const TLegend* leg) {
     if (!leg) return false;
     // approximate position of the legend

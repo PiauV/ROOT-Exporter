@@ -75,7 +75,7 @@ GnuplotExportManager::~GnuplotExportManager() {
 }
 
 TString GnuplotExportManager::FormatLabel(const TString& str) const {
-    TString ltx = ExportManager::FormatLabel(str);
+    TString ltx = VirtualExportManager::FormatLabel(str);
     if (latex_) {
         int s = ltx.Index("\\");
         while (s >= 0) {

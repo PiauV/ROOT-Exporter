@@ -4,6 +4,9 @@ namespace REx {
 PadProperties::Color::Color(double r, double g, double b, double a) : red(r), green(g), blue(b), alpha(a) {};
 PadProperties::Color::Color() : Color(0, 0, 0, 1) {};
 
+/// @brief Convert color to string (rgb version)
+/// @param with_alpha true to include transparency
+/// @return string describing the color with rgb values
 TString PadProperties::Color::rgb_str(bool with_alpha) const {
     TString str;
     if (with_alpha)
@@ -13,6 +16,9 @@ TString PadProperties::Color::rgb_str(bool with_alpha) const {
     return str;
 }
 
+/// @brief Convert color to string (hex version)
+/// @param with_alpha true to include transparency
+/// @return string describing the color with hexadecimal values
 TString PadProperties::Color::hex_str(bool with_alpha) const {
     TString str;
     int r = 255 * red;

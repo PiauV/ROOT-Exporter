@@ -10,6 +10,7 @@
 
 namespace REx {
 
+/// @brief Structure containing the properties necessary for reproducing the plot with an external tool
 struct PadProperties {
     struct Color {
         double red;
@@ -22,6 +23,12 @@ struct PadProperties {
         TString hex_str(bool with_alpha = false) const;
     };
 
+    struct DrawingStyle {
+        unsigned short style = 0;
+        unsigned short size = 1;
+        Color color;
+    };
+
     struct AxisProperties {
         TString title;
         bool log = false;
@@ -30,12 +37,7 @@ struct PadProperties {
         Color color;
     };
 
-    struct DrawingStyle {
-        unsigned short style = 0;
-        unsigned short size = 1;
-        Color color;
-    };
-
+    // Data represented in the plot
     struct Data {
         DataType type;
         TString label;
@@ -55,6 +57,7 @@ struct PadProperties {
         void set(double x, double y, double xmax = 0, double ymax = 0);
     };
 
+    // Graphical objects that are not data (legend, text, etc...)
     struct Decorator {
         DataType type;
         DrawingStyle properties;

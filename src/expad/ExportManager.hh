@@ -7,6 +7,7 @@ class TVirtualPad;
 
 namespace REx {
 
+/// @brief Base class for exporting plots
 class BaseExportManager {
 public:
     BaseExportManager();
@@ -28,6 +29,7 @@ protected:
     bool inFolder_;
 };
 
+/// @brief Export all data objects drawn in a plot to text files
 class DataExportManager : public BaseExportManager {
 public:
     DataExportManager() {};
@@ -37,10 +39,11 @@ protected:
     void WriteToFile(const char*, const PadProperties&) const override {};
 };
 
-class ExportManager : public BaseExportManager {
+/// @brief Base virtual class for exporting plots to external tools as text files (script + data)
+class VirtualExportManager : public BaseExportManager {
 public:
-    ExportManager();
-    virtual ~ExportManager();
+    VirtualExportManager();
+    virtual ~VirtualExportManager();
 
     inline void EnableLatex(bool flag = true) { latex_ = flag; };
 
@@ -55,7 +58,7 @@ protected:
     virtual void SetDecorators(std::ofstream& ofs, const PadProperties& pp) const = 0;
 
 protected:
-    bool latex_;
+    bool latex_; // (partial) LaTeX support
 };
 
 } // namespace REx

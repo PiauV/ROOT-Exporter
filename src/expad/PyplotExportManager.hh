@@ -7,7 +7,8 @@
 
 namespace REx {
 
-class PyplotExportManager : public ExportManager {
+/// @brief Export plot to python with matplotlib.pyplot library (https://matplotlib.org/)
+class PyplotExportManager : public VirtualExportManager {
 public:
     PyplotExportManager();
     virtual ~PyplotExportManager();
