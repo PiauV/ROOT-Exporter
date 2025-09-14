@@ -16,14 +16,14 @@ class TGraph2D;
 class TF1;
 class TClass;
 
+namespace REx {
+
 // The user writers must have this signature
 // Hence, the object should be cast *inside* the writer, and *must* inherit from TObject
 // This is not the most convenient way, but it is a more straightforward approach than using templates
+typedef void (*rtt_writer)(const TObject* obj, const TString& option, std::ofstream& ofs);
+
 // using writer = std::function<void(const TObject* obj, const TString& option, std::ofstream& ofs)>; // not compatible with my old ROOT5 + MSVC 12.0 config
-
-typedef void (*writer)(const TObject* obj, const TString& option, std::ofstream& ofs);
-
-namespace REx {
 
 class ROOTToText {
 public:
@@ -39,9 +39,10 @@ public:
     inline TString GetDirectory() const;
     inline char GetCommentChar() const;
     inline void SetVerbose(bool v);
+    inline bool GetVerbose() const;
     inline void SetDefaultNpFunction(int n);
     // set precision, format ?
-    bool AddCustomWriter(const char* class_name, writer& func);
+    bool AddCustomWriter(const char* class_name, rtt_writer& func);
     bool RemoveCustomWriter(const char* class_name);
     void ClearCustomWriters();
 
@@ -71,7 +72,7 @@ private:
     char cc_;    // comment character
     bool verb_;  // verbose
     int npfunc_; // default number of points for functions (TF1)
-    std::map<TClass*, writer> userWriters_;
+    std::map<TClass*, rtt_writer> userWriters_;
 };
 
 /// @brief Setup the default header content
@@ -100,6 +101,10 @@ char ROOTToText::GetCommentChar() const {
 
 void ROOTToText::SetVerbose(bool v) {
     verb_ = v;
+}
+
+bool ROOTToText::GetVerbose() const {
+    return verb_;
 }
 
 /// @brief Set the default number of points to use when saving a TF1

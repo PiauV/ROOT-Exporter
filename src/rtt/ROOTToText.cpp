@@ -210,7 +210,7 @@ bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, TString& filename, Option
     return res;
 }
 
-bool ROOTToText::AddCustomWriter(const char* class_name, writer& func) {
+bool ROOTToText::AddCustomWriter(const char* class_name, rtt_writer& func) {
     auto cl = TClass::GetClass(class_name);
     if (!cl) {
         LOG_ERROR("Class " << class_name << " not found in ROOT.");

@@ -183,50 +183,54 @@ void TestExportManager() {
     ltx->Draw();
     c2->Update();
 
-    // Data export
+    // Use ExPad clases to export pad in different languages
     try {
+        // Data export
         auto dem = std::make_unique<REx::DataExportManager>();
         dem->ExportPad(c1, "output/test_export");
         // RTT was tested previously --> if files exist, their content should be ok
         SIMPLE_TEST(!gSystem->AccessPathName("output/test_export/h.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/test_export/f.txt"));
 
+        // GLE
         gSystem->mkdir("output/gle");
         auto gle_man = std::make_unique<REx::GleExportManager>();
         gle_man->SaveInFolder(true);
         gle_man->ExportPad(c1, "output/gle/c1");
-        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/h.txt"));
-        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/f.txt"));
-        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/c1.gle"));
         gle_man->SaveInFolder(false);
         gle_man->SetDataDirectory("data_c2");
         gle_man->ExportPad(c2, "output/gle/c2.gle");
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/h.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/f.txt"));
+        SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/c1.gle"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gle/data_c2/gr_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gle/data_c2/gre1_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gle/data_c2/gre2_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c2.gle"));
 
+        // gnuplot
         gSystem->mkdir("output/gnuplot");
         auto gnuplot_man = std::make_unique<REx::GnuplotExportManager>();
         gnuplot_man->SaveInFolder(false);
         gnuplot_man->ExportPad(c1, "output/gnuplot/c1");
+        gnuplot_man->ExportPad(c2, "output/gnuplot/c2");
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/h.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/f.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/c1.gp"));
-        gnuplot_man->ExportPad(c2, "output/gnuplot/c2");
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/gr_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/gre1_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/gre2_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/c2.gp"));
 
+        // python
         gSystem->mkdir("output/python");
         auto pyplot_man = std::make_unique<REx::PyplotExportManager>();
         pyplot_man->SaveInFolder(false);
         pyplot_man->ExportPad(c1, "output/python/c1");
+        pyplot_man->ExportPad(c2, "output/python/c2");
         SIMPLE_TEST(!gSystem->AccessPathName("output/python/h.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/python/f.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/python/c1.py"));
-        pyplot_man->ExportPad(c2, "output/python/c2");
         SIMPLE_TEST(!gSystem->AccessPathName("output/python/gr_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/python/gre1_c2.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/python/gre2_c2.txt"));

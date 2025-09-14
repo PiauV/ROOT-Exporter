@@ -5,8 +5,7 @@
 #include "LinkDefBase.h" // creation of base dictionaries for REx
 
 // Turn on creation of additional dictionaries for REx/ExPad module
-#pragma link C++ class REx::PlotSerializer;
-#pragma link C++ class REx::ExportManager;
+#pragma link C++ class REx::BaseExportManager;
 #pragma link C++ class REx::DataExportManager;
 #pragma link C++ class REx::GleExportManager;
 #pragma link C++ class REx::GnuplotExportManager;

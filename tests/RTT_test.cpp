@@ -138,7 +138,7 @@ void TestRTTOutput() {
     SIMPLE_TEST(gRTT->SaveObject(h2, "h2_columns", "C"));
 
     // Use a custom writer
-    writer fw = [](const TObject* obj, const TString& /*opt*/, std::ofstream& ofs) {
+    REx::rtt_writer fw = [](const TObject* obj, const TString& /*opt*/, std::ofstream& ofs) {
         auto ff = dynamic_cast<const TF1*>(obj);
         if (ff) {
             ofs << ff->Eval(100) << std::endl;

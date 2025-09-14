@@ -188,7 +188,7 @@ void GnuplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) 
             if (li.size > 1)
                 ofs << " lw " << li.size;
             if (dashtype.count(li.style)) {
-                int dt = pointtype.at(li.style);
+                int dt = dashtype.at(li.style);
                 if (dt) ofs << " dt " << dt;
             }
             ci = li.color;

@@ -14,14 +14,14 @@ set(RTT_SRC
   rtt/ROOTToText.cpp
 )
 
-set(RTT_DICT ROOTToText_dict)
+set(RTT_DICT RTT_dict)
 
 #--- Create ROOT dictonary
 ROOT_GENERATE_DICTIONARY(${RTT_DICT} ${RTT_HEADERS} LINKDEF rtt/LinkDefRTT.h)
 
 #--- Create a shared library
-add_library(libROOTToText SHARED ${RTT_SRC} ${RTT_DICT}.cxx)
-target_link_libraries(libROOTToText PUBLIC ${ROOT_LIBS})
+add_library(libRTT SHARED ${RTT_SRC} ${RTT_DICT}.cxx)
+target_link_libraries(libRTT PUBLIC ${ROOT_LIBS})
 
 
 ##### Export Plots And Datasets (ExPad)
@@ -32,7 +32,7 @@ set(EXPAD_HEADERS
   expad/GleExportManager.hh
   expad/GnuplotExportManager.hh
   # expad/PadProperties.hh # not needed for dictionnary generation
-  expad/PlotSerializer.hh
+  # expad/PlotSerializer.hh # not needed for dictionnary generation
   expad/PyplotExportManager.hh
 )
 
@@ -53,8 +53,8 @@ ROOT_GENERATE_DICTIONARY(${EXPAD_DICT} ${EXPAD_HEADERS} LINKDEF expad/LinkDefExP
 
 #--- Create a shared library
 add_library(libExPad SHARED ${EXPAD_SRC} ${EXPAD_DICT}.cxx)
-add_dependencies(libExPad libROOTToText)
-target_link_libraries(libExPad PUBLIC libROOTToText ${ROOT_LIBS})
+add_dependencies(libExPad libRTT)
+target_link_libraries(libExPad PUBLIC libRTT ${ROOT_LIBS})
 
 
-set_target_properties(libROOTToText libExPad PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+set_target_properties(libRTT libExPad PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
