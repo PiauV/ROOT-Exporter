@@ -56,5 +56,7 @@ add_library(libExPad SHARED ${EXPAD_SRC} ${EXPAD_DICT}.cxx)
 add_dependencies(libExPad libRTT)
 target_link_libraries(libExPad PUBLIC libRTT ${ROOT_LIBS})
 
+install(TARGETS libRTT libExPad)
+install(FILES ${RTT_HEADERS} ${EXPAD_HEADERS} DESTINATION "include")
 
 set_target_properties(libRTT libExPad PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)

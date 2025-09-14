@@ -21,6 +21,7 @@ BaseExportManager::BaseExportManager() {
     com_ = '#';
     dataDir_ = "";
     inFolder_ = false;
+    verb_ = false;
 }
 
 BaseExportManager::~BaseExportManager() {
@@ -53,18 +54,25 @@ void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const 
     if (!dataDir_.IsWhitespace())
         folder.Append("/").Append(dataDir_);
 
+    // save gRTT parameters
     auto rtt_folder = gRTT->GetDirectory();
     auto rtt_cc = gRTT->GetCommentChar();
+    auto rtt_verb = gRTT->GetVerbose();
     gRTT->SetDirectory(folder);
     gRTT->SetCommentChar(com_);
+    gRTT->SetVerbose(verb_);
     // std::cout << "RTT directory: " << gRTT->GetDirectory() << " (" << pad->GetName() << ")" << std::endl;
     for (int i = 0; i < (int)ps->dataObjects_.size(); i++) {
         SaveData(ps->dataObjects_[i], ps->pp_.datasets[i]);
     }
+    // restore gRTT parameters
     gRTT->SetDirectory(rtt_folder);
     gRTT->SetCommentChar(rtt_cc);
+    gRTT->SetVerbose(rtt_verb);
 
     WriteToFile(path, ps->pp_);
+
+    if (verb_) LOG_INFO("Saved plot from " << pad->GetName() << " in " << path);
 }
 
 /// @brief Get the ouput file path for exporting a plot
@@ -188,6 +196,11 @@ void BaseExportManager::SetDataDirectory(TString folder_name) {
 /// @brief Set to true to save the plot and the data files in a dedicated folder
 void BaseExportManager::SaveInFolder(bool flag) {
     inFolder_ = flag;
+}
+
+/// @brief Set to true to add verbosity
+void BaseExportManager::SetVerbose(bool v) {
+    verb_ = v;
 }
 
 VirtualExportManager::VirtualExportManager() : BaseExportManager() {
