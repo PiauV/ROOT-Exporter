@@ -81,7 +81,7 @@ PyplotExportManager::~PyplotExportManager() {
 }
 
 TString PyplotExportManager::FormatLabel(const TString& str) const {
-    TString ltx = VirtualExportManager::FormatLabel(str);
+    TString ltx = VirtualExportManager::FormatLabel(str, false); // do not escape characters
     if (latex_) {
         ltx.Prepend("r");
     }
@@ -207,6 +207,10 @@ void PyplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) c
                 options.push_back({"ds", "\"steps-mid\""});
             if (li.size != 1) // 1 is the default size
                 options.push_back({"lw", std::to_string(li.size)});
+        }
+        else if (ncol >= 3) {
+            // in errorbars plot, we need to explicitely specify that no line should be drawn
+            options.push_back({"fmt", "\" \""});
         }
         // marker style
         auto mi = pp.datasets[i].marker;

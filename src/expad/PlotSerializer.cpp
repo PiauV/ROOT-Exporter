@@ -27,6 +27,8 @@ PlotSerializer::~PlotSerializer() {
 
 void PlotSerializer::Restart() {
     pp_.datasets.clear();
+    pp_.decorators.clear();
+    dataObjects_.clear();
     pp_ = PadProperties();
     ExtractPadProperties();
 }
@@ -112,10 +114,9 @@ void PlotSerializer::ExtractPadProperties() {
 /// @brief Extract properties of a data object
 void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TString& extra_opts) {
     if (data_type == MultiGraph1D) {
+        TString opt(obj->GetDrawOption());
         TListIter next(((TMultiGraph*)obj)->GetListOfGraphs());
         while (next()) {
-            TString opt(next.GetOption());
-            opt.Append(obj->GetDrawOption());
             StoreData(*next, Graph1D, opt);
         }
     }
@@ -230,16 +231,30 @@ bool PlotSerializer::GetAxis(const TH1* h) {
     const TAxis* xx = h->GetXaxis();
     pp_.xaxis.title = xx->GetTitle();
     pp_.xaxis.color = GetColor(xx->GetAxisColor());
-    pp_.xaxis.min = pad_->GetUxmin();
-    pp_.xaxis.max = pad_->GetUxmax();
-    pp_.xaxis.log = (pad_->GetLogx() == 1);
+    if (pad_->GetLogx() == 1) {
+        pp_.xaxis.min = pow(10, pad_->GetUxmin());
+        pp_.xaxis.max = pow(10, pad_->GetUxmax());
+        pp_.xaxis.log = true;
+    }
+    else {
+        pp_.xaxis.min = pad_->GetUxmin();
+        pp_.xaxis.max = pad_->GetUxmax();
+        pp_.xaxis.log = false;
+    }
 
     const TAxis* yy = h->GetYaxis();
     pp_.yaxis.title = yy->GetTitle();
     pp_.yaxis.color = GetColor(yy->GetAxisColor());
-    pp_.yaxis.min = pad_->GetUymin();
-    pp_.yaxis.max = pad_->GetUymax();
-    pp_.yaxis.log = (pad_->GetLogy() == 1);
+    if (pad_->GetLogy() == 1) {
+        pp_.yaxis.min = pow(10, pad_->GetUymin());
+        pp_.yaxis.max = pow(10, pad_->GetUymax());
+        pp_.yaxis.log = true;
+    }
+    else {
+        pp_.yaxis.min = pad_->GetUymin();
+        pp_.yaxis.max = pad_->GetUymax();
+        pp_.yaxis.log = false;
+    }
 
     return true;
 }

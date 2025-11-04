@@ -152,6 +152,8 @@ void BaseExportManager::SaveData(const TObject* obj, PadProperties::Data& data) 
                     }
                 }
             }
+            else
+                LOG_ERROR("bad dynamic_cast in " << __FUNCTION__);
         } break;
         case Histo1D: {
             auto h = dynamic_cast<const TH1*>(obj);
@@ -169,6 +171,8 @@ void BaseExportManager::SaveData(const TObject* obj, PadProperties::Data& data) 
                     ncol++;
                 }
             }
+            else
+                LOG_ERROR("bad dynamic_cast in " << __FUNCTION__);
         } break;
         default:
             ncol = 2;
@@ -211,27 +215,46 @@ VirtualExportManager::~VirtualExportManager() {
 }
 
 /// @brief Export LaTeX symbols and formulas
-TString VirtualExportManager::FormatLabel(const TString& str) const {
+TString VirtualExportManager::FormatLabel(const TString& str, bool escape) const {
     TString label(str);
     if (latex_) {
-        // process LaTeX symbols : replace '#sym' with '$\sym$'
-        int s = label.Index('#');
-        bool eol = false; // set to true if we need to end the line with '$'
-        while (s >= 0) {
-            label.Replace(s, 1, "\\");
-            if (!eol) {
-                label.Insert(s, '$');
-                s = label.Index(' ', s);
-                if (s >= 0)
-                    label.Insert(s, '$');
-                else
-                    eol = true;
-                s = label.Index(s, '$');
+        int s = 0;
+        bool in_formula = false;
+        while (s < label.Length()) {
+            char c = label[s];
+            switch (c) {
+                case '#':
+                    // process LaTeX symbols : replace '#sym' with '$\sym$'
+                    label.Replace(s, 1, "\\");
+                    if (!in_formula) {
+                        label.Insert(s, '$'); // start formula
+                        in_formula = true;
+                    }
+                    s++;
+                    break;
+                case ' ':
+                    if (in_formula) {
+                        label.Insert(s, '$'); // end formula
+                        in_formula = false;
+                    }
+                    s++;
+                    break;
+                case '_':
+                    if (in_formula) {
+                        s++;
+                        break;
+                    } // no need to escape '_' within a formula
+                case '%':
+                    if (escape) {
+                        label.Insert(s, '\\'); // escape
+                        s++;
+                    }
+                default:
+                    s++; // next character
+                    break;
             }
-            s = label.Index('#', s);
         }
-        if (eol)
-            label.Append('$');
+        if (in_formula) label.Append('$');
     }
     label.Prepend('\"').Append('\"');
     return label;

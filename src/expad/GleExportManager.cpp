@@ -168,7 +168,7 @@ void GleExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) cons
                     ofs << " line";
             }
             ofs << " lwidth " << 0.015 * li.size;
-            ci = li.color;
+            if (li.color != Black) ci = li.color;
         }
         if (ci != Black)
             ofs << " color " << ci.rgb_str();

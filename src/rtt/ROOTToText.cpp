@@ -74,7 +74,7 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filenam
 
 bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, Option_t* opt) const {
     if (!obj) {
-        LOG_ERROR("null pointer");
+        LOG_ERROR("null pointer in " << __FUNCTION__);
         return false;
     }
 
@@ -170,7 +170,7 @@ void ROOTToText::PrintOptions() const {
 
 bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, TString& filename, Option_t* opt) const {
     if (!mg) {
-        LOG_ERROR("null pointer");
+        LOG_ERROR("null pointer in " << __FUNCTION__);
         return false;
     }
 
