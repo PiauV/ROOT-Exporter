@@ -17,6 +17,7 @@ public:
     void SetDataDirectory(TString folder_name);
     void SaveInFolder(bool flag);
     void SetVerbose(bool v);
+    void IgnoreListOfFunctions(bool flag);
 
 protected:
     TString GetFilePath(TVirtualPad* pad, const char* filename) const;
@@ -29,6 +30,7 @@ protected:
     TString dataDir_;
     bool inFolder_;
     bool verb_; // verbose
+    bool saveListFunc_;
 };
 
 /// @brief Export all data objects drawn in a plot to text files

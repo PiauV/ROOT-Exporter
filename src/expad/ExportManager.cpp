@@ -22,6 +22,7 @@ BaseExportManager::BaseExportManager() {
     dataDir_ = "";
     inFolder_ = false;
     verb_ = false;
+    saveListFunc_ = true;
 }
 
 BaseExportManager::~BaseExportManager() {
@@ -205,6 +206,11 @@ void BaseExportManager::SaveInFolder(bool flag) {
 /// @brief Set to true to add verbosity
 void BaseExportManager::SetVerbose(bool v) {
     verb_ = v;
+}
+
+/// @brief Set to true to ignore functions associated with histograms (e.g. from fits)
+void BaseExportManager::IgnoreListOfFunctions(bool flag) {
+    saveListFunc_ = !flag;
 }
 
 VirtualExportManager::VirtualExportManager() : BaseExportManager() {

@@ -158,6 +158,23 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TSt
         }
         pp_.datasets.push_back(prop);
         dataObjects_.push_back(obj);
+        if ((data_type == Histo1D || data_type == Histo2D) && !opt.Contains("HIST")) {
+            // also add functions from the list of functions associated to the histogram
+            // (not drawn if the histo is plotted with 'HIST' option)
+            TListIter iter(((TH1*)obj)->GetListOfFunctions());
+            while (auto func = iter.Next()) {
+                // ignore stat box for now
+                if (strcmp(func->GetName(), "stats") == 0)
+                    continue;
+                auto dt = GetDataType(func); // not always a function !
+                // unknown objects are ignored
+                if (dt == DataType::Undefined)
+                    continue;
+                // some functions from the list might not be plotted
+                if (!func->TestBit(TF1::kNotDraw))
+                    StoreData(func, dt);
+            }
+        }
     }
 }
 
