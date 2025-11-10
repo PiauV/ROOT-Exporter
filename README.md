@@ -4,7 +4,7 @@
 
 During export, datasets from the plot are saved as ASCII files using the **RTT** (ROOT To Text) sub-library.
 
-**Version:** 0.1.0
+**Version:** 0.1.1
 
 ## Installation
 
@@ -12,7 +12,7 @@ REx can be built and installed using CMake:
 ```bash
 cd <rex-folder>
 mkdir build && cd build
-cmake -S .. -B .
+cmake -S .. -B . -DCMAKE_INSTALL_PREFIX="path/to/install"
 cmake --build .
 cmake --install .
 ```
@@ -69,6 +69,7 @@ To use REx during an interactive ROOT session, you need to load the desired libr
 gSystem->Load("<path-to-rex-install>/libRTT.so"); // RTT only
 // or
 gSystem->Load("<path-to-rex-install>/libExPad.so"); // Full REx library (ExPad + RTT)
+// N.B. : <path-to-rex-install> should be added to your LD_LIBRARY_PATH
 ```
 
 **Tip:** Add the above line to your `rootlogon` file for automatic loading at ROOT startup.
