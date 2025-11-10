@@ -12,6 +12,7 @@
 #include "TGraph.h"
 #include "TGraphErrors.h"
 #include "TH1D.h"
+#include "THStack.h"
 #include "TLatex.h"
 #include "TLegend.h"
 #include "TMultiGraph.h"
@@ -38,19 +39,25 @@ void TestPlotSerializer() {
     // CASE 1 - histo & func
     TCanvas* c1 = new TCanvas();
     TH1D* h = new TH1D("h", "h;xtitle;ytitle", 50, 0, 10);
+    TH1D* h2 = new TH1D("h2", "h2;xtitle;ytitle", 50, 0, 10);
     TF1* f = new TF1("f", "gaus", 0, 10);
     f->SetParameters(1, 5, 1);
     h->FillRandom("f", 100);
-    h->Draw();
+    h2->Fill(2);
+    THStack* hs = new THStack("hs", "hs;xtitle;ytitle");
+    hs->Add(h);
+    hs->Add(h2);
+    hs->Draw("NOSTACK"); // without option 'nostack', h and h2 are inverted in PlotSerializer (as the histos are stacked)
     f->Draw("same");
     c1->Update(); // necessary to get the title in the list of primitives
     try {
         ps = new REx::PlotSerializer(gPad);
-        SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
+        SIMPLE_TEST(ps->GetNumberOfDatasets() == 3);
         COMPARE_TSTRING(ps->GetDatasetTitle(0), "h");
-        COMPARE_TSTRING(ps->GetDatasetTitle(1), "gaus");
+        COMPARE_TSTRING(ps->GetDatasetTitle(1), "h2");
+        COMPARE_TSTRING(ps->GetDatasetTitle(2), "gaus");
         SIMPLE_TEST(ps->GetLegendPosition() == 0);
-        COMPARE_TSTRING(ps->GetPlotTitle(), "h");
+        COMPARE_TSTRING(ps->GetPlotTitle(), "hs");
         COMPARE_TSTRING(ps->GetXaxisTitle(), "xtitle");
         COMPARE_TSTRING(ps->GetYaxisTitle(), "ytitle");
     }
@@ -62,11 +69,11 @@ void TestPlotSerializer() {
     c1->Update();
     try {
         ps->Restart();
-        SIMPLE_TEST(ps->GetNumberOfDatasets() == 2);
+        SIMPLE_TEST(ps->GetNumberOfDatasets() == 3);
         SIMPLE_TEST(ps->GetLegendPosition() > 0);
         COMPARE_TSTRING(ps->GetDatasetTitle(0), "h"); // should still be 'h' (legend built before the title was changed)
-        COMPARE_TSTRING(ps->GetDatasetTitle(1), "gaus");
-        COMPARE_TSTRING(ps->GetPlotTitle(), "title"); // title has changed
+        COMPARE_TSTRING(ps->GetDatasetTitle(2), "gaus");
+        COMPARE_TSTRING(ps->GetPlotTitle(), "hs"); // title has not changed
     }
     catch (const std::exception& e) {
         EXCEPTION_CAUGHT(e);
@@ -115,7 +122,9 @@ void TestPlotSerializer() {
     delete c2;
 
     delete mg; // gr and gre are owned by the multigraph (they should not be deleted !)
+    delete hs;
     delete h;
+    delete h2;
     delete f;
     delete legend;
     END_TEST();
@@ -128,10 +137,16 @@ void TestExportManager() {
 
     TCanvas* c1 = new TCanvas();
     TH1D* h = new TH1D("h", "h;xtitle;ytitle", 50, 0, 10);
+    TH1D* h2 = new TH1D("h2", "h2", 50, 0, 10);
     TF1* f = new TF1("f", "gausn", 0, 10);
     f->SetParameters(200, 5, 1);
     h->FillRandom("f", 1000);
-    h->Draw();
+    h2->Fill(6, 20);
+    h2->SetLineColor(kGreen);
+    auto hs = new THStack("hs", "hs");
+    hs->Add(h);
+    hs->Add(h2);
+    hs->Draw();
     f->Draw("same");
     auto arrow = new TArrow(3.8, 40, 6.2, 40, 0.03, "<|>");
     arrow->SetLineColor(kRed);
@@ -263,7 +278,9 @@ void TestExportManager() {
     delete c2;
 
     delete f;
+    delete hs;
     delete h;
+    delete h2;
     delete mg;
 
     END_TEST();

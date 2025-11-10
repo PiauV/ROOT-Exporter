@@ -9,6 +9,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
+#include "THStack.h"
 #include "TMultiGraph.h"
 #include "TString.h"
 #include "TSystem.h"
@@ -102,6 +103,10 @@ void TestRTTOutput() {
     mg->Add(gr);
     mg->Add(gre);
 
+    // THStack
+    auto hs = new THStack("hs", "hs");
+    hs->Add(h);
+
     // TGraph2D
     TGraph2D* gr2d = new TGraph2D(N * N);
     gr2d->SetName("gr2d");
@@ -124,6 +129,7 @@ void TestRTTOutput() {
 
     // simple saves
     SIMPLE_TEST(gRTT->SaveObject(h));
+    SIMPLE_TEST(gRTT->SaveObject(hs));
     SIMPLE_TEST(gRTT->SaveObject(h2));
     SIMPLE_TEST(gRTT->SaveObject(gr));
     SIMPLE_TEST(gRTT->SaveObject(gre));
@@ -133,6 +139,7 @@ void TestRTTOutput() {
 
     // saving with options and filenames
     SIMPLE_TEST(gRTT->SaveObject(h, "h_with_errors", "E"));
+    SIMPLE_TEST(gRTT->SaveObject(hs, "hstack_with_errors", "E"));
     SIMPLE_TEST(gRTT->SaveObject(h, "h_lowedge_and_errors.dat", "EL"));
     SIMPLE_TEST(gRTT->SaveObject(gre, "gre_horizontal_errors.txt", "H"));
     SIMPLE_TEST(gRTT->SaveObject(h2, "h2_columns", "C"));
@@ -174,6 +181,7 @@ void TestRTTOutput() {
     // gRTT->SetVerbose(true);
     SIMPLE_TEST(check_file_content("./output/test_rtt/h.txt", 2, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/test_rtt/h2.txt", N, N, sum_z, 0));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/hs_h.txt", 2, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/test_rtt/gr.txt", 2, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/test_rtt/gre.txt", 3, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/test_rtt/gre.txt", 3, N, sum_ey, 3));
@@ -182,6 +190,7 @@ void TestRTTOutput() {
     SIMPLE_TEST(check_file_content("./output/test_rtt/gr2d.txt", 3, N * N, sum_z, 3));
     SIMPLE_TEST(check_file_content("./output/test_rtt/func.txt", 2, 3, 2 + 3 + 4, 2));
     SIMPLE_TEST(check_file_content("./output/test_rtt/h_with_errors.txt", 3, N, sum_y, 2));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/hstack_with_errors_h.txt", 3, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/test_rtt/h_lowedge_and_errors.dat", 3, N, sum_ey, 3));
     SIMPLE_TEST(check_file_content("./output/test_rtt/gre_horizontal_errors.txt", 4, N, sum_y, 2));
     SIMPLE_TEST(check_file_content("./output/test_rtt/gre_horizontal_errors.txt", 4, N, sum_ex, 3));

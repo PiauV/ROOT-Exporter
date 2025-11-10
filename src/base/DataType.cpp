@@ -24,6 +24,9 @@ DataType GetDataType(const TObject* obj) {
     else if (obj->InheritsFrom("TMultiGraph")) {
         return MultiGraph1D;
     }
+    else if (obj->InheritsFrom("THStack")) {
+        return MultiHisto1D;
+    }
     else if (obj->InheritsFrom("TF1")) {
         if (obj->InheritsFrom("TF2")) {
             return Function2D;

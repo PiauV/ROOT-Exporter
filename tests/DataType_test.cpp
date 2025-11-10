@@ -13,6 +13,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TH3D.h"
+#include "THStack.h"
 #include "TLatex.h"
 #include "TLegend.h"
 #include "TMultiGraph.h"
@@ -24,29 +25,31 @@
 
 void TestDataType() {
     BEGIN_TEST();
-    TH1S* h1 = new TH1S();
-    TH2D* h2 = new TH2D();
-    TH3F* h3 = new TH3F();
-    TProfile* pf = new TProfile();
-    TGraph* gr = new TGraph();
-    TGraph* gre = new TGraphErrors();
-    TGraph2D* gr2D = new TGraph2D();
-    TMultiGraph* mg = new TMultiGraph();
-    TF1* f1 = new TF1();
-    TF1* f12 = new TF12();
-    TF2* f2 = new TF2();
-    TLegend* leg = new TLegend();
-    TText* txt = new TText();
-    TLatex* ltx = new TLatex();
-    TPaveText* pvtxt = new TPaveText();
-    TFrame* frm = new TFrame();
-    TCanvas* c = new TCanvas();
+    auto h1 = new TH1S();
+    auto h2 = new TH2D();
+    auto h3 = new TH3F();
+    auto pf = new TProfile();
+    auto hs = new THStack();
+    auto gr = new TGraph();
+    auto gre = new TGraphErrors();
+    auto gr2D = new TGraph2D();
+    auto mg = new TMultiGraph();
+    auto f1 = new TF1();
+    auto f12 = new TF12();
+    auto f2 = new TF2();
+    auto leg = new TLegend();
+    auto txt = new TText();
+    auto ltx = new TLatex();
+    auto pvtxt = new TPaveText();
+    auto frm = new TFrame();
+    auto c = new TCanvas();
 
     // histograms
     SIMPLE_TEST(REx::GetDataType(h1) == REx::Histo1D);
     SIMPLE_TEST(REx::GetDataType(h2) == REx::Histo2D);
     SIMPLE_TEST(REx::GetDataType(h3) == REx::Histo3D);
     SIMPLE_TEST(REx::GetDataType(pf) == REx::Histo1D);
+    SIMPLE_TEST(REx::GetDataType(hs) == REx::MultiHisto1D);
 
     // graphs
     SIMPLE_TEST(REx::GetDataType(gr) == REx::Graph1D);

@@ -8,6 +8,7 @@
 #include "TGraphErrors.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "THStack.h"
 #include "TMath.h"
 #include "TMultiGraph.h"
 #include "TObjString.h"
@@ -81,9 +82,14 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, 
     TString option(opt);
     option.ToUpper();
 
-    if (dt == MultiGraph1D) {
+    // save collection of objects (TMultiGraph or THStack)
+    // we need to perform this test first, because 'filename' is a basename, not a file name
+    if (dt == MultiGraph1D || dt == MultiHisto1D) {
         if (userWriters_.count(obj->IsA()) == 0 || option.Contains("D")) {
-            return SaveMultiGraph(dynamic_cast<const TMultiGraph*>(obj), filename, opt);
+            if (dt == MultiGraph1D)
+                return SaveMultiGraph(dynamic_cast<const TMultiGraph*>(obj), filename, opt);
+            else
+                return SaveHistoStack(dynamic_cast<const THStack*>(obj), filename, opt);
         }
     }
 
@@ -153,6 +159,7 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, 
 /// | G  | TH2     | Save 2D data in GLE format              |
 /// | R  | TH1/TH2 | Save only data in the bin range         |
 /// | H  | TGraph  | Save horizontal errors                  |
+/// | S  | THStack | Save stacked histograms                 |
 /// |N<n>| TF1     | Use n points to save function           |
 ///
 void ROOTToText::PrintOptions() const {
@@ -164,6 +171,7 @@ void ROOTToText::PrintOptions() const {
               << "\tG      [TH2] - Save 2D data in GLE format\n"
               << "\tR  [TH1/TH2] - Save only data in the bin range\n"
               << "\tH   [TGraph] - Save horizontal errors\n"
+              << "\tS  [THStack] - Save stacked histograms\n"
               << "\tN<n>   [TF1] - Use n points to save function\n"
               << std::endl;
 }
@@ -205,6 +213,49 @@ bool ROOTToText::SaveMultiGraph(const TMultiGraph* mg, TString& filename, Option
         filename_graph.Insert(s, "_" + gr_name);
         // save it
         res = res && SaveObject(gr, Graph1D, filename_graph, opt);
+    }
+    filename = basename;
+    return res;
+}
+
+bool ROOTToText::SaveHistoStack(const THStack* hs, TString& filename, Option_t* opt) const {
+    if (!hs) {
+        LOG_ERROR("null pointer in " << __FUNCTION__);
+        return false;
+    }
+
+    // the title of the histo will be basename_histname
+    TString basename(filename);
+    if (basename.IsWhitespace()) {
+        basename = hs->GetName();
+        if (basename.IsNull()) basename = "Stack";
+    }
+    Ssiz_t s = basename.Length();
+    TPRegexp has_ext("\\.[a-zA-Z0-9]+$");
+    if (has_ext.MatchB(basename)) {
+        s = basename.Last('.');
+    }
+
+    TString option(opt);
+    option.ToUpper();
+
+    TCollection* hlist = nullptr;
+    if (option.Contains("S"))
+        hlist = ((THStack*)hs->Clone())->GetStack();
+    else
+        hlist = hs->GetHists();
+
+    TIter it(hlist);
+
+    bool res = true;
+    // loop over all graphs stored in the multigraph, and save them
+    while (it.Next()) {
+        TString hist_name = (*it)->GetName();
+        // set the filename corresponding to this hist
+        TString filename_hist(basename);
+        filename_hist.Insert(s, "_" + hist_name);
+        // save it
+        res = res && SaveObject(*it, Histo1D, filename_hist, opt);
     }
     filename = basename;
     return res;

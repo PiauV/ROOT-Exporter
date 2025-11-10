@@ -5,6 +5,7 @@
 #include "TF1.h"
 #include "TGraph.h"
 #include "TH1.h"
+#include "THStack.h"
 #include "TLegend.h"
 #include "TLegendEntry.h"
 #include "TLine.h"
@@ -68,16 +69,6 @@ void PlotSerializer::ExtractPadProperties() {
         if (dim == 1) {
             // 1D data
             StoreDataWithAxis(obj_p, data, axis_needed);
-            if (legend) {
-                // Update this object's label (legend has already been read)
-                for (const TObject* obj_l : *legend->GetListOfPrimitives()) {
-                    auto entry = static_cast<const TLegendEntry*>(obj_l);
-                    const TObject* entry_obj = entry->GetObject();
-                    if (entry_obj != obj_l) continue;
-                    pp_.datasets.back().label = entry->GetLabel();
-                    break; // obj_l found : end the loop
-                }
-            }
         }
         else if (dim == 2 || dim == 3) {
             LOG_WARN("2D/3D plots are not supported yet.");
@@ -109,6 +100,33 @@ void PlotSerializer::ExtractPadProperties() {
     }
     if (!pp_.datasets.size())
         throw std::runtime_error("REx failed to export this plot (no compatible data was found).");
+    // update object labels if there is a legend
+    if (legend) {
+        for (const auto* legObj : *legend->GetListOfPrimitives()) {
+            auto entry = static_cast<const TLegendEntry*>(legObj);
+            const TObject* entry_obj = entry->GetObject();
+            auto legend_label = entry->GetLabel();
+            bool found = false;
+            for (int i = 0; i < dataObjects_.size(); i++) {
+                if (entry_obj == dataObjects_[i]) {
+                    pp_.datasets[i].label = legend_label;
+                    found = true;
+                    break; // object found : go to next legend entry
+                }
+            }
+            if (!found) {
+                // object not found... may be it is a clone (different address)
+                // --> so we will use the object name this time
+                auto entryName = entry_obj->GetName();
+                for (int i = 0; i < dataObjects_.size(); i++) {
+                    if (strcmp(entryName, dataObjects_[i]->GetName()) == 0) {
+                        pp_.datasets[i].label = legend_label;
+                        break; // object found : go to next legend entry
+                    }
+                }
+            }
+        }
+    }
 }
 
 /// @brief Extract properties of a data object
@@ -118,6 +136,28 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TSt
         TListIter next(((TMultiGraph*)obj)->GetListOfGraphs());
         while (next()) {
             StoreData(*next, Graph1D, opt);
+        }
+    }
+    else if (data_type == MultiHisto1D) {
+        TString opt(obj->GetDrawOption());
+        opt.ToUpper();
+        TCollection* hlist = nullptr;
+        Bool_t dir = kIterForward;
+        if (opt.Contains("NOSTACK")) {
+            hlist = ((THStack*)obj)->GetHists();
+        }
+        else {
+            hlist = ((THStack*)obj->Clone())->GetStack();
+            dir = kIterBackward; // in case of stacked histogram, the last one is plotted first
+        }
+        // remove drawing options specific to THStack (not relevant for TH1)
+        opt.ReplaceAll("NOSTACKB", 0x0);
+        opt.ReplaceAll("NOSTACK", 0x0);
+        opt.ReplaceAll("PADS", 0x0);
+        opt.ReplaceAll("NOCLEAR", 0x0);
+        TIter next(hlist, dir);
+        while (next()) {
+            StoreData(*next, Histo1D, opt);
         }
     }
     else {
@@ -195,6 +235,9 @@ void PlotSerializer::StoreDataWithAxis(const TObject* obj, DataType data_type, B
                 break;
             case MultiGraph1D:
                 h = ((TMultiGraph*)obj)->GetHistogram();
+                break;
+            case MultiHisto1D:
+                h = ((THStack*)obj)->GetHistogram();
                 break;
             default:
                 throw std::invalid_argument("Unexpected data type (" + std::to_string(data_type) + ")");

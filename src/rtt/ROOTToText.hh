@@ -10,6 +10,7 @@
 
 class TH1;
 class TH2;
+class THStack;
 class TGraph;
 class TMultiGraph;
 class TGraph2D;
@@ -56,6 +57,7 @@ private:
     TString GetFilePath(const TObject* obj, const char* filename) const;
 
     bool SaveMultiGraph(const TMultiGraph* mg, TString& filename, Option_t* opt = "") const;
+    bool SaveHistoStack(const THStack* hs, TString& filename, Option_t* opt = "") const;
 
     void WriteTH1(const TH1* h, const TString& option, std::ofstream& ofs) const;
     void WriteTH2(const TH2* h, const TString& option, std::ofstream& ofs) const;

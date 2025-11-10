@@ -15,6 +15,7 @@ enum DataType {
     Function1D = 3,
     Function2D = 13,
     MultiGraph1D = 4,
+    MultiHisto1D = 5,
     TextBox = 101,
     BareText = 102,
     Legend = 103,
