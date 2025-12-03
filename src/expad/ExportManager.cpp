@@ -164,9 +164,9 @@ void BaseExportManager::SaveData(const TObject* obj, PadProperties::Data& data) 
                 // opth.Append(h->GetOption());
                 opth.ToUpper();
                 bool with_err = false;
-                if (opth.Contains("E")) with_err = true;
-                if (!with_err && h->GetSumw2()->GetSize()) with_err = true;
-                if (with_err && opth.Contains("HIST")) with_err = false;
+                if (h->GetSumw2()->GetSize()) with_err = true;           // sum of weight -> error bars
+                if (with_err && opth.Contains("HIST")) with_err = false; // remove errors if drawn with HIST
+                if (!with_err && opth.Contains("E")) with_err = true;    // ...unless option 'E' is given
                 if (with_err) {
                     option = "E";
                     ncol++;
@@ -246,15 +246,19 @@ TString VirtualExportManager::FormatLabel(const TString& str, bool escape) const
                     s++;
                     break;
                 case '_':
-                    if (in_formula) {
+                    if (!in_formula && escape) {
+                        label.Insert(s, '\\'); // escape
                         s++;
-                        break;
-                    } // no need to escape '_' within a formula
+                    }
+                    s++;
+                    break;
                 case '%':
                     if (escape) {
                         label.Insert(s, '\\'); // escape
                         s++;
                     }
+                    s++;
+                    break;
                 default:
                     s++; // next character
                     break;

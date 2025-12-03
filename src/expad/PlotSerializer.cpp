@@ -107,7 +107,7 @@ void PlotSerializer::ExtractPadProperties() {
             const TObject* entry_obj = entry->GetObject();
             auto legend_label = entry->GetLabel();
             bool found = false;
-            for (int i = 0; i < dataObjects_.size(); i++) {
+            for (int i = 0; i < (int)dataObjects_.size(); i++) {
                 if (entry_obj == dataObjects_[i]) {
                     pp_.datasets[i].label = legend_label;
                     found = true;
@@ -118,7 +118,7 @@ void PlotSerializer::ExtractPadProperties() {
                 // object not found... may be it is a clone (different address)
                 // --> so we will use the object name this time
                 auto entryName = entry_obj->GetName();
-                for (int i = 0; i < dataObjects_.size(); i++) {
+                for (int i = 0; i < (int)dataObjects_.size(); i++) {
                     if (strcmp(entryName, dataObjects_[i]->GetName()) == 0) {
                         pp_.datasets[i].label = legend_label;
                         break; // object found : go to next legend entry
@@ -135,6 +135,7 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TSt
         TString opt(obj->GetDrawOption());
         TListIter next(((TMultiGraph*)obj)->GetListOfGraphs());
         while (next()) {
+            opt.Append(next.GetOption());
             StoreData(*next, Graph1D, opt);
         }
     }
