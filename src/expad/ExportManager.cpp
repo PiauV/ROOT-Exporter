@@ -32,7 +32,7 @@ BaseExportManager::~BaseExportManager() {
 /// @param pad plot to export
 /// @param filename ouput script name
 void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const {
-    auto ps = std::make_unique<PlotSerializer>(pad);
+    auto ps = std::make_unique<PlotSerializer>(pad, saveListFunc_);
 
     auto path = GetFilePath(pad, filename);
     TString folder = gSystem->DirName(path);

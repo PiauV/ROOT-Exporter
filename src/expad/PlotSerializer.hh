@@ -17,7 +17,7 @@ namespace REx {
 /// @brief Extracts the properties of a plot (content and style)
 class PlotSerializer {
 public:
-    PlotSerializer(TVirtualPad* pad);
+    PlotSerializer(TVirtualPad* pad, bool save_func = true);
     ~PlotSerializer();
 
     void Restart();
@@ -43,6 +43,7 @@ private:
     TVirtualPad* pad_;
     PadProperties pp_;
     std::vector<const TObject*> dataObjects_;
+    Bool_t saveFunctions_;
 
     friend class BaseExportManager;
 };

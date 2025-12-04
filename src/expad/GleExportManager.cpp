@@ -137,7 +137,7 @@ void GleExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadProperties& 
     if (yc != Black) {
         ofs << "\tyaxis color " << yc.rgb_str() << std::endl;
     }
-    ofs << std::endl;
+    // ofs << std::endl;
 }
 
 void GleExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) const {
@@ -146,10 +146,10 @@ void GleExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) cons
     for (int i = 0; i < n; i++) {
         const auto di = pp.datasets[i];
         // read data file
-        ofs << "\tdata \"" << di.file.first << "\"" << std::endl;
+        ofs << "\n\tdata \"" << di.file.first << "\"" << std::endl;
 
         // marker, line & color
-        ofs << "\n\td" << idx_data;
+        ofs << "\td" << idx_data;
         auto ci = Black;
         auto mi = di.marker;
         if (mi.style) {
@@ -167,7 +167,8 @@ void GleExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) cons
                 else
                     ofs << " line";
             }
-            ofs << " lwidth " << 0.015 * li.size;
+            if (li.size > 1)
+                ofs << " lwidth " << 0.015 * li.size;
             if (li.color != Black) ci = li.color;
         }
         if (ci != Black)

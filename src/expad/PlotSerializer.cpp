@@ -19,7 +19,7 @@
 
 namespace REx {
 
-PlotSerializer::PlotSerializer(TVirtualPad* pad) : pad_(pad) {
+PlotSerializer::PlotSerializer(TVirtualPad* pad, bool save_func) : pad_(pad), saveFunctions_(save_func) {
     ExtractPadProperties();
 }
 
@@ -199,7 +199,7 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TSt
         }
         pp_.datasets.push_back(prop);
         dataObjects_.push_back(obj);
-        if ((data_type == Histo1D || data_type == Histo2D) && !opt.Contains("HIST")) {
+        if (saveFunctions_ && (data_type == Histo1D || data_type == Histo2D) && !opt.Contains("HIST")) {
             // also add functions from the list of functions associated to the histogram
             // (not drawn if the histo is plotted with 'HIST' option)
             TListIter iter(((TH1*)obj)->GetListOfFunctions());
