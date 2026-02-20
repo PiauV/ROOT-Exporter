@@ -252,6 +252,7 @@ TString VirtualExportManager::FormatLabel(const TString& str, bool escape) const
                     }
                     s++;
                     break;
+                case '&':
                 case '%':
                     if (escape) {
                         label.Insert(s, '\\'); // escape
