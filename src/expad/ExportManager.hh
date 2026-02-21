@@ -21,7 +21,7 @@ public:
 
 protected:
     TString GetFilePath(TVirtualPad* pad, const char* filename) const;
-    virtual void SaveData(const TObject* obj, PadProperties::Data& data) const;
+    void SaveData(const TObject* obj, const TString& objName, PadProperties::Data& data) const;
     virtual void WriteToFile(const char* filename, const PadProperties& pp) const = 0;
 
 protected:

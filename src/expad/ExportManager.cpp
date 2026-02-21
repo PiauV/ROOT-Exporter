@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <set>
 
 namespace REx {
 
@@ -63,8 +64,18 @@ void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const 
     gRTT->SetCommentChar(com_);
     gRTT->SetVerbose(verb_);
     // std::cout << "RTT directory: " << gRTT->GetDirectory() << " (" << pad->GetName() << ")" << std::endl;
+    std::multiset<TString> names;
     for (int i = 0; i < (int)ps->dataObjects_.size(); i++) {
-        SaveData(ps->dataObjects_[i], ps->pp_.datasets[i]);
+        auto obj = ps->dataObjects_[i];
+        TString obj_name = obj->GetName();
+        names.insert(obj_name);
+        int nn = names.count(obj_name);
+        if (nn > 1) {
+            // there are multiple objects with the same name
+            // add a counter at the end of to provide a unique filename
+            obj_name = Form("%s_%d", obj_name.Data(), nn);
+        }
+        SaveData(obj, obj_name, ps->pp_.datasets[i]);
     }
     // restore gRTT parameters
     gRTT->SetDirectory(rtt_folder);
@@ -126,7 +137,7 @@ TString BaseExportManager::GetFilePath(TVirtualPad* pad, const char* filename) c
 }
 
 /// @brief Save a drawn data object to an external file using ROOTToText
-void BaseExportManager::SaveData(const TObject* obj, PadProperties::Data& data) const {
+void BaseExportManager::SaveData(const TObject* obj, const TString& objName, PadProperties::Data& data) const {
     TString option = "";
     int ncol = 0;
     switch (data.type) {
@@ -180,7 +191,7 @@ void BaseExportManager::SaveData(const TObject* obj, PadProperties::Data& data) 
             break;
     }
 
-    TString filename = "";
+    TString filename(objName);
     if (gRTT->SaveObject(obj, data.type, filename, option)) {
         data.file.first = gSystem->BaseName(filename);
         data.file.second = ncol;
