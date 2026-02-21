@@ -10,7 +10,7 @@ namespace REx {
 /// @brief Export plot to gnuplot graphing utility (http://www.gnuplot.info/)
 class GnuplotExportManager : public VirtualExportManager {
 public:
-    GnuplotExportManager();
+    GnuplotExportManager(bool verbose = false);
     virtual ~GnuplotExportManager();
 
 protected:

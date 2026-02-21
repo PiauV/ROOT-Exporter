@@ -63,7 +63,7 @@ const std::unordered_map<int, std::string> GLE_just = {
 
 namespace REx {
 
-GleExportManager::GleExportManager() {
+GleExportManager::GleExportManager(bool v) : VirtualExportManager(v) {
     ext_ = ".gle";
     com_ = '!';
 }

@@ -66,7 +66,7 @@ const std::unordered_map<int, std::string> gnuplot_just = {
 
 namespace REx {
 
-GnuplotExportManager::GnuplotExportManager() {
+GnuplotExportManager::GnuplotExportManager(bool v) : VirtualExportManager(v) {
     ext_ = ".gp";
     com_ = '#';
 }

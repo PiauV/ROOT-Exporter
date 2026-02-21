@@ -17,12 +17,11 @@
 
 namespace REx {
 
-BaseExportManager::BaseExportManager() {
+BaseExportManager::BaseExportManager(bool verbose) : verb_(verbose) {
     ext_ = "";
     com_ = '#';
     dataDir_ = "";
     inFolder_ = false;
-    verb_ = false;
     saveListFunc_ = true;
 }
 
@@ -224,7 +223,7 @@ void BaseExportManager::IgnoreListOfFunctions(bool flag) {
     saveListFunc_ = !flag;
 }
 
-VirtualExportManager::VirtualExportManager() : BaseExportManager() {
+VirtualExportManager::VirtualExportManager(bool v) : BaseExportManager(v) {
     EnableLatex();
 }
 

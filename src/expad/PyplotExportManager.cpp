@@ -72,7 +72,7 @@ const std::unordered_map<int, std::string> py_align = {
 
 namespace REx {
 
-PyplotExportManager::PyplotExportManager() {
+PyplotExportManager::PyplotExportManager(bool v) : VirtualExportManager(v) {
     ext_ = ".py";
     com_ = '#';
 }

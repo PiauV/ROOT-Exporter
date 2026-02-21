@@ -10,7 +10,7 @@ namespace REx {
 /// @brief Base class for exporting plots
 class BaseExportManager {
 public:
-    BaseExportManager();
+    BaseExportManager(bool verbose = false);
     virtual ~BaseExportManager();
 
     void ExportPad(TVirtualPad* pad, const char* filename) const;
@@ -36,7 +36,7 @@ protected:
 /// @brief Export all data objects drawn in a plot to text files
 class DataExportManager : public BaseExportManager {
 public:
-    DataExportManager() {};
+    DataExportManager(bool verbose = false) : BaseExportManager(verbose) {};
     virtual ~DataExportManager() {};
 
 protected:
@@ -46,7 +46,7 @@ protected:
 /// @brief Base virtual class for exporting plots to external tools as text files (script + data)
 class VirtualExportManager : public BaseExportManager {
 public:
-    VirtualExportManager();
+    VirtualExportManager(bool verbose = false);
     virtual ~VirtualExportManager();
 
     inline void EnableLatex(bool flag = true) { latex_ = flag; };

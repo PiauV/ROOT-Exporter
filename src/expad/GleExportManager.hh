@@ -10,7 +10,7 @@ namespace REx {
 /// @brief Export plot to the GLE scripting language (https://glx.sourceforge.io/)
 class GleExportManager : public VirtualExportManager {
 public:
-    GleExportManager();
+    GleExportManager(bool verbose = false);
     virtual ~GleExportManager();
 
 protected:
