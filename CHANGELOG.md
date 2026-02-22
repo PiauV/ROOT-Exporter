@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.2] - 2026-02-22
+    - [Added] Verbose parameter of all export managers can be set directly in their constructor
+    - [Added] A unique filename is now given to data files saved through ExPad (even if the associated objects have the same name)
+    - [Fixed] Minor bug fixes in ExPad
+
 ## [0.1.1] - 2025-11-10
     - [Added] Support of THStack in RTT and ExPad (with and without 'nostack' option) 
     - [Added] Export functions from TH1 ListOfFunctions

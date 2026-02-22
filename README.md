@@ -4,7 +4,7 @@
 
 During export, datasets from the plot are saved as ASCII files using the **RTT** (ROOT To Text) sub-library.
 
-**Version:** 0.1.1
+**Version:** 0.1.2
 
 ## Installation
 
