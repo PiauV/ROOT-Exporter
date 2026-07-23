@@ -64,6 +64,8 @@ protected:
     virtual void SetDecorators(std::ofstream& ofs, const PadProperties& pp) const = 0;
     virtual void SetFunctions(std::ofstream& ofs, const PadProperties& pp) const = 0;
 
+    virtual TString ColorToStr(PadProperties::Color c) const = 0; // TODO
+
 protected:
     bool latex_; // (partial) LaTeX support
 };

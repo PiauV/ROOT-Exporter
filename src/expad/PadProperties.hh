@@ -3,6 +3,7 @@
 
 #include "DataType.hh"
 
+#include "TColor.h"
 #include "TF1.h"
 #include "TString.h"
 
@@ -18,7 +19,9 @@ struct PadProperties {
         double green;
         double blue;
         double alpha;
+        TString name = "";
         Color();
+        Color(TColor* c);
         Color(double r, double g, double b, double a = 1);
         TString rgb_str(bool with_alpha = false) const;
         TString hex_str(bool with_alpha = false) const;

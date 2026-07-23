@@ -21,6 +21,8 @@ protected:
     virtual void SetDecorators(std::ofstream& ofs, const PadProperties& pp) const;
     virtual void SetFunctions(std::ofstream& ofs, const PadProperties& pp) const;
 
+    virtual TString ColorToStr(PadProperties::Color c) const;
+
 private:
     void InitFile(std::ofstream& ofs) const;
 };

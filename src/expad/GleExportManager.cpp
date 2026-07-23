@@ -73,6 +73,14 @@ GleExportManager::GleExportManager(bool v) : VirtualExportManager(v) {
 GleExportManager::~GleExportManager() {
 }
 
+TString GleExportManager::ColorToStr(PadProperties::Color c) const {
+    TString str = c.name;
+    // if (str == "green") str = "lime"; // more accurate
+
+    if (str.IsNull()) str = c.rgb_str().Prepend("rgb"); // NB : rgba for transparency
+    return str;
+}
+
 void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp) const {
     std::ofstream ofs(filename);
     if (!ofs.is_open()) {
@@ -132,7 +140,7 @@ void GleExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadProperties& 
     ofs << std::endl;
     auto xc = pp.xaxis.color;
     if (xc != Black) {
-        ofs << "\txaxis color " << xc.rgb_str() << std::endl;
+        ofs << "\txaxis color " << ColorToStr(xc) << std::endl;
     }
     ofs << "\tytitle " << FormatLabel(pp.yaxis.title) << std::endl;
     ofs << "\tyaxis min " << pp.yaxis.min << " max " << pp.yaxis.max;
@@ -140,7 +148,7 @@ void GleExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadProperties& 
     ofs << std::endl;
     auto yc = pp.yaxis.color;
     if (yc != Black) {
-        ofs << "\tyaxis color " << yc.rgb_str() << std::endl;
+        ofs << "\tyaxis color " << ColorToStr(yc) << std::endl;
     }
     // ofs << std::endl;
 }
@@ -191,7 +199,7 @@ void GleExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) cons
             if (li.color != Black) ci = li.color;
         }
         if (ci != Black)
-            ofs << " color " << ci.rgb_str();
+            ofs << " color " << ColorToStr(ci);
         ofs << std::endl;
 
         // key (legend)
@@ -230,7 +238,7 @@ void GleExportManager::SetDecorators(std::ofstream& ofs, const PadProperties& pp
         for (const auto& d : pp.decorators) {
             ofs << std::endl;
             if (d.properties.color != current_color) {
-                ofs << "set color " << d.properties.color.rgb_str() << std::endl;
+                ofs << "set color " << ColorToStr(d.properties.color) << std::endl;
                 current_color = d.properties.color;
             }
             switch (d.type) {

@@ -93,6 +93,13 @@ TString GnuplotExportManager::FormatLabel(const TString& str) const {
     return ltx;
 }
 
+TString GnuplotExportManager::ColorToStr(PadProperties::Color c) const {
+    TString str = c.name;
+
+    if (str.IsNull()) str = c.hex_str();
+    return "\"" + str + "\"";
+}
+
 void GnuplotExportManager::WriteToFile(const char* filename, const PadProperties& pp) const {
     std::ofstream ofs(filename);
     if (!ofs.is_open()) {
@@ -146,12 +153,12 @@ void GnuplotExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadProperti
     auto cx = pp.xaxis.color; // colored axis : do not change border color (tricky use of "set border" + "set arrow" will be done by user)
     ofs << "\nset xlabel " << FormatLabel(pp.xaxis.title);
     if (cx != Black)
-        ofs << " textcolor rgb " << cx.hex_str();
+        ofs << " textcolor rgb " << ColorToStr(cx);
     ofs << std::endl;
     if (cx != Black || pp.xaxis.log) {
         ofs << "set xtics";
         if (cx != Black)
-            ofs << " textcolor rgb " << cx.hex_str();
+            ofs << " textcolor rgb " << ColorToStr(cx);
         if (pp.xaxis.log)
             ofs << " logscale";
         ofs << std::endl;
@@ -161,12 +168,12 @@ void GnuplotExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadProperti
     auto cy = pp.yaxis.color;
     ofs << "set ylabel " << FormatLabel(pp.yaxis.title);
     if (cy != Black)
-        ofs << " textcolor rgb " << cy.hex_str();
+        ofs << " textcolor rgb " << ColorToStr(cy);
     ofs << std::endl;
     if (cy != Black || pp.yaxis.log) {
         ofs << "set ytics";
         if (cy != Black)
-            ofs << " textcolor rgb " << cy.hex_str();
+            ofs << " textcolor rgb " << ColorToStr(cy);
         if (pp.yaxis.log)
             ofs << " logscale";
         ofs << std::endl;
@@ -217,7 +224,7 @@ void GnuplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) 
             ci = li.color;
         }
         // color
-        ofs << " lc rgb " << ci.hex_str();
+        ofs << " lc rgb " << ColorToStr(ci);
 
         // plotting style : points / line / error bars
         if (ncol == 2) {
@@ -293,7 +300,7 @@ void GnuplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties
                     }
                     // color
                     if (d.properties.color != Black)
-                        ofs << " lc rgb " << d.properties.color.hex_str();
+                        ofs << " lc rgb " << ColorToStr(d.properties.color);
                     // arrow tip
                     int arrow = 0;
                     if (d.label.Contains('>')) arrow += 1;
@@ -315,7 +322,7 @@ void GnuplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties
                         ofs << " offset 0, character " << ((d.properties.style % 10 == 1) ? "0.6" : "-0.6");
                     }
                     if (d.properties.color != Black)
-                        ofs << " tc rgb " << d.properties.color.hex_str();
+                        ofs << " tc rgb " << ColorToStr(d.properties.color);
                     ofs << " front" << std::endl;
                     break;
                 }

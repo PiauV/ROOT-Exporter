@@ -1,8 +1,46 @@
 #include "PadProperties.hh"
 
+#include <unordered_map>
+
+namespace {
+const std::unordered_map<int, TString> named_colors = {
+    {kWhite, "white"},
+    {kBlack, "black"},
+    {2, "red"},
+    {3, "green"},
+    {4, "blue"},
+    {5, "yellow"},
+    {6, "magenta"},
+    {7, "cyan"},
+    {EColor::kRed, "red"},
+    {EColor::kGreen, "green"},
+    {EColor::kBlue, "blue"},
+    {EColor::kYellow, "yellow"},
+    {EColor::kMagenta, "magenta"},
+    {EColor::kCyan, "cyan"},
+    {EColor::kOrange, "orange"},
+    {EColor::kViolet, "violet"},
+    {EColor::kGray, "gray"},
+};
+
+} // namespace
+
 namespace REx {
-PadProperties::Color::Color(double r, double g, double b, double a) : red(r), green(g), blue(b), alpha(a) {};
+PadProperties::Color::Color(double r, double g, double b, double a) : red(r), green(g), blue(b), alpha(a) {}
+
 PadProperties::Color::Color() : Color(0, 0, 0, 1) {};
+
+PadProperties::Color::Color(TColor* c) : Color() {
+    if (c) {
+        red = c->GetRed();
+        green = c->GetGreen();
+        blue = c->GetBlue();
+        alpha = c->GetAlpha();
+        if (named_colors.count(c->GetNumber())) {
+            name = named_colors.at(c->GetNumber());
+        }
+    }
+};
 
 /// @brief Convert color to string (rgb version)
 /// @param with_alpha true to include transparency
@@ -10,9 +48,9 @@ PadProperties::Color::Color() : Color(0, 0, 0, 1) {};
 TString PadProperties::Color::rgb_str(bool with_alpha) const {
     TString str;
     if (with_alpha)
-        str.Form("rgba(%.3g,%.3g,%.3g,%3g)", alpha, red, green, blue);
+        str.Form("(%.3g,%.3g,%.3g,%3g)", alpha, red, green, blue);
     else
-        str.Form("rgb(%.3g,%.3g,%.3g)", red, green, blue);
+        str.Form("(%.3g,%.3g,%.3g)", red, green, blue);
     return str;
 }
 
@@ -26,10 +64,10 @@ TString PadProperties::Color::hex_str(bool with_alpha) const {
     int b = 255 * blue;
     if (with_alpha) {
         int a = 255 * alpha;
-        str.Form("\"0x%02X%02X%02X%02X\"", a, r, g, b);
+        str.Form("0x%02X%02X%02X%02X", a, r, g, b);
     }
     else {
-        str.Form("\"0x%02X%02X%02X\"", r, g, b);
+        str.Form("0x%02X%02X%02X", r, g, b);
     }
     return str;
 }

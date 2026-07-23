@@ -22,10 +22,10 @@ protected:
     virtual void SetFunctions(std::ofstream& ofs, const PadProperties& pp) const;
 
     virtual TString FormatLabel(const TString& str) const;
+    virtual TString ColorToStr(PadProperties::Color c) const;
 
 private:
     void InitFile(std::ofstream& ofs) const;
-    char* getColor(PadProperties::Color c) const;
 };
 } // namespace REx
 

@@ -353,14 +353,7 @@ bool PlotSerializer::GetLegend(const TLegend* leg) {
 }
 
 PadProperties::Color PlotSerializer::GetColor(Color_t ci) const {
-    TColor* color = gROOT->GetColor(ci);
-    PadProperties::Color c;
-    if (color) {
-        c.red = color->GetRed();
-        c.green = color->GetGreen();
-        c.blue = color->GetBlue();
-        c.alpha = color->GetAlpha();
-    }
+    PadProperties::Color c(gROOT->GetColor(ci));
     return c;
 }
 

@@ -91,8 +91,10 @@ TString PyplotExportManager::FormatLabel(const TString& str) const {
     return ltx;
 }
 
-char* PyplotExportManager::getColor(PadProperties::Color c) const {
-    return Form("(%.3g,%.3g,%.3g)", c.red, c.green, c.blue);
+TString PyplotExportManager::ColorToStr(PadProperties::Color c) const {
+    TString str = c.name;
+    if (str.Length() > 0) return "\'" + str + "\'";
+    return c.rgb_str();
 }
 
 void PyplotExportManager::WriteToFile(const char* filename, const PadProperties& pp) const {
@@ -165,7 +167,7 @@ void PyplotExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadPropertie
     const PadProperties::Color black(0, 0, 0);
     if (pp.xaxis.color != black) {
         auto c = pp.xaxis.color;
-        ofs << "cx = " << getColor(c) << "\n"
+        ofs << "cx = " << ColorToStr(c) << "\n"
             << "ax.xaxis.label.set_color(cx)\n"
             << "ax.spines[\"bottom\"].set_edgecolor(cx)\n"
             << "ax.tick_params(axis='x', colors=cx)\n"
@@ -173,7 +175,7 @@ void PyplotExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadPropertie
     }
     if (pp.yaxis.color != black) {
         auto c = pp.yaxis.color;
-        ofs << "cy = " << getColor(c) << "\n"
+        ofs << "cy = " << ColorToStr(c) << "\n"
             << "ax.yaxis.label.set_color(cy)\n"
             << "ax.spines[\"left\"].set_edgecolor(cy)\n"
             << "ax.tick_params(axis='y', colors=cy)\n"
@@ -218,7 +220,7 @@ void PyplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) c
         // line style
         auto li = pp.datasets[i].line;
         if (li.style) {
-            options.push_back({"color", getColor(li.color)});
+            options.push_back({"color", ColorToStr(li.color).Data()});
             options.push_back({"", ""});
             if (py_line.count(li.style))
                 options.push_back({"ls", py_line.at(li.style)});
@@ -237,7 +239,7 @@ void PyplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) c
         auto mi = pp.datasets[i].marker;
         if (mi.style) {
             if (!li.style)
-                options.push_back({"color", getColor(mi.color)});
+                options.push_back({"color", ColorToStr(mi.color).Data()});
             options.push_back({"", ""});
             options.push_back({"marker", py_marker.at(mi.style)});
             if (mi.size != 10) // 10 is the default marker size
@@ -245,8 +247,8 @@ void PyplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) c
             if ((mi.style >= 24 && mi.style <= 28) || mi.style == 30 || mi.style == 32 || mi.style == 46)
                 options.push_back({"fillstyle", "\'none\'"});
             else if (li.style && mi.color != li.color) {
-                options.push_back({"mfc", getColor(mi.color)});
-                options.push_back({"mec", getColor(mi.color)});
+                options.push_back({"mfc", ColorToStr(mi.color).Data()});
+                options.push_back({"mec", ColorToStr(mi.color).Data()});
             }
         }
         if (pp.legend)
@@ -304,7 +306,7 @@ void PyplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties&
                         ofs << "ls=" << py_line.at(line.style) << ", ";
                     // color
                     if (d.properties.color != Black)
-                        ofs << "color=" << getColor(d.properties.color) << ", ";
+                        ofs << "color=" << ColorToStr(d.properties.color) << ", ";
                     // arrow tip
                     int arrow = 0;
                     if (d.label.Contains('>')) arrow += 1;
@@ -319,7 +321,7 @@ void PyplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties&
                         << FormatLabel(d.label) << ", "
                         << py_align.at(d.properties.style) << ", ";
                     if (d.properties.color != Black)
-                        ofs << "c=" << getColor(d.properties.color) << ", ";
+                        ofs << "c=" << ColorToStr(d.properties.color) << ", ";
                     ofs << ")" << std::endl;
                     break;
                 }
