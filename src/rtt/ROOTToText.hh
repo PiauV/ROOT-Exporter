@@ -65,6 +65,8 @@ private:
     void WriteGraph2D(const TGraph2D* gr, const TString& option, std::ofstream& ofs) const;
     void WriteTF1(const TF1* f, const TString& option, std::ofstream& ofs) const;
 
+    TString ParseTF1Formula(TString form) const;
+
 private:
     bool headerTitle_ = true;
     bool headerAxis_ = true;

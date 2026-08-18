@@ -17,6 +17,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <regex>
 
 REx::ROOTToText* gRTT = REx::ROOTToText::GetInstance();
 
@@ -161,6 +162,7 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, 
 /// | H  | TGraph  | Save horizontal errors                  |
 /// | S  | THStack | Save stacked histograms                 |
 /// |N<n>| TF1     | Use n points to save function           |
+/// | F  | TF1     | Save only the formula and parameters    |
 ///
 void ROOTToText::PrintOptions() const {
     std::cout << "Available options :\n"
@@ -173,6 +175,7 @@ void ROOTToText::PrintOptions() const {
               << "\tH   [TGraph] - Save horizontal errors\n"
               << "\tS  [THStack] - Save stacked histograms\n"
               << "\tN<n>   [TF1] - Use n points to save function\n"
+              << "\tF      [TF1] - Save only the formula and parameters\n"
               << std::endl;
 }
 
@@ -579,6 +582,35 @@ void ROOTToText::WriteGraph2D(const TGraph2D* gr, const TString& /*option*/, std
 }
 
 void ROOTToText::WriteTF1(const TF1* f, const TString& option, std::ofstream& ofs) const {
+    // 2 possibilities : save as a points collection OR save as a formal function with parameters
+
+    // function range
+    Double_t xmin, xmax;
+    f->GetRange(xmin, xmax);
+
+    // save the formula with its parameters (no evaluation)
+    if (option.Contains("F")) {
+        if (headerTitle_)
+            ofs << cc_ << " Function " << f->GetName() << "(x)" << std::endl;
+        if (headerAxis_)
+            ofs << cc_ << " x from " << xmin << " to " << xmax << std::endl;
+
+        auto form = ParseTF1Formula(f->GetExpFormula());
+        ofs << form << std::endl;
+        for (int k = 0; k < f->GetNpar(); k++) {
+            ofs << f->GetParName(k) << " = " << f->GetParameter(k) << std::endl;
+        }
+        return;
+    }
+
+    if (headerTitle_)
+        ofs << cc_ << " Function " << f->GetName() << " : x -> " << f->GetExpFormula("P") << std::endl;
+
+    if (headerAxis_) {
+        ofs << cc_ << " 1:X - from " << xmin << " to " << xmax << std::endl;
+        ofs << cc_ << " 2:Y=" << f->GetName() << "(X)" << std::endl;
+    }
+
     // number of points for evaluation
     int npoints = -1;
     if (option.Contains("N")) {
@@ -592,23 +624,76 @@ void ROOTToText::WriteTF1(const TF1* f, const TString& option, std::ofstream& of
     }
     if (npoints <= 0) npoints = npfunc_;
 
-    // function range
-    Double_t xmin, xmax;
-    f->GetRange(xmin, xmax);
-
-    if (headerTitle_)
-        ofs << cc_ << " Function " << f->GetName() << " : x -> " << f->GetExpFormula("P") << std::endl;
-
-    if (headerAxis_) {
-        ofs << cc_ << " 1:X - from " << xmin << " to " << xmax << std::endl;
-        ofs << cc_ << " 2:Y=" << f->GetName() << "(X)" << std::endl;
-    }
-
     double dx = (xmax - xmin) / ((double)npoints - 1);
     for (int i = 0; i < npoints; i++) {
         double xi = xmin + dx * i;
         ofs << xi << " " << f->Eval(xi) << std::endl;
     }
+}
+
+TString ROOTToText::ParseTF1Formula(TString f) const {
+    // lower case
+    f.ToLower();
+    // get rid of TMath functions, e.g., "TMath::Cos()" will be replaced by standard "cos()"
+    f.ReplaceAll("tmath::", "");
+
+    // now parse the formula using regex
+    std::string str = f.Data();
+    std::string form = ""; // final formula to be returned
+    if (str == "gaus") {
+        return "Constant*exp(-0.5*((x-Mean)/Sigma)**2)";
+    }
+    else if (str == "gausn") {
+        return "Constant*exp(-0.5*((x-Mean)/Sigma)**2)/(sqrt(2*pi)*Sigma)";
+    }
+    else if (str == "expo") {
+        return "exp(Constant+Slope*x)";
+    }
+
+    std::regex re("(gausn?|expo|pol\\d)\\((\\d)\\)|\\[(\\w+)\\]");
+    // replace ROOT syntax with more generic expressions
+    for (std::smatch m; regex_search(str, m, re);) {
+        form += str.substr(0, m.position(0));
+        // parameters
+        if (m[3].matched) {
+            // in ROOT, parameters take the form [parameter] or [n] (where n is an int)
+            // replace them with 'parameter' or 'pn', respectively
+            TString sparam(m[3].str().c_str());
+            if (sparam.IsDigit()) form += "p";
+            form += sparam;
+        }
+        // ROOT function shortcuts : gaus, pol, expo
+        else {
+            auto expr = m[1].str();
+            int p = 0;
+            if (m[2].matched)
+                p = stoi(m[2].str()); // starting parameter
+            if (expr == "gaus") {
+                form += Form("p%d*exp(-0.5*((x-p%d)/p%d)**2)", p, p + 1, p + 2);
+            }
+            else if (expr == "gausn") {
+                form += Form("p%d*exp(-0.5*((x-p%d)/p%d)**2)/(sqrt(2*pi)*p%d)", p, p + 1, p + 2, p + 2);
+            }
+            else if (expr == "expo") {
+                form += Form("exp(p%d+p%d*x)", p, p + 1);
+            }
+            else {
+                // poln
+                int o = expr.back() - '0'; // order of polynomial function
+                form += Form("(p%d", p);
+                if (o >= 1) form += Form("+p%d*x", p + 1);
+                for (int k = 2; k <= o; k++)
+                    form += Form("+p%d*x**%d", p + k, k);
+                form += ')';
+            }
+        }
+        str = m.suffix(); // search the rest of the formula
+    }
+    form += str; // append the end of the formula
+
+    // LOG_DEBUG(form);
+
+    return form.c_str(); // implicit conversion from char* to TString
 }
 
 } // namespace REx

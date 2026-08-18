@@ -119,7 +119,8 @@ void TestRTTOutput() {
     }
 
     // TF1
-    TF1* f = new TF1("func", "x+1", 1, 3);
+    TF1* f = new TF1("func", "[0]*x+1", 1, 3);
+    f->SetParameter(0, 1);
 
     // TText
     TText* text = new TText(0, 0, "100");
@@ -143,6 +144,7 @@ void TestRTTOutput() {
     SIMPLE_TEST(gRTT->SaveObject(h, "h_lowedge_and_errors.dat", "EL"));
     SIMPLE_TEST(gRTT->SaveObject(gre, "gre_horizontal_errors.txt", "H"));
     SIMPLE_TEST(gRTT->SaveObject(h2, "h2_columns", "C"));
+    SIMPLE_TEST(gRTT->SaveObject(f, "function.out", "F"));
 
     // Use a custom writer
     REx::rtt_writer fw = [](const TObject* obj, const TString& /*opt*/, std::ofstream& ofs) {
@@ -198,6 +200,7 @@ void TestRTTOutput() {
     SIMPLE_TEST(check_file_content("./output/test_rtt/h2_columns.txt", 3, N * N, sum_z, 3));
     SIMPLE_TEST(check_file_content("./output/test_rtt/text.txt", 1, 1, 100, 0));
     SIMPLE_TEST(check_file_content("./output/test_rtt/func_custom.txt", 1, 1, 101, 0));
+    SIMPLE_TEST(check_file_content("./output/test_rtt/function.out", 0, 2)); // simply check that files exist and has the expected number of lines
 
     delete h;
     delete h2;
@@ -221,15 +224,22 @@ bool check_file_content(const char* filename, int _col, int _lin, double _sum, i
     while (line.size() == 0 || line[0] == '#') {
         getline(ifs, line);
     }
+    // read the first line
     std::stringstream ss;
-    ss.str(line);
     double val;
-    while (ss >> val)
-        in.push_back({val});
-    int ncol = in.size();
+    int ncol = 0;
+    if (_col > 0) {
+        // count the number of columns from the first line
+        ss.str(line);
+        while (ss >> val)
+            in.push_back({val});
+        ncol = in.size();
+    }
     int nline = 1;
     while (getline(ifs, line)) {
         if (line.size() == 0 || line[0] == '#') continue;
+        nline++;
+        if (ncol == 0) continue; // sometimes we do not want to count columns
         ss.clear();
         ss.str(line);
         int icol = 0;
@@ -237,14 +247,13 @@ bool check_file_content(const char* filename, int _col, int _lin, double _sum, i
             in[icol++].push_back(val);
         }
         if (icol != ncol) {
-            std::cerr << "something is wrong!" << std::endl;
+            std::cerr << "Something is wrong (columns) !" << std::endl;
             return false;
         }
-        nline++;
     }
     ifs.close();
 
-    if (_col != ncol) {
+    if (_col > 0 && _col != ncol) {
         std::cerr << "Unexpected number of columns" << std::endl;
         std::cerr << "Expected " << _col << ", found " << ncol << std::endl;
         return false;
