@@ -1,13 +1,15 @@
 #include "GleExportManager.hh"
 
 #include "Log.hh"
-#include "PlotSerializer.hh"
+#include "PadProperties.hh"
+#include "ROOTToText.hh"
 
 #include "TPad.h"
 #include "TSystem.h"
 
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <unordered_map>
 
 namespace {
@@ -81,6 +83,9 @@ void GleExportManager::WriteToFile(const char* filename, const PadProperties& pp
     // write default header (gle configuration : size, font, etc...)
     InitFile(ofs);
 
+    // define functions as subroutines
+    SetFunctions(ofs, pp);
+
     // >>> plot data
 
     // start graph
@@ -143,10 +148,24 @@ void GleExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadProperties& 
 void GleExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) const {
     int n = pp.datasets.size();
     int idx_data = 1;
+    int ifunc = 0;
     for (int i = 0; i < n; i++) {
         const auto di = pp.datasets[i];
-        // read data file
-        ofs << "\n\tdata \"" << di.file.first << "\"" << std::endl;
+        int ncol = di.file.second;
+
+        if (ncol)
+            // read data file
+            ofs << "\n\tdata \"" << di.file.first << "\"" << std::endl;
+        else {
+            // function
+            auto f = pp.functions[ifunc++];
+            ofs << "\n\tlet d" << idx_data << " = " << f->GetName() << "(x";
+            for (int p = 0; p < f->GetNpar(); p++) {
+                ofs << ", " << f->GetParameter(p);
+            }
+            ofs << ") from " << f->GetXmin() << " to " << f->GetXmax() << std::endl;
+            ncol = 2; // for incrementing idx_data at the end of the loop
+        }
 
         // marker, line & color
         ofs << "\td" << idx_data;
@@ -180,7 +199,6 @@ void GleExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) cons
             ofs << "\td" << idx_data << " key " << FormatLabel(di.label) << std::endl;
 
         // errors (if any)
-        int ncol = di.file.second;
         if (ncol == 3) {
             ofs << "\td" << idx_data
                 << " err d" << idx_data + 1 << " errwidth 0.05"
@@ -257,6 +275,23 @@ void GleExportManager::SetDecorators(std::ofstream& ofs, const PadProperties& pp
                     LOG_WARN("Decorator not implemented for GLE");
                     break;
             }
+        }
+    }
+}
+
+void GleExportManager::SetFunctions(std::ofstream& ofs, const PadProperties& pp) const {
+    if (evalFunc_) return;
+
+    std::set<std::string> fnames;
+    for (auto f : pp.functions) {
+        if (!fnames.count(f->GetName())) {
+            ofs << "sub " << f->GetName() << " x";
+            for (int p = 0; p < f->GetNpar(); p++)
+                ofs << " " << f->GetParName(p);
+            ofs << std::endl;
+            ofs << "\treturn " << ROOTToText::ParseTF1Formula(f->GetExpFormula()) << std::endl;
+            ofs << "end sub\n"
+                << std::endl;
         }
     }
 }

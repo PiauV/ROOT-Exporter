@@ -2,12 +2,15 @@
 
 #include "Log.hh"
 #include "PlotSerializer.hh"
+#include "ROOTToText.hh"
 
 #include "TPad.h"
 #include "TSystem.h"
 
 #include <fstream>
 #include <iostream>
+#include <set>
+#include <string>
 #include <unordered_map>
 
 namespace {
@@ -106,13 +109,16 @@ void GnuplotExportManager::WriteToFile(const char* filename, const PadProperties
     // >>> plot data
     SetTitleAndAxis(ofs, pp);
 
+    // define functions to be plotted
+    SetFunctions(ofs, pp);
+
     // plot other graphical elements (must come before the plot!)
     SetDecorators(ofs, pp);
 
     // configure legend
     SetLegend(ofs, pp);
 
-    // draw data from files
+    // draw data from files or functions
     SetData(ofs, pp);
 
     // plot data <<<
@@ -170,10 +176,27 @@ void GnuplotExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadProperti
 
 void GnuplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) const {
     int n = pp.datasets.size();
+    int ifunc = 0;
     ofs << "\nplot ";
     for (int i = 0; i < n; ++i) {
-        auto di = pp.datasets[i];
-        ofs << " \"" << di.file.first << "\"";
+        const auto di = pp.datasets[i];
+        int ncol = di.file.second;
+
+        if (ncol)
+            // plot data from file
+            ofs << " \"" << di.file.first << "\"";
+        else {
+            // plot function
+            auto f = pp.functions[ifunc++];
+            ofs << "[x=" << f->GetXmin() << ":" << f->GetXmax() << "] "; // sampling range
+            ofs << f->GetName() << "(x";
+            for (int p = 0; p < f->GetNpar(); p++) {
+                ofs << "," << f->GetParameter(p);
+            }
+            ofs << ")";
+            ncol = 2; // will be used later on (no error line if ncol==2)
+        }
+
         auto ci = Black;     // color
         auto mi = di.marker; // marker
         auto li = di.line;   // line
@@ -197,7 +220,6 @@ void GnuplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) 
         ofs << " lc rgb " << ci.hex_str();
 
         // plotting style : points / line / error bars
-        int ncol = di.file.second; // get error bars
         if (ncol == 2) {
             // no error bars
             if (li.style == 0)
@@ -303,6 +325,25 @@ void GnuplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties
             }
         }
     }
+}
+
+void GnuplotExportManager::SetFunctions(std::ofstream& ofs, const PadProperties& pp) const {
+    if (evalFunc_) return;
+
+    std::set<std::string> fnames;
+    for (auto f : pp.functions) {
+        if (!fnames.count(f->GetName())) {
+            ofs << "\n";
+            ofs << f->GetName() << "(x";
+            for (int p = 0; p < f->GetNpar(); p++)
+                ofs << "," << f->GetParName(p);
+            ofs << ") = ";
+            ofs << ROOTToText::ParseTF1Formula(f->GetExpFormula());
+            ofs << "\n"
+                << std::endl;
+        }
+    }
+    // <func-name>(<p1> {,<p2>} ... {,<p12>}) = <expression>
 }
 
 } // namespace REx

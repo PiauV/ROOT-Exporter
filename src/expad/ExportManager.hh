@@ -18,6 +18,7 @@ public:
     void SaveInFolder(bool flag);
     void SetVerbose(bool v);
     void IgnoreListOfFunctions(bool flag);
+    void EvaluateFunctions(bool flag);
 
 protected:
     TString GetFilePath(TVirtualPad* pad, const char* filename) const;
@@ -31,6 +32,7 @@ protected:
     bool inFolder_;
     bool verb_; // verbose
     bool saveListFunc_;
+    bool evalFunc_;
 };
 
 /// @brief Export all data objects drawn in a plot to text files
@@ -60,6 +62,7 @@ protected:
     virtual void SetData(std::ofstream& ofs, const PadProperties& pp) const = 0;
     virtual void SetLegend(std::ofstream& ofs, const PadProperties& pp) const = 0;
     virtual void SetDecorators(std::ofstream& ofs, const PadProperties& pp) const = 0;
+    virtual void SetFunctions(std::ofstream& ofs, const PadProperties& pp) const = 0;
 
 protected:
     bool latex_; // (partial) LaTeX support

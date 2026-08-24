@@ -631,7 +631,7 @@ void ROOTToText::WriteTF1(const TF1* f, const TString& option, std::ofstream& of
     }
 }
 
-TString ROOTToText::ParseTF1Formula(TString f) const {
+TString ROOTToText::ParseTF1Formula(TString f) {
     // lower case
     f.ToLower();
     // get rid of TMath functions, e.g., "TMath::Cos()" will be replaced by standard "cos()"

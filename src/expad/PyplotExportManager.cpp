@@ -2,12 +2,15 @@
 
 #include "Log.hh"
 #include "PlotSerializer.hh"
+#include "ROOTToText.hh"
 
 #include "TPad.h"
 #include "TSystem.h"
 
 #include <fstream>
 #include <iostream>
+#include <set>
+#include <string>
 #include <unordered_map>
 
 namespace {
@@ -99,8 +102,11 @@ void PyplotExportManager::WriteToFile(const char* filename, const PadProperties&
         return;
     }
 
-    // write default header for configuration (import libraries) and set output name
+    // write default header for configuration (import libraries)
     InitFile(ofs);
+
+    // define functions
+    SetFunctions(ofs, pp);
 
     ofs << "fig, ax = plt.subplots()" << std::endl;
 
@@ -132,6 +138,7 @@ void PyplotExportManager::WriteToFile(const char* filename, const PadProperties&
 void PyplotExportManager::InitFile(std::ofstream& ofs) const {
     ofs << "import numpy as np\n"
         << "import matplotlib.pyplot as plt\n"
+        << "from math import *\n"
         << std::endl;
 }
 
@@ -177,14 +184,28 @@ void PyplotExportManager::SetTitleAndAxis(std::ofstream& ofs, const PadPropertie
 
 void PyplotExportManager::SetData(std::ofstream& ofs, const PadProperties& pp) const {
     int n = pp.datasets.size();
+    int ifunc = 0;
     for (int i = 0; i < n; i++) {
         const auto di = pp.datasets[i];
-        // read data file
-        ofs << Form("d%d = np.transpose(np.loadtxt(\"%s\"))", i + 1, di.file.first.Data()) << std::endl;
+        int ncol = pp.datasets[i].file.second;
+
+        if (ncol)
+            // get data from file
+            ofs << "d" << i + 1 << " = np.transpose(np.loadtxt(\"" << di.file.first << "\"))\n";
+        else {
+            // generate data from function
+            auto f = pp.functions[ifunc++];
+            ofs << "X" << i + 1 << " = np.linspace(" << f->GetXmin() << "," << f->GetXmax() << ")\n";
+            ofs << "d" << i + 1 << " = np.vstack((X" << i + 1 << "," << f->GetName() << "(X" << i + 1;
+            for (int p = 0; p < f->GetNpar(); p++) {
+                ofs << ", " << f->GetParameter(p);
+            }
+            ofs << ")))\n";
+        }
+
         // setup options
         std::vector<std::pair<std::string, std::string>> options;
         // errors (if any)
-        int ncol = pp.datasets[i].file.second;
         if (ncol == 3) {
             // y error bars
             options.push_back({"yerr", Form("d%d[2]", i + 1)});
@@ -262,7 +283,6 @@ void PyplotExportManager::SetLegend(std::ofstream& ofs, const PadProperties& pp)
 void PyplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties& pp) const {
     if (pp.decorators.size()) {
         for (const auto& d : pp.decorators) {
-            ofs << std::endl;
             switch (d.type) {
                 case Line: {
                     if (!d.pos.isok) {
@@ -307,6 +327,28 @@ void PyplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties&
                     LOG_WARN("Decorator not implemented for pyplot");
                     break;
             }
+            ofs << std::endl;
+        }
+    }
+}
+
+void PyplotExportManager::SetFunctions(std::ofstream& ofs, const PadProperties& pp) const {
+    if (evalFunc_) return;
+
+    std::set<std::string> fnames;
+    for (auto f : pp.functions) {
+        if (!fnames.count(f->GetName())) {
+            TString formula = ROOTToText::ParseTF1Formula(f->GetExpFormula());
+            // 2 possibilities here : either use math functions, or numpy ones
+            // but to use numpy functions it would be necessary to rename all function to np.<func>
+            ofs << "\n@np.vectorize";
+            ofs << "\ndef " << f->GetName() << "(x";
+            for (int p = 0; p < f->GetNpar(); p++)
+                ofs << "," << f->GetParName(p);
+            ofs << "):\n";
+            ofs << "\treturn " << formula;
+            ofs << "\n"
+                << std::endl;
         }
     }
 }

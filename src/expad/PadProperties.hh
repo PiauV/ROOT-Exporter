@@ -3,6 +3,7 @@
 
 #include "DataType.hh"
 
+#include "TF1.h"
 #include "TString.h"
 
 #include <utility>
@@ -70,6 +71,7 @@ struct PadProperties {
     AxisProperties xaxis;
     AxisProperties yaxis;
     std::vector<Data> datasets;
+    std::vector<const TF1*> functions;
     std::vector<Decorator> decorators;
     unsigned short legend = 0;
 };

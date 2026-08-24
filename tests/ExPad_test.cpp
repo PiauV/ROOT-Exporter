@@ -138,8 +138,8 @@ void TestExportManager() {
     TCanvas* c1 = new TCanvas();
     TH1D* h = new TH1D("h", "h;xtitle;ytitle", 50, 0, 10);
     TH1D* h2 = new TH1D("h2", "h2", 50, 0, 10);
-    TF1* f = new TF1("f", "gausn", 0, 10);
-    f->SetParameters(200, 5, 1);
+    TF1* f = new TF1("f", "gaus", 0, 10);
+    f->SetParameters(80, 5, 1);
     h->FillRandom("f", 1000);
     h2->Fill(6, 20);
     h2->SetLineColor(kGreen);
@@ -196,6 +196,10 @@ void TestExportManager() {
     c2->BuildLegend(0.65, 0.15, 0.88, 0.35);
     auto ltx = new TLatex(1.2, 4.8, "#alpha+#beta+#gamma");
     ltx->Draw();
+    TF1* f2 = new TF1("f2", "pol1", 0, 6);
+    f2->SetParameters(2, 0.5);
+    f2->Draw("same");
+    f2->SetLineColor(kGreen);
     c2->Update();
 
     // Use ExPad clases to export pad in different languages
@@ -211,8 +215,10 @@ void TestExportManager() {
         gSystem->mkdir("output/gle");
         auto gle_man = std::make_unique<REx::GleExportManager>();
         gle_man->SaveInFolder(true);
+        gle_man->EvaluateFunctions(false);
         gle_man->ExportPad(c1, "output/gle/c1");
         gle_man->SaveInFolder(false);
+        gle_man->EvaluateFunctions(true);
         gle_man->SetDataDirectory("data_c2");
         gle_man->ExportPad(c2, "output/gle/c2.gle");
         SIMPLE_TEST(!gSystem->AccessPathName("output/gle/c1/h.txt"));
@@ -227,7 +233,9 @@ void TestExportManager() {
         gSystem->mkdir("output/gnuplot");
         auto gnuplot_man = std::make_unique<REx::GnuplotExportManager>();
         gnuplot_man->SaveInFolder(false);
+        gnuplot_man->EvaluateFunctions(false);
         gnuplot_man->ExportPad(c1, "output/gnuplot/c1");
+        gnuplot_man->EvaluateFunctions(true);
         gnuplot_man->ExportPad(c2, "output/gnuplot/c2");
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/h.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/gnuplot/f.txt"));
@@ -241,7 +249,9 @@ void TestExportManager() {
         gSystem->mkdir("output/python");
         auto pyplot_man = std::make_unique<REx::PyplotExportManager>();
         pyplot_man->SaveInFolder(false);
+        pyplot_man->EvaluateFunctions(false);
         pyplot_man->ExportPad(c1, "output/python/c1");
+        pyplot_man->EvaluateFunctions(true);
         pyplot_man->ExportPad(c2, "output/python/c2");
         SIMPLE_TEST(!gSystem->AccessPathName("output/python/h.txt"));
         SIMPLE_TEST(!gSystem->AccessPathName("output/python/f.txt"));

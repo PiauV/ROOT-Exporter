@@ -52,6 +52,8 @@ public:
     bool SaveObject(const TObject* obj, DataType dt, TString& filename, Option_t* opt = "") const;
     void PrintOptions() const;
 
+    static TString ParseTF1Formula(TString form);
+
 private:
     ROOTToText();
     TString GetFilePath(const TObject* obj, const char* filename) const;
@@ -64,8 +66,6 @@ private:
     void WriteGraph(const TGraph* gr, const TString& option, std::ofstream& ofs) const;
     void WriteGraph2D(const TGraph2D* gr, const TString& option, std::ofstream& ofs) const;
     void WriteTF1(const TF1* f, const TString& option, std::ofstream& ofs) const;
-
-    TString ParseTF1Formula(TString form) const;
 
 private:
     bool headerTitle_ = true;

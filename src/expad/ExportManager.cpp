@@ -5,6 +5,7 @@
 #include "ROOTToText.hh"
 
 #include "TClass.h"
+#include "TF1.h"
 #include "TGraph.h"
 #include "TH1.h"
 #include "TSystem.h"
@@ -23,6 +24,7 @@ BaseExportManager::BaseExportManager(bool verbose) : verb_(verbose) {
     dataDir_ = "";
     inFolder_ = false;
     saveListFunc_ = true;
+    evalFunc_ = true;
 }
 
 BaseExportManager::~BaseExportManager() {
@@ -75,6 +77,10 @@ void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const 
             obj_name = Form("%s_%d", obj_name.Data(), nn);
         }
         SaveData(obj, obj_name, ps->pp_.datasets[i]);
+        if (ps->pp_.datasets[i].file.second == 0) {
+            // function to be evaluated later
+            ps->pp_.functions.push_back((const TF1*)obj);
+        }
     }
     // restore gRTT parameters
     gRTT->SetDirectory(rtt_folder);
@@ -185,6 +191,14 @@ void BaseExportManager::SaveData(const TObject* obj, const TString& objName, Pad
             else
                 LOG_ERROR("bad dynamic_cast in " << __FUNCTION__);
         } break;
+        case Function1D: {
+            if (!evalFunc_) {
+                ncol = 0;
+                option = "F";
+            }
+            else
+                ncol = 2;
+        } break;
         default:
             ncol = 2;
             break;
@@ -221,6 +235,10 @@ void BaseExportManager::SetVerbose(bool v) {
 /// @brief Set to true to ignore functions associated with histograms (e.g. from fits)
 void BaseExportManager::IgnoreListOfFunctions(bool flag) {
     saveListFunc_ = !flag;
+}
+
+void BaseExportManager::EvaluateFunctions(bool flag) {
+    evalFunc_ = flag;
 }
 
 VirtualExportManager::VirtualExportManager(bool v) : BaseExportManager(v) {
