@@ -1,2 +1,5 @@
-build/**
 .vscode/
+build/**
+install/**
+doc/examples/rtt_output/**
+doc/examples/expad_output/**

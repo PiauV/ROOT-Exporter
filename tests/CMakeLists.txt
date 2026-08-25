@@ -18,10 +18,10 @@ target_link_libraries(TREx PUBLIC libExPad)
 
 # Testing REx itself --> run TREx
 add_test(NAME TestREx COMMAND TREx WORKING_DIRECTORY ${test_dir})
-set_tests_properties(TestREx     PROPERTIES FIXTURES_SETUP    Files TIMEOUT 60)
+set_tests_properties(TestREx PROPERTIES FIXTURES_SETUP Files TIMEOUT 60)
 
 # Testing the export  --> the generated script should produce the expected output file
-set (EXT_TEST ${CMAKE_CURRENT_SOURCE_DIR}/run_test_external.cmake)
+set(EXT_TEST ${CMAKE_CURRENT_SOURCE_DIR}/run_test_external.cmake)
 
 ## gle
 find_program(GLE "gle")

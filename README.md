@@ -4,7 +4,7 @@
 
 During export, datasets from the plot are saved as ASCII files using the **RTT** (ROOT To Text) sub-library.
 
-**Version:** 0.1.2
+**Version:** 0.2.0
 
 ## Installation
 
@@ -22,7 +22,9 @@ cmake --install .
 The REx test suite, **TREx** (Testing REx), can be run with CTest:
 ```bash
 cd <rex-folder>/build
-ctest [-V] [--output-on-failure]
+ctest [-C <cfg>] [-V] [--output-on-failure] [-R <regex_test_name>]
+# for instance :
+ctest --output-on-failure -R Python # run only python test
 ```
 
 ## Features
@@ -91,5 +93,5 @@ The TREx tests could also serve as examples for advanced REx features.
 
 ## Additional Notes
 
-- **Compatibility:** REx should be compatible with ROOT 6 and legacy ROOT 5.34.
+- **Compatibility:** REx should be compatible with ROOT 6 and legacy ROOT 5.34, on Linux and Windows OS
 - **License:** GNU Lesser General Public License v3, see files COPYING and COPYING.LESSER.
