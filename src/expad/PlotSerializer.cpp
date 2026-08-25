@@ -199,10 +199,18 @@ void PlotSerializer::StoreData(const TObject* obj, DataType data_type, const TSt
         }
         pp_.datasets.push_back(prop);
         dataObjects_.push_back(obj);
-        if (saveFunctionsFromList_ && (data_type == Histo1D || data_type == Histo2D) && !opt.Contains("HIST")) {
-            // also add functions from the list of functions associated to the histogram
-            // (not drawn if the histo is plotted with 'HIST' option)
-            TListIter iter(((TH1*)obj)->GetListOfFunctions());
+        if (saveFunctionsFromList_) {
+            // also add functions from the list of functions associated to the histogram or graph
+            TList* list = nullptr;
+            if ((data_type == Histo1D || data_type == Histo2D) && !opt.Contains("HIST"))
+                // the functions are not drawn if the histo is plotted with 'HIST' option
+                list = ((TH1*)obj)->GetListOfFunctions();
+            else if (data_type == Graph1D)
+                list = ((TGraph*)obj)->GetListOfFunctions();
+
+            if (!list) return;
+
+            TListIter iter(list);
             while (auto func = iter.Next()) {
                 // ignore stat box for now
                 if (strcmp(func->GetName(), "stats") == 0)
