@@ -1,0 +1,45 @@
+name: Build and Test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: rootproject/root:latest # ROOT Docker Image
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install matplotlib
+        run: python -m pip install --upgrade pip matplotlib
+
+      - name: Install GLE and gnuplot
+        run: |
+          apt-get update -q --fix-missing
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get install -qy --no-install-recommends \
+            gle-graphics gnuplot-qt texlive-base texlive-latex-base ghostscript
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+      - name: Build REx
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+      - name: Run TREx
+        run: |
+          cd ${{github.workspace}}/build
+          ctest -C ${{env.BUILD_TYPE}}
