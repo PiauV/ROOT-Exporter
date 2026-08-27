@@ -346,7 +346,7 @@ void PyplotExportManager::SetFunctions(std::ofstream& ofs, const PadProperties& 
             ofs << "\n@np.vectorize";
             ofs << "\ndef " << f->GetName() << "(x";
             for (int p = 0; p < f->GetNpar(); p++)
-                ofs << "," << f->GetParName(p);
+                ofs << "," << ToLower(f->GetParName(p));
             ofs << "):\n";
             ofs << "\treturn " << formula;
             ofs << "\n"

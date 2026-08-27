@@ -295,7 +295,7 @@ void GleExportManager::SetFunctions(std::ofstream& ofs, const PadProperties& pp)
         if (!fnames.count(f->GetName())) {
             ofs << "sub " << f->GetName() << " x";
             for (int p = 0; p < f->GetNpar(); p++)
-                ofs << " " << f->GetParName(p);
+                ofs << " " << ToLower(f->GetParName(p));
             ofs << std::endl;
             ofs << "\treturn " << ROOTToText::ParseTF1Formula(f->GetExpFormula()) << std::endl;
             ofs << "end sub\n"

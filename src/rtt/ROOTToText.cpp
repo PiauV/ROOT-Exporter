@@ -641,13 +641,13 @@ TString ROOTToText::ParseTF1Formula(TString f) {
     std::string str = f.Data();
     std::string form = ""; // final formula to be returned
     if (str == "gaus") {
-        return "Constant*exp(-0.5*((x-Mean)/Sigma)**2)";
+        return "constant*exp(-0.5*((x-mean)/sigma)**2)";
     }
     else if (str == "gausn") {
-        return "Constant*exp(-0.5*((x-Mean)/Sigma)**2)/(sqrt(2*pi)*Sigma)";
+        return "constant*exp(-0.5*((x-mean)/sigma)**2)/(sqrt(2*pi)*sigma)";
     }
     else if (str == "expo") {
-        return "exp(Constant+Slope*x)";
+        return "exp(constant+slope*x)";
     }
 
     std::regex re("(gausn?|expo|pol\\d)\\((\\d)\\)|\\[(\\w+)\\]");

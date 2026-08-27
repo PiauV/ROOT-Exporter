@@ -343,7 +343,7 @@ void GnuplotExportManager::SetFunctions(std::ofstream& ofs, const PadProperties&
             ofs << "\n";
             ofs << f->GetName() << "(x";
             for (int p = 0; p < f->GetNpar(); p++)
-                ofs << "," << f->GetParName(p);
+                ofs << "," << ToLower(f->GetParName(p));
             ofs << ") = ";
             ofs << ROOTToText::ParseTF1Formula(f->GetExpFormula());
             ofs << "\n"
