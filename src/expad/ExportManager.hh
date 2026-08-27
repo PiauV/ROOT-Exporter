@@ -54,7 +54,8 @@ public:
     inline void EnableLatex(bool flag = true) { latex_ = flag; };
 
 protected:
-    virtual TString FormatLabel(const TString& str, bool escape = true) const;
+    TString FormatLabel(const TString& str, bool escape) const;
+    virtual TString FormatLabel(const TString& str) const;
 
     virtual void WriteToFile(const char*, const PadProperties&) const = 0;
 

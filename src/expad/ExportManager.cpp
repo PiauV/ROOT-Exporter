@@ -299,4 +299,8 @@ TString VirtualExportManager::FormatLabel(const TString& str, bool escape) const
     return label;
 }
 
+TString VirtualExportManager::FormatLabel(const TString& str) const {
+    return FormatLabel(str, true);
+}
+
 } // namespace REx
