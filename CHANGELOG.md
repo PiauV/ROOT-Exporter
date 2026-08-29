@@ -1,7 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.1] - 2026-08-29
  - [Fixed] Consistent case for function parameters
+ - [Fixed] Code fixes (error/warnings during build)
+ - [Added] Continous integration workflow (Github Action)
 
 ## [0.2.0] - 2026-08-25
  - [Added] Functions can be exported as a formula with parameters, instead of generating datafiles (RTT + ExPad)
