@@ -63,7 +63,7 @@ bool ROOTToText::SaveObject(const TObject* obj, const char* filename, Option_t* 
     return SaveObject(obj, GetDataType(obj), str, opt);
 }
 
-/// @brief Set a TObject in a text file
+/// @brief Save a TObject in a text file
 /// @param obj object to save
 /// @param dt object type
 /// @param filename output file name
@@ -74,10 +74,16 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, const char* filenam
     return SaveObject(obj, dt, str, opt);
 }
 
+/// @brief Save a TObject in a text file
+/// @param obj object to save
+/// @param dt object type
+/// @param filename output file name
+/// @param opt option(s), see ROOTToText::PrintOptions()
+/// @return true in case of success ; and 'filename' will contain the full name of the output file
 bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, Option_t* opt) const {
     if (!obj) {
         LOG_ERROR("null pointer in " << __FUNCTION__);
-        return false;
+        return false; // throw exception ?
     }
 
     TString option(opt);
@@ -94,7 +100,22 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, 
         }
     }
 
+    bool verbose = verb_ || option.Contains("V");
+
     TString path = GetFilePath(obj, filename.Data());
+    bool file_exists = !gSystem->AccessPathName(path, EAccessMode::kFileExists);
+    if (file_exists) {
+        if (option.Contains("P")) {
+            // Preserve existing file
+            LOG_ERROR("File " << path << " already exists - aborting");
+            return false; // throw exception ?
+        }
+        else if (verbose) {
+            // just print a warning
+            LOG_WARN("Overwriting file " << path);
+        }
+    }
+
     std::ofstream ofs(path);
     if (!ofs.is_open()) {
         LOG_ERROR("Could not open file " << path);
@@ -144,25 +165,27 @@ bool ROOTToText::SaveObject(const TObject* obj, DataType dt, TString& filename, 
     }
 
     ofs.close();
-    if (verb_) LOG_INFO("Saved " << obj->GetName() << " in " << path);
+    if (verbose) LOG_INFO("Saved " << obj->GetName() << " in " << path);
     filename = path;
     return true;
 }
 
 /// @brief Print list of available options
 ///
-/// |    | Objects | Description                             |
-/// |----|---------|-----------------------------------------|
-/// | D  | all     | Use default RTT writer                  |
-/// | L  | TH1     | Use bin low edge instead of bin center  |
-/// | E  | TH1     | Save bin errors                         |
-/// | C  | TH2     | Save 2D data in columns : X Y Z         |
-/// | G  | TH2     | Save 2D data in GLE format              |
-/// | R  | TH1/TH2 | Save only data in the bin range         |
-/// | H  | TGraph  | Save horizontal errors                  |
-/// | S  | THStack | Save stacked histograms                 |
-/// |N<n>| TF1     | Use n points to save function           |
-/// | F  | TF1     | Save only the formula and parameters    |
+/// |    | Objects | Description                                      |
+/// |----|---------|--------------------------------------------------|
+/// | D  | all     | Use default RTT writer                           |
+/// | L  | TH1     | Use bin low edge instead of bin center           |
+/// | E  | TH1     | Save bin errors                                  |
+/// | C  | TH2     | Save 2D data in columns : X Y Z                  |
+/// | G  | TH2     | Save 2D data in GLE format                       |
+/// | R  | TH1/TH2 | Save only data in the bin range                  |
+/// | H  | TGraph  | Save horizontal errors                           |
+/// | S  | THStack | Save stacked histograms                          |
+/// |N<n>| TF1     | Use n points to save function                    |
+/// | F  | TF1     | Save only the formula and parameters             |
+/// | P  | all     | Preserve (i.e., do not overwrite) existing files |
+/// | V  | all     | Set extra verbosity, like gRTT->SetVerbose(true) |
 ///
 void ROOTToText::PrintOptions() const {
     std::cout << "Available options :\n"
@@ -176,6 +199,8 @@ void ROOTToText::PrintOptions() const {
               << "\tS  [THStack] - Save stacked histograms\n"
               << "\tN<n>   [TF1] - Use n points to save function\n"
               << "\tF      [TF1] - Save only the formula and parameters\n"
+              << "\tP      [all] - Preserve (i.e., do not overwrite) existing files\n"
+              << "\tV      [all] - Set extra verbosity, like gRTT->SetVerbose(true)\n"
               << std::endl;
 }
 

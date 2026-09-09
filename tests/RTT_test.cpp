@@ -140,6 +140,8 @@ void TestRTTOutput() {
 
     // saving with options and filenames
     SIMPLE_TEST(gRTT->SaveObject(h, "h_with_errors", "E"));
+    LOG_INFO("Expecting an error next...");                  // just to be clear -> the point of the test is to trigger the error
+    SIMPLE_TEST(!gRTT->SaveObject(h, "h_with_errors", "P")); // should not overwrite
     SIMPLE_TEST(gRTT->SaveObject(hs, "hstack_with_errors", "E"));
     SIMPLE_TEST(gRTT->SaveObject(h, "h_lowedge_and_errors.dat", "EL"));
     SIMPLE_TEST(gRTT->SaveObject(gre, "gre_horizontal_errors.txt", "H"));
