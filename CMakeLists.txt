@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.17)
 
-project(REx LANGUAGES CXX)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+# Get the version from the git tag
+include(GetGitVersion)
+
+project(REx LANGUAGES CXX VERSION ${GIT_VERSION})
+message(STATUS "Configuring REx ${CMAKE_PROJECT_VERSION}")
 
 if(MSVC)
     # level 4 warnings but without:

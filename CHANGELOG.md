@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.2] - 2026-09-17
+ - [Added] New RTT options : verbose (V) and overwriting protection (P)
+ - [Added] New Expad function : ExportCurrentPad(filename) (equivalent to ExportPad(gPad, filename))
+
 ## [0.2.1] - 2026-08-29
  - [Fixed] Consistent case for function parameters
  - [Fixed] Code fixes (error/warnings during build)
