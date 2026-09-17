@@ -30,10 +30,15 @@ BaseExportManager::BaseExportManager(bool verbose) : verb_(verbose) {
 BaseExportManager::~BaseExportManager() {
 }
 
-/// @brief Save plot to text files (plotting script with data files)
+/// @brief Save plot as a plotting script with data files
 /// @param pad plot to export
-/// @param filename ouput script name
+/// @param filename output name (for the main script file)
 void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const {
+    if (!pad) {
+        LOG_ERROR("No pad was selected");
+        return;
+    }
+
     auto ps = std::make_unique<PlotSerializer>(pad, saveListFunc_);
 
     auto path = GetFilePath(pad, filename);
@@ -90,6 +95,12 @@ void BaseExportManager::ExportPad(TVirtualPad* pad, const char* filename) const 
     WriteToFile(path, ps->pp_);
 
     if (verb_) LOG_INFO("Saved plot from " << pad->GetName() << " in " << path);
+}
+
+/// @brief Save plot from gPad (current pad) as a plotting script with data files
+/// @param filename output name (for the main script file)
+void BaseExportManager::ExportCurrentPad(const char* filename) const {
+    ExportPad(gPad, filename);
 }
 
 /// @brief Get the ouput file path for exporting a plot

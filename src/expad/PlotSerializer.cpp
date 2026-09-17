@@ -20,7 +20,7 @@
 namespace REx {
 
 PlotSerializer::PlotSerializer(TVirtualPad* pad, bool save_func_list) : pad_(pad), saveFunctionsFromList_(save_func_list) {
-    ExtractPadProperties();
+    if (pad) ExtractPadProperties();
 }
 
 PlotSerializer::~PlotSerializer() {
@@ -31,7 +31,7 @@ void PlotSerializer::Restart() {
     pp_.decorators.clear();
     dataObjects_.clear();
     pp_ = PadProperties();
-    ExtractPadProperties();
+    if (pad_) ExtractPadProperties();
 }
 
 int PlotSerializer::GetNumberOfDatasets() const {

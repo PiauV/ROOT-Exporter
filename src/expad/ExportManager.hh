@@ -14,6 +14,7 @@ public:
     virtual ~BaseExportManager();
 
     void ExportPad(TVirtualPad* pad, const char* filename) const;
+    void ExportCurrentPad(const char* filename) const;
     void SetDataDirectory(TString folder_name);
     void SaveInFolder(bool flag);
     void SetVerbose(bool v);
