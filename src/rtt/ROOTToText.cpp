@@ -374,6 +374,12 @@ TString ROOTToText::GetFilePath(const TObject* obj, const char* filename) const 
         str = obj->GetName();
         str.ReplaceAll(' ', '_');
     }
+    else if (str.EndsWith("/") || str.EndsWith("\\")) {
+        // folder without filename : append object name
+        TString oname = obj->GetName();
+        oname.ReplaceAll(' ', '_');
+        str.Append(oname);
+    }
 
     // check that filename ends with a file extension
     // if not, add the default extension
