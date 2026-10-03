@@ -337,11 +337,13 @@ void GnuplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties
 void GnuplotExportManager::SetFunctions(std::ofstream& ofs, const PadProperties& pp) const {
     if (evalFunc_) return;
 
-    std::set<std::string> fnames;
+    std::set<std::string> funcs; // to avoid duplicate function definitions
     for (auto f : pp.functions) {
-        if (!fnames.count(f->GetName())) {
+        std::string fname = f->GetName();
+        if (!funcs.count(fname)) {
+            funcs.emplace(fname);
             ofs << "\n";
-            ofs << f->GetName() << "(x";
+            ofs << fname << "(x";
             for (int p = 0; p < f->GetNpar(); p++)
                 ofs << "," << ToLower(f->GetParName(p));
             ofs << ") = ";

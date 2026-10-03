@@ -290,10 +290,12 @@ void GleExportManager::SetDecorators(std::ofstream& ofs, const PadProperties& pp
 void GleExportManager::SetFunctions(std::ofstream& ofs, const PadProperties& pp) const {
     if (evalFunc_) return;
 
-    std::set<std::string> fnames;
+    std::set<std::string> funcs; // to avoid duplicate function definitions
     for (auto f : pp.functions) {
-        if (!fnames.count(f->GetName())) {
-            ofs << "sub " << f->GetName() << " x";
+        std::string fname = f->GetName();
+        if (!funcs.count(fname)) {
+            funcs.emplace(fname);
+            ofs << "sub " << fname << " x";
             for (int p = 0; p < f->GetNpar(); p++)
                 ofs << " " << ToLower(f->GetParName(p));
             ofs << std::endl;

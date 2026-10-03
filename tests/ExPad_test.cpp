@@ -176,14 +176,14 @@ void TestExportManager() {
     gr->SetFillColor(kWhite);
     TGraphErrors* gre1 = new TGraphErrors(3, x2, y2, 0, ey2);
     gre1->SetName("gre1_c2");
-    gre1->SetTitle("graph1");
+    gre1->SetTitle("graph #1");
     gre1->SetMarkerStyle(20);
     gre1->SetMarkerColor(kBlue);
     gre1->SetLineColor(kBlue);
     gre1->SetFillColor(kWhite);
     TGraphErrors* gre2 = new TGraphErrors(2, x3, y3, ex3, ey3);
     gre2->SetName("gre2_c2");
-    gre2->SetTitle("graph2");
+    gre2->SetTitle("graph #2");
     gre2->SetMarkerStyle(25);
     gre2->SetFillColor(kWhite);
     TMultiGraph* mg = new TMultiGraph();

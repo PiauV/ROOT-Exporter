@@ -337,14 +337,16 @@ void PyplotExportManager::SetDecorators(std::ofstream& ofs, const PadProperties&
 void PyplotExportManager::SetFunctions(std::ofstream& ofs, const PadProperties& pp) const {
     if (evalFunc_) return;
 
-    std::set<std::string> fnames;
+    std::set<std::string> funcs; // to avoid duplicate function definitions
     for (auto f : pp.functions) {
-        if (!fnames.count(f->GetName())) {
+        std::string fname = f->GetName();
+        if (!funcs.count(fname)) {
+            funcs.emplace(fname);
             TString formula = ROOTToText::ParseTF1Formula(f->GetExpFormula());
             // 2 possibilities here : either use math functions, or numpy ones
             // but to use numpy functions it would be necessary to rename all function to np.<func>
             ofs << "\n@np.vectorize";
-            ofs << "\ndef " << f->GetName() << "(x";
+            ofs << "\ndef " << fname << "(x";
             for (int p = 0; p < f->GetNpar(); p++)
                 ofs << "," << ToLower(f->GetParName(p));
             ofs << "):\n";

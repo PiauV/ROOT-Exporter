@@ -270,26 +270,34 @@ TString VirtualExportManager::FormatLabel(const TString& str, bool escape) const
             switch (c) {
                 case '#':
                     // process LaTeX symbols : replace '#sym' with '$\sym$'
-                    label.Replace(s, 1, "\\");
-                    if (!in_formula) {
-                        label.Insert(s, '$'); // start formula
-                        in_formula = true;
+                    if (s < label.Length() - 1) {
+                        if (isalpha(label[s + 1])) {
+                            label.Replace(s, 1, "\\");
+                            if (!in_formula) {
+                                label.Insert(s, '$'); // start formula
+                                s++;
+                                in_formula = true;
+                            }
+                        }
+                        else if (escape) {
+                            // we merely have an '#' symbol that needs escaping
+                            label.Insert(s, '\\'); // escape
+                            s++;
+                        }
                     }
-                    s++;
                     break;
                 case ' ':
                     if (in_formula) {
                         label.Insert(s, '$'); // end formula
+                        s++;
                         in_formula = false;
                     }
-                    s++;
                     break;
                 case '_':
                     if (!in_formula && escape) {
                         label.Insert(s, '\\'); // escape
                         s++;
                     }
-                    s++;
                     break;
                 case '&':
                 case '%':
@@ -297,12 +305,11 @@ TString VirtualExportManager::FormatLabel(const TString& str, bool escape) const
                         label.Insert(s, '\\'); // escape
                         s++;
                     }
-                    s++;
                     break;
                 default:
-                    s++; // next character
                     break;
             }
+            s++; // go to next character
         }
         if (in_formula) label.Append('$');
     }
