@@ -146,6 +146,7 @@ void TestRTTOutput() {
     SIMPLE_TEST(gRTT->SaveObject(h, "h_lowedge_and_errors.dat", "EL"));
     SIMPLE_TEST(gRTT->SaveObject(gre, "gre_horizontal_errors.txt", "H"));
     SIMPLE_TEST(gRTT->SaveObject(h2, "h2_columns", "C"));
+    SIMPLE_TEST(gRTT->SaveObject(h2, "h2_gle", "G"));
     SIMPLE_TEST(gRTT->SaveObject(f, "function.out", "F"));
 
     // Use a custom writer

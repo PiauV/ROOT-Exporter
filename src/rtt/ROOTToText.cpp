@@ -447,42 +447,8 @@ void ROOTToText::WriteTH2(const TH2* h, const TString& option, std::ofstream& of
     // ...
     bool glefile = option.Contains("G");
     if (in_columns && glefile) {
-        LOG_WARN("Changing 2D GLE file format from \'columns\' to \'matrix\'.");
+        LOG_WARN("Ignoring TH2 file format 'C' (columns) due to incompatibility with option 'G'.");
         in_columns = false;
-    }
-
-    if (glefile) {
-        // GLE mandatory header
-        int nx = h->GetNbinsX();
-        int ny = h->GetNbinsY();
-        ofs << "! nx " << nx
-            << " xmin " << h->GetXaxis()->GetBinLowEdge(1)
-            << " xmax " << h->GetXaxis()->GetBinLowEdge(nx + 1)
-            << " ny " << ny
-            << " ymin " << h->GetYaxis()->GetBinLowEdge(1)
-            << " ymax " << h->GetYaxis()->GetBinLowEdge(ny + 1)
-            << std::endl;
-    }
-
-    if (headerTitle_)
-        ofs << cc_ << " " << h->GetTitle() << std::endl;
-
-    if (headerAxis_) {
-        ofs << cc_ << " 1:X";
-        TString xaxis = h->GetXaxis()->GetTitle();
-        if (xaxis.Length() > 0)
-            ofs << " - " << xaxis;
-        ofs << std::endl;
-        ofs << cc_ << " 2:Y";
-        TString yaxis = h->GetYaxis()->GetTitle();
-        if (yaxis.Length() > 0)
-            ofs << " - " << yaxis;
-        ofs << std::endl;
-        ofs << cc_ << " 3:Z";
-        TString zaxis = h->GetZaxis()->GetTitle();
-        if (zaxis.Length() > 0)
-            ofs << " - " << zaxis;
-        ofs << std::endl;
     }
 
     int imin = 1, imax = h->GetNbinsX();
@@ -494,6 +460,41 @@ void ROOTToText::WriteTH2(const TH2* h, const TString& option, std::ofstream& of
     if (use_range) {
         jmin = h->GetYaxis()->GetFirst();
         jmax = h->GetYaxis()->GetLast();
+    }
+
+    if (glefile) {
+        // GLE mandatory header
+        int nx = 1 + imax - imin;
+        int ny = 1 + jmax - jmin;
+        ofs << "! nx " << nx
+            << " xmin " << h->GetXaxis()->GetBinLowEdge(imin)
+            << " xmax " << h->GetXaxis()->GetBinLowEdge(imax + 1)
+            << " ny " << ny
+            << " ymin " << h->GetYaxis()->GetBinLowEdge(jmin)
+            << " ymax " << h->GetYaxis()->GetBinLowEdge(jmax + 1)
+            << std::endl;
+    }
+    else {
+        if (headerTitle_)
+            ofs << cc_ << " " << h->GetTitle() << std::endl;
+
+        if (headerAxis_) {
+            ofs << cc_ << " 1:X";
+            TString xaxis = h->GetXaxis()->GetTitle();
+            if (xaxis.Length() > 0)
+                ofs << " - " << xaxis;
+            ofs << std::endl;
+            ofs << cc_ << " 2:Y";
+            TString yaxis = h->GetYaxis()->GetTitle();
+            if (yaxis.Length() > 0)
+                ofs << " - " << yaxis;
+            ofs << std::endl;
+            ofs << cc_ << " 3:Z";
+            TString zaxis = h->GetZaxis()->GetTitle();
+            if (zaxis.Length() > 0)
+                ofs << " - " << zaxis;
+            ofs << std::endl;
+        }
     }
 
     if (in_columns) {
