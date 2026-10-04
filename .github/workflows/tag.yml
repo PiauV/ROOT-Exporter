@@ -1,0 +1,48 @@
+name: auto-tag
+
+on:
+  push:
+    paths:
+      - "CMakeLists.txt"
+  workflow_dispatch:
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Get version from CMakeLists.txt
+        id: get_version
+        run: |
+          LAST_VERSION="v$(grep -m 1 -Po "project\\(REx .* VERSION \K\d+\.\d+\.\d+" CMakeLists.txt)"
+          LAST_TAG=$(git describe --tags --abbrev=0)
+          # echo "VERSION=${LAST_VERSION} and TAG=${LAST_TAG}"
+          if [ "$LAST_VERSION" != "$LAST_TAG" ]; then
+            echo "version=$LAST_VERSION" >> "$GITHUB_OUTPUT"
+          fi
+
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: version
+    steps:
+      - name: Create new tag
+        if: "${{ needs.version.outputs.version != '' }}"
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const tagName = '${{needs.version.outputs.version}}';
+            const commitSha = process.env.GITHUB_SHA;
+            const tag = await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${tagName}`,
+              sha: commitSha,
+            });
+            console.log(`Created new tag: ${tagName}`);
