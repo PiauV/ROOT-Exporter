@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3] - 2026-10-04
+ - [Added] Auto-tagging workflow (Github Action) 
+ - [Fixed] Minor fix in RTT : header of 2D histograms for GLE (x and y ranges)
+ - [Fixed] Remove duplicate function declaration in Expad
+ - [Fixed] Escape '#' symbol (when it is not related to TLatex)
+ - [Fixed] Automatic RTT filename generation when a folder is given as path
+
 ## [0.2.2] - 2026-09-17
  - [Added] New RTT options : verbose (V) and overwriting protection (P)
  - [Added] New Expad function : ExportCurrentPad(filename) (equivalent to ExportPad(gPad, filename))

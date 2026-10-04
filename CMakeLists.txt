@@ -3,9 +3,10 @@ cmake_minimum_required(VERSION 3.17)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # Get the version from the git tag
-include(GetGitVersion)
+# include(GetGitVersion) 
+# extract the version from git tag -> ${GIT_VERSION} variable
 
-project(REx LANGUAGES CXX VERSION ${GIT_VERSION})
+project(REx LANGUAGES CXX VERSION 0.2.3)
 message(STATUS "Configuring REx ${CMAKE_PROJECT_VERSION}")
 
 if(MSVC)

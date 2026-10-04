@@ -1,6 +1,7 @@
 # ROOT Exporter (REx)
 
-![Version][version-badge] [![Build Status][workflow-badge]][workflow-link] 
+[![Version][version-badge]][version-link]
+[![Build Status][workflow-badge]][workflow-link] 
 
 **REx** (ROOT Exporter) is a C++ library for exporting figures generated with the [ROOT framework](https://root.cern.ch/) into scripts for external plotting tools. 
 
@@ -96,6 +97,7 @@ The TREx tests could also serve as examples for advanced REx features.
 - **Compatibility:** REx should be compatible with ROOT 6 and legacy ROOT 5.34, on Linux and Windows OS
 - **License:** GNU Lesser General Public License v3, see files COPYING and COPYING.LESSER.
 
-[version-badge]:   https://badgen.net/github/tag/PiauV/ROOT-Exporter?label=version
+[version-badge]:   https://badgen.net/github/tag/PiauV/ROOT-Exporter?icon=git
+[version-link]:    https://github.com/PiauV/ROOT-Exporter/tags
 [workflow-badge]:  https://github.com/PiauV/ROOT-Exporter/actions/workflows/ci.yml/badge.svg
 [workflow-link]:   https://github.com/PiauV/ROOT-Exporter/actions/workflows/ci.yml
